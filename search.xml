@@ -2960,6 +2960,85 @@ if ($invalid_referer) {
       </tags>
   </entry>
   <entry>
+    <title>Mysql主从级联、半同步复制和加密</title>
+    <url>/2018/03/27/mysql%E5%8D%8A%E5%90%8C%E6%AD%A5/</url>
+    <content><![CDATA[<h3 id="Mysql主从级联复制"><a href="#Mysql主从级联复制" class="headerlink" title="Mysql主从级联复制"></a>Mysql主从级联复制</h3><p>配置主从级联复制时，作为中间节点的那个服务器需要额外做如下配置，以确保从服务器从主服务器哪里复制来的数据能记录二进制日志。<br>[mysqld]<br>log_bin<br>log_slave_updates</p>
+<p>余下的从服务器需要指定该中间节点为主服务器。</p>
+<h3 id="复制架构中应该注意的问题"><a href="#复制架构中应该注意的问题" class="headerlink" title="复制架构中应该注意的问题"></a>复制架构中应该注意的问题</h3><p><strong>限制从服务器为只读</strong></p>
+<ul>
+<li>在从服务器上设置read-only=ON<br>注意：此限制对拥有super权限的用户均无效。</li>
+<li>阻止所有用户，包括主服务器复制的更新<br>mysql&gt; flush tables with read lock;</li>
+</ul>
+<p><strong>RESET SLAVE</strong><br>在从服务器清除master.info，relay-log.info,relay log,开始新的relaylog，注意，需要先stop slave;<br>reset slave all 清除所有从服务器上设置的主服务器同步信息如：port,host,user,password等</p>
+<p><strong>sql_slave_skip_counter=N</strong><br>从服务器忽略几个主服务器的复制时间，global变量。</p>
+<p><strong>如何保证主从复制的事务安全</strong><br>在master节点启用参数</p>
+<ul>
+<li>sync_binlog=1 每次写后立即同步二进制日知道磁盘，性能差<br>如果用到的是innodb存储引擎</li>
+<li>innodb_fush_log_at_trx_commit=1 每次事务提交立即同步日志写磁盘</li>
+<li>innodb_support_xa=ON 默认值，分布式事务mariadb10.3.0废除</li>
+<li>sync_master_info=# #次事件后master.info同步到磁盘</li>
+</ul>
+<p>在slave节点启用服务器选项</p>
+<ul>
+<li>skip_slave_start=ON 不自动启动slave</li>
+</ul>
+<p>在slave节点启用参数</p>
+<ul>
+<li>sync_relay_log=# #次写后同步relay log到磁盘</li>
+<li>sync_relay_log_info=# #次事务后同步relay-log.info到磁盘</li>
+</ul>
+<h3 id="半同步复制"><a href="#半同步复制" class="headerlink" title="半同步复制"></a>半同步复制</h3><p>默认情况下，MySQL的复制功能是异步的，异步复制可以提供最佳的性能，主<br>库把binlog日志发送给从库即结束，并不验证从库是否接收完毕。这意味着当<br>主服务器或从服务器端发生故障时，有可能从服务器没有接收到主服务器发送<br>过来的binlog日志，这就会造成主服务器和从服务器的数据不一致，甚至在恢<br>复时造成数据的丢失</p>
+<h4 id="半同步复制的实现"><a href="#半同步复制的实现" class="headerlink" title="半同步复制的实现"></a>半同步复制的实现</h4><p>主服务器配置:<br>mysql&gt; INSTALL PLUGIN rpl_semi_sync_master SONAME ‘semisync_master.so’; #安装插件<br>mysql&gt;SET GLOBAL rpl_semi_sync_master_enabled=1; #启用插件<br>mysql&gt;SET GLOBAL rpl_semi_sync_master_timeout = 1000;超时长为1s<br>mysql&gt;SHOW GLOBAL VARIABLES LIKE ‘%semi%’;<br>mysql&gt;SHOW GLOBAL STATUS LIKE ‘%semi%‘;</p>
+<p>从服务器配置:<br>mysql&gt; INSTALL PLUGIN rpl_semi_sync_slave SONAME ‘semisync_slave.so’;<br>mysql&gt; SET GLOBAL rpl_semi_sync_slave_enabled=1;</p>
+<p>如果要永久使用半同步复制功能，需要将启用插件写入配置文件<br>主服务器：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">~]<span class="comment">#vi /etc/my.cnf.d/server.cnf</span></span><br><span class="line">[mysqld]</span><br><span class="line">rpl_semi_sync_master_enabled</span><br></pre></td></tr></table></figure>
+<p>从服务器</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">~]<span class="comment">#vi /etc/my.cnf.d/server.cnf</span></span><br><span class="line">[mysqld]</span><br><span class="line">rpl_semi_sync_slave_enabled</span><br></pre></td></tr></table></figure>
+
+<p>配置好主从服务器后，需要重启从服务器的线程</p>
+<ul>
+<li>stop slave </li>
+<li>start slave</li>
+</ul>
+<h3 id="复制过滤器"><a href="#复制过滤器" class="headerlink" title="复制过滤器"></a>复制过滤器</h3><p>让从节点仅复制指定的数据库，或指定数据库的指定表。<br>实现方式有两种：<br><strong>第一种实现方式</strong><br>服务器选项：主服务器仅向二进制日志中记录与特定数据库相关的事件<br>注意：此项和binlog_format相关<br>参看：<a href="https://mariadb.com/kb/en/library/mysqld-options/#-binlogignore-db" target="_blank" rel="noopener">https://mariadb.com/kb/en/library/mysqld-options/#-binlogignore-db</a></p>
+<ul>
+<li>binlog_do_db = 数据库白名单列表，多个数据库需多行实现</li>
+<li>binlog_ignore_db = 数据库黑名单列表<br>问题：基于二进制还原将无法实现；不建议使用</li>
+</ul>
+<p><strong>第二种是实现方式</strong><br>从服务器SQL_THREAD在replay中继日志中的事件时，仅读取与特定数<br>据库(特定表)相关的事件并应用于本地<br>问题：会造成网络及磁盘IO浪费<br>从服务器上的复制过滤器相关变量</p>
+<ul>
+<li>replicate_do_db= 指定复制库的白名单</li>
+<li>replicate_ignore_db= 指定复制库黑名单</li>
+<li>replicate_do_table= 指定复制表的白名单</li>
+<li>replicate_ignore_table= 指定复制表的黑名单</li>
+<li>replicate_wild_do_table= foo%.bar% 支持通配符</li>
+<li>replicate_wild_ignore_table=</li>
+</ul>
+<p>写入配置文件永久生效</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">~]<span class="comment">#vi /etc/my.cnf.d/server.cnf</span></span><br><span class="line">replicate_do_db=db1</span><br><span class="line">replicate_do_db=db2</span><br><span class="line">replicate_do_db=db3</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+
+<h3 id="Mysql复制加密"><a href="#Mysql复制加密" class="headerlink" title="Mysql复制加密"></a>Mysql复制加密</h3><p>基于SSL复制：<br>在默认的主从复制过程或远程连接到MySQL/MariaDB所有的链接通信中的数据都是明文的，外网里访问数据或则复制，存在安全隐患。通过SSL/TLS加密的方式进行复制的方法，来进一步提高数据的安全性<br>配置实现：<br>参看：<a href="https://mariadb.com/kb/en/library/replication-with-secureconnections/" target="_blank" rel="noopener">https://mariadb.com/kb/en/library/replication-with-secureconnections/</a></p>
+<ul>
+<li>主服务器开启SSL：[mysqld] 加一行ssl</li>
+<li>主服务器配置证书和私钥；并且创建一个要求必须使用SSL连接的复制账号</li>
+<li>从服务器使用CHANGER MASTER TO 命令时指明ssl相关选项</li>
+</ul>
+<p>主服务器配置</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">~]<span class="comment">#vi /etc/my.cnf.d/server.cnf</span></span><br><span class="line">[mysqld]</span><br><span class="line"><span class="built_in">log</span>-bin</span><br><span class="line">server_id=1</span><br><span class="line">ssl</span><br><span class="line">ssl-ca=/etc/my.cnf.d/ssl/cacert.pem</span><br><span class="line">ssl-cert=/etc/my.cnf.d/ssl/master.crt</span><br><span class="line">ssl-key=/etc/my.cnf.d/ssl/master.key</span><br></pre></td></tr></table></figure>
+
+<p>从服务器配置</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line">mysql&gt;</span><br><span class="line"><span class="keyword">CHANGE</span> <span class="keyword">MASTER</span> <span class="keyword">TO</span></span><br><span class="line">MASTER_HOST=<span class="string">'MASTERIP'</span>,</span><br><span class="line">MASTER_USER=<span class="string">'rep'</span>,</span><br><span class="line">MASTER_PASSWORD=<span class="string">'centos'</span>,</span><br><span class="line">MASTER_LOG_FILE=<span class="string">'mariadb-bin.000001'</span>,</span><br><span class="line">MASTER_LOG_POS=<span class="number">245</span>,</span><br><span class="line">MASTER_SSL=<span class="number">1</span>,</span><br><span class="line">MASTER_SSL_CA = <span class="string">'/etc/my.cnf.d/ssl/cacert.pem'</span>,</span><br><span class="line">MASTER_SSL_CERT = <span class="string">'/etc/my.cnf.d/ssl/slave.crt'</span>,</span><br><span class="line">MASTER_SSL_KEY = <span class="string">'/etc/my.cnf.d/ssl/slave.key'</span>;</span><br></pre></td></tr></table></figure>
+
+<p>证书申请过程<br>(umask 066;openssl genrsa 2048 &gt; cakey.pem)<br>openssl req -new -x509 -key cakey.pem -out cacert.pem -days 3650<br>openssl req -newkey rsa:2048 -days 365 -nodes -keyout master.key &gt; master.csr<br>openssl req -newkey rsa:2048 -days 365 -nodes -keyout slave.key &gt; slave.csr<br>openssl x509 -req -in master.csr  -CA cacert.pem -CAkey cakey.pem -set_serial 01 &gt; master.crt<br>openssl x509 -in master.crt -noout -text<br>openssl x509 -req -in slave.csr  -CA cacert.pem -CAkey cakey.pem -set_serial 02 &gt; slave.crt</p>
+<h3 id="复制的监控和维护"><a href="#复制的监控和维护" class="headerlink" title="复制的监控和维护"></a>复制的监控和维护</h3>]]></content>
+      <tags>
+        <tag>Mysql</tag>
+        <tag>主从级联</tag>
+        <tag>半同步</tag>
+        <tag>Mysql加密</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>LAMP搭建</title>
     <url>/2018/03/20/lamp/</url>
     <content><![CDATA[<p>实现lamp框架有两种方案，一是将php作为Apache的一个模块使用，另一个是将php作为一个单独的守护进程，请求静态资源时，由Apache提供服务，请求动态资源时，由Apache通过fastcgi转发给php处理。这两种方式在centos7默认都支持，在不能同时使用，只能使用其中一种方式。</p>
