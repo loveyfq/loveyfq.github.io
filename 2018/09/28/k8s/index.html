@@ -1,0 +1,1471 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="k8s," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="kubernetesKubernetes技术已经成为了原生云技术的事实标准，它是目前基础软件领域最为热门的分布式调度和管理平台。于是，Kubernetes也几乎成了时下开发工程师和运维工程师必备的技能之一。 容器编排系统：  Docker Swarm Apache Mesos and Marathon kubernetes  k8s物理结构master  API Server(数据库，实现对容器的">
+<meta property="og:type" content="article">
+<meta property="og:title" content="k8s">
+<meta property="og:url" content="http://yoursite.com/2018/09/28/k8s/index.html">
+<meta property="og:site_name" content="漫步人生路">
+<meta property="og:description" content="kubernetesKubernetes技术已经成为了原生云技术的事实标准，它是目前基础软件领域最为热门的分布式调度和管理平台。于是，Kubernetes也几乎成了时下开发工程师和运维工程师必备的技能之一。 容器编排系统：  Docker Swarm Apache Mesos and Marathon kubernetes  k8s物理结构master  API Server(数据库，实现对容器的">
+<meta property="article:published_time" content="2018-09-27T16:00:00.000Z">
+<meta property="article:modified_time" content="2020-04-20T13:33:50.814Z">
+<meta property="article:author" content="ShengQin Miao">
+<meta property="article:tag" content="k8s">
+<meta name="twitter:card" content="summary">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2018/09/28/k8s/"/>
+
+
+
+
+
+  <title>k8s | 漫步人生路</title>
+  
+
+
+
+
+
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?f076ecd4b66d3a02de923868671591de";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+<meta name="generator" content="Hexo 4.2.0"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">漫步人生路</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off"
+             placeholder="搜索..." spellcheck="false"
+             type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/09/28/k8s/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="ShengQin Miao">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/uploads/touxiang.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="漫步人生路">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">k8s</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-09-28T00:00:00+08:00">
+                2018-09-28
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+             <span id="/2018/09/28/k8s/" class="leancloud_visitors" data-flag-title="k8s">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+            <div class="post-wordcount">
+              
+                
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-file-word-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">字数统计&#58;</span>
+                
+                <span title="字数统计">
+                  3.1k
+                </span>
+              
+
+              
+                <span class="post-meta-divider">|</span>
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-clock-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">阅读时长 &asymp;</span>
+                
+                <span title="阅读时长">
+                  13
+                </span>
+              
+            </div>
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="kubernetes"><a href="#kubernetes" class="headerlink" title="kubernetes"></a>kubernetes</h2><p>Kubernetes技术已经成为了原生云技术的事实标准，它是目前基础软件领域最为热门的分布式调度和管理平台。于是，Kubernetes也几乎成了时下开发工程师和运维工程师必备的技能之一。</p>
+<p>容器编排系统：</p>
+<ul>
+<li>Docker Swarm</li>
+<li>Apache Mesos and Marathon</li>
+<li>kubernetes</li>
+</ul>
+<p>k8s物理结构<br><strong>master</strong></p>
+<ul>
+<li><p>API Server(数据库，实现对容器的增删改查)</p>
+<blockquote>
+<p>API<br>UI<br>CLI</p>
+</blockquote>
+</li>
+<li><p>Scheduler(watch API Server上的变动，一旦发现变动就同步变动。)</p>
+</li>
+<li><p>Controller(对比用户期望的和现有的资源状态)</p>
+</li>
+<li><p>etcd</p>
+</li>
+</ul>
+<p>service:</p>
+<ul>
+<li><p>proxy mode: userspace/iptables/ipvs</p>
+<blockquote>
+<p>kube-proxy</p>
+</blockquote>
+</li>
+<li><p>service type: ClusterIP, NodePort(30000-32767之间的端口), LoadBalancer,ExternalName,  </p>
+</li>
+<li><p>label selector:Pod资源，自动为每个Pod对象创建Endpoint</p>
+</li>
+</ul>
+<p>PV的回收策略：</p>
+<ul>
+<li>return</li>
+<li>resycle</li>
+<li>delete</li>
+</ul>
+<h2 id="部署k8s测试集群"><a href="#部署k8s测试集群" class="headerlink" title="部署k8s测试集群"></a>部署k8s测试集群</h2><h3 id="主机环境预设"><a href="#主机环境预设" class="headerlink" title="主机环境预设"></a>主机环境预设</h3><h3 id="安装程序包"><a href="#安装程序包" class="headerlink" title="安装程序包"></a>安装程序包</h3><p>在各节点配置docker-ce仓库</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@master yum.repos.d]<span class="comment"># wget https://mirrors.aliyun.com/docker-ce/linux/centos/docker-ce.repo</span></span><br></pre></td></tr></table></figure>
+<p>安装docker-ce</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@master yum.repos.d]<span class="comment"># yum -y install docker-ce</span></span><br></pre></td></tr></table></figure>
+<p>配置启动docker<br>修改docker的启动文件，在service配置段增加如下内容</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">[root@master yum.repos.d]<span class="comment"># vi /usr/lib/systemd/system/docker.service</span></span><br><span class="line">[Service]</span><br><span class="line">Environment=<span class="string">"HTTPS_PROXY=http://www.ik8s.io:10070"</span> <span class="comment">#设定访问k8s时的代理</span></span><br><span class="line">Environment=<span class="string">"NO_PROXY=127.0.0.0/8,192.168.34.0/32,172.18.0.0/24"</span> <span class="comment">#对哪些网段不使用代理</span></span><br><span class="line">ExecStartPost=/usr/sbin/iptables -P FORWARD ACCEPT <span class="comment">#由于docker会在启动时将FORWARD链修改为DROP，所以在启动docker后要将默认策略改为ACCEPT，以确保不影响k8s的使用。</span></span><br></pre></td></tr></table></figure>
+<p>启动docker</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@master yum.repos.d]<span class="comment">#systemctl start docker &amp;&amp; systemctl enable docker</span></span><br></pre></td></tr></table></figure>
+<p>修改内核参数</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[root@master yum.repos.d]<span class="comment"># cat /etc/sysctl.d/k8s.conf</span></span><br><span class="line">net.bridge.bridge-nf-call-ip6tables = 1</span><br><span class="line">net.bridge.bridge-nf-call-iptables = 1</span><br></pre></td></tr></table></figure>
+<p>重载内核参数</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[root@master yum.repos.d]<span class="comment"># sysctl -p /etc/sysctl.d/k8s.conf </span></span><br><span class="line">net.bridge.bridge-nf-call-ip6tables = 1</span><br><span class="line">net.bridge.bridge-nf-call-iptables = 1</span><br></pre></td></tr></table></figure>
+
+<p>配置kubernetes的yum仓库</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">[root@master yum.repos.d]<span class="comment"># cat k8s.repo </span></span><br><span class="line">[kubernetes]</span><br><span class="line">name=k8s</span><br><span class="line">baseurl=https://mirrors.aliyun.com/kubernetes/yum/repos/kubernetes-el7-x86_64/</span><br><span class="line">gpgcheck=1</span><br><span class="line">gpgkey=https://mirrors.aliyun.com/kubernetes/yum/doc/rpm-package-key.gpg</span><br><span class="line">	https://mirrors.aliyun.com/kubernetes/yum/doc/yum-key.gpg</span><br></pre></td></tr></table></figure>
+
+<p>安装kubernetes</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@master yum.repos.d]<span class="comment"># yum install kubeadm kubelet</span></span><br></pre></td></tr></table></figure>
+<p>如果未关闭swap，则再启动kubernetes时必须加一个参数，禁止检查swap分区。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@master yum.repos.d]<span class="comment"># cat /etc/sysconfig/kubelet </span></span><br><span class="line">KUBELET_EXTRA_ARGS=<span class="string">"--fail-swap-on=false"</span></span><br></pre></td></tr></table></figure>
+<p>而后，在运行初始化命令之前先运行如下命令单独获取相关的镜像文件，然后在执行初始化命令，以便观察到镜像文件的下载过程。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">~]<span class="comment"># kubeadm config images pull</span></span><br></pre></td></tr></table></figure>
+
+<p>初始化master节点</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">~]<span class="comment"># kubeadm init --kubernetes-version=v1.13.3 --pod-network-cidr=10.244.0.0/16 --service-cidr=10.96.0.0/12 --ignore-preflight-errors=Swap</span></span><br></pre></td></tr></table></figure>
+
+<p>命令中的各选项简单说明如下：</p>
+<pre><code>(1) --kubernetes-version选项的版本号用于指定要部署的Kubenretes程序版本，它需要与当前的kubeadm支持的版本保持一致；
+(2) --pod-network-cidr选项用于指定分Pod分配使用的网络地址，它通常应该与要部署使用的网络插件（例如flannel、calico等）的默认设定保持一致，10.244.0.0/16是flannel默认使用的网络；
+(3) --service-cidr用于指定为Service分配使用的网络地址，它由kubernetes管理，默认即为10.96.0.0/12；
+(4) 最后一个选项“--ignore-preflight-errors=Swap”仅应该在未禁用Swap设备的状态下使用。</code></pre><p>如果是一个普通用户使用k8s集群，则需要执行如下步骤</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">~]<span class="comment">#  mkdir -p $HOME/.kube</span></span><br><span class="line">~]<span class="comment">#  sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config</span></span><br><span class="line">~]<span class="comment">#  sudo chown $(id -u):$(id -g) $HOME/.kube/config</span></span><br></pre></td></tr></table></figure>
+<p>如果是root用户，则直接再加目录下执行如下操作即可</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">~]<span class="comment">#mkdir -p root/.kube</span></span><br><span class="line">~]<span class="comment"># cp -i /etc/kubernetes/admin.conf root/.kube/config</span></span><br></pre></td></tr></table></figure>
+
+<p>添加flannel网络附件</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">~]<span class="comment"># kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml</span></span><br></pre></td></tr></table></figure>
+
+<p>使用如下命令确认其输出结果中Pod的状态为”Running”</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">~]<span class="comment"># kubectl get pods -n kube-system -l app=flannel</span></span><br><span class="line">   NAME                          READY   STATUS    RESTARTS   AGE</span><br><span class="line">   kube-flannel-ds-amd64-wscnz   1/1     Running   0          14m</span><br></pre></td></tr></table></figure>
+
+<p>验证master节点已经就绪</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"> ~]<span class="comment"># kubectl get nodes</span></span><br><span class="line"> NAME     STATUS   ROLES    AGE   VERSION</span><br><span class="line">master   Ready    master   53m   v1.13.3</span><br></pre></td></tr></table></figure>
+
+<p>至此，kubernetes就能已经搭建完成。接下来，向该集群中加入节点：</p>
+<p>在需要加入的节点上安装kubeadm kubectl kubelet,然后使用如下命令将节点加入到该集群中：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">~]<span class="comment"># kubeadm join 172.18.139.207:6443 --token 5w02cc.eivi4xb8885qnb8h --discovery-token-ca-cert-hash sha256:569ce592569c88a322c701458d70130d66ae92bbe24cf97900754beb0ff4ac1a --ignore-preflight-errors=Swap</span></span><br></pre></td></tr></table></figure>
+
+<p>node加入集群报错：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[discovery] Failed to request cluster info, will try again: [Get https://192</span><br></pre></td></tr></table></figure>
+<p>解决方案：<br>次报错是由于node和master的时间不一致导致的，需要使用ntp做时间同步。</p>
+<p>获取集群状态信息</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@master ~]<span class="comment"># kubectl cluster-info</span></span><br></pre></td></tr></table></figure>
+
+<p>其中一个节点在执行过程中报如下错误</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">[root@node03 ~]<span class="comment"># sysctl -p /etc/sysctl.d/k8s.conf </span></span><br><span class="line">net.ipv4.ip_forward = 1</span><br><span class="line">sysctl: cannot <span class="built_in">stat</span> /proc/sys/net/bridge/bridge-nf-call-ip6tables: No such file or directory</span><br><span class="line">sysctl: cannot <span class="built_in">stat</span> /proc/sys/net/bridge/bridge-nf-call-iptables: No such file or directory</span><br></pre></td></tr></table></figure>
+
+<p>解决办法为,加载相应的内核模块</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@node03 ~]<span class="comment"># modprobe br_netfilter</span></span><br></pre></td></tr></table></figure>
+<p>之后就可以正常修改内核参数。</p>
+<h4 id="从集群中移除节点"><a href="#从集群中移除节点" class="headerlink" title="从集群中移除节点"></a>从集群中移除节点</h4><p>如果运行过程中需要从正常运行的集群中移除节点，则执行以下步骤：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">~]<span class="comment"># kubectl drain NODE_ID --delete-local-data --force --ignore-daemonsets</span></span><br><span class="line">~]<span class="comment"># kubectl delete node NODE_ID</span></span><br></pre></td></tr></table></figure>
+<p>然后再需要删除的节点上执行如下命令重置系统状态便可完成移除操作</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">~]<span class="comment"># kubeadm reset</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="重新生成用于节点加入几群的认证命令"><a href="#重新生成用于节点加入几群的认证命令" class="headerlink" title="重新生成用于节点加入几群的认证命令"></a>重新生成用于节点加入几群的认证命令</h4><p>获取集群上存在的认证令牌</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">~]<span class="comment"># kubeadm token list</span></span><br></pre></td></tr></table></figure>
+
+<p>生成用于验证CA的哈希值(discovery-token-ca-cert-hash)的命令如下：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">~]<span class="comment"># openssl x509 -pubkey -in /etc/kubernetes/pki/ca.crt | openssl rsa -pubin -outform der 2&gt;/dev/null | openssl dgst -sha256 -hex | sed 's/^.* //'</span></span><br></pre></td></tr></table></figure>
+
+<p>然后，将上述两个命令生成的结果合称为如下格式的kubeadm join命令即可用于让node加入急群众，其中TOKEN为上面第一个命令看到的token，HASH为第二条命令生成的HASH</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">~]<span class="comment"># kubeadm join master-ip:port --token TOKEN --discovery-token-ca-cert-hash HASH</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="管理kubernetes集群"><a href="#管理kubernetes集群" class="headerlink" title="管理kubernetes集群"></a>管理kubernetes集群</h2><h3 id="kubectl命令常用操作示例"><a href="#kubectl命令常用操作示例" class="headerlink" title="kubectl命令常用操作示例"></a>kubectl命令常用操作示例</h3><h4 id="创建资源对象"><a href="#创建资源对象" class="headerlink" title="创建资源对象"></a>创建资源对象</h4><p>创建名为nginx-deploy的Deployment控制器资源对象</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[root@master ~]<span class="comment"># kubectl run nginx-deploy --image=nginx:1.12 --replicas=2</span></span><br><span class="line">kubectl run --generator=deployment/apps.v1 is DEPRECATED and will be removed <span class="keyword">in</span> a future version. Use kubectl run --generator=run-pod/v1 or kubectl create instead.</span><br><span class="line">deployment.apps/nginx-deploy created</span><br></pre></td></tr></table></figure>
+
+<p>创建名为nginx-svc的Service资源对象</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@master ~]<span class="comment"># kubectl expose deployment/nginx-deploy --name=nginx-svc --port=80</span></span><br></pre></td></tr></table></figure>
+
+<p>pod地址：<br>service：nodeport<br>hostport<br>hostnetwork</p>
+<h4 id="查看资源对象"><a href="#查看资源对象" class="headerlink" title="查看资源对象"></a>查看资源对象</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">~]<span class="comment"># kubectl get namespace #列出系统上所有的namespace资源对象</span></span><br><span class="line">~]<span class="comment"># [root@master ~]# kubectl get pods -l k8s-app -o wide -n kube-system #列出kube-system名称空间下拥有k8s-app标签名称的所有pod对象</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="打印资源对象的详细信息"><a href="#打印资源对象的详细信息" class="headerlink" title="打印资源对象的详细信息"></a>打印资源对象的详细信息</h4><p>每个资源对象都包含着用户期望的状态(spec)和现有的实际状态(status)两种状态信息，”kubectl get -o {yaml|json}” 或 “kubectl describe”命令都能打印出指定资源的详细信息.</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@master ~]<span class="comment"># kubectl get pods -l component=kube-apiserver -o yaml -n kube-system</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="打印容器中的日志信息"><a href="#打印容器中的日志信息" class="headerlink" title="打印容器中的日志信息"></a>打印容器中的日志信息</h4><p>命令格式:</p>
+<pre><code>kubectl logs [-f] [-p] (POD|TYPE/NAME) [-c CONTAINER] [options] </code></pre><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@master ~]<span class="comment"># kubectl logs kube-apiserver-master.ilinux.io -n kube-system</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="在容器中执行命令"><a href="#在容器中执行命令" class="headerlink" title="在容器中执行命令"></a>在容器中执行命令</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@master ~]<span class="comment"># kubectl exec kube-apiserver-master.ilinux.io -n kube-system -- ps</span></span><br></pre></td></tr></table></figure>
+<p>如果pod对象中存在多个容器，则需要以-c选项指定容器后再运行。</p>
+<h4 id="删除资源对象"><a href="#删除资源对象" class="headerlink" title="删除资源对象"></a>删除资源对象</h4><p>删除单个对像，如果对象受控于控制器，则删除之后其控制器可能会重建出类似的对象。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@master ~]<span class="comment"># kubectl delete svc nginx-svc</span></span><br></pre></td></tr></table></figure>
+
+<p>删除拥有某一标签的所有对象</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl delete pods -l app=monitor -n kube-system</span><br></pre></td></tr></table></figure>
+
+<p>删除指定名称空间的所有某类对象，可以使用kbectl delete TYPE –all -n NS,例如，删除kube-public名称空间中的所有pod对象。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl delete pods --all -n kube-public</span><br></pre></td></tr></table></figure>
+<p>另外，有些资源类型(如pod)，支持优雅删除的机制，它们有着默认的删除宽限期，不过，用户可以在命令中使用–grace-period或–now选项来覆盖默认的宽限期。</p>
+<h3 id="命令式容器应用编排"><a href="#命令式容器应用编排" class="headerlink" title="命令式容器应用编排"></a>命令式容器应用编排</h3><p>k8s集群网络：</p>
+<ul>
+<li>node network：与外部网络接口</li>
+<li>service network：</li>
+<li>pod network：内部网络</li>
+</ul>
+<h3 id="pod相关操作"><a href="#pod相关操作" class="headerlink" title="pod相关操作"></a>pod相关操作</h3><h4 id="pod标签相关的操作"><a href="#pod标签相关的操作" class="headerlink" title="pod标签相关的操作"></a>pod标签相关的操作</h4><p>基于配置文件生成pod</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">[root@master basic]<span class="comment"># cat pod-demo-2.yaml </span></span><br><span class="line">apiVersion: v1</span><br><span class="line">kind: Pod</span><br><span class="line">metadata: </span><br><span class="line">  name: pod-demo</span><br><span class="line">  namespace: prod</span><br><span class="line">  labels:</span><br><span class="line">    app: pod-demo</span><br><span class="line">    rel: stable</span><br><span class="line">spec:</span><br><span class="line">  containers:</span><br><span class="line">  - name: myapp</span><br><span class="line">    image: ikubernetes/myapp:v1</span><br><span class="line">  - name: bbox</span><br><span class="line">    image: busybox:latest</span><br><span class="line">    imagePullPolicy: IfNotPresent</span><br><span class="line">    <span class="built_in">command</span>: [<span class="string">"/bin/sh"</span>,<span class="string">"-c"</span>,<span class="string">"sleep 86400"</span>]</span><br><span class="line">[root@master basic]<span class="comment"># kubectl apply -f pod-demo-2.yaml</span></span><br></pre></td></tr></table></figure>
+
+<p>通过命令为为pod打标签</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@master basic]<span class="comment"># kubectl label pods pod-demo -n prod tier=backend --overwrite</span></span><br></pre></td></tr></table></figure>
+
+<p>修改pod已有标签的值</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@master basic]<span class="comment"># kubectl label pods pod-demo -n prod tier=backend --overwrite</span></span><br></pre></td></tr></table></figure>
+
+<p>删除pod的某个标签</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">[root@master basic]<span class="comment"># kubectl get pods -n prod --show-labels</span></span><br><span class="line">NAME       READY   STATUS        RESTARTS   AGE    LABELS</span><br><span class="line">pod-demo   0/2     Terminating   0          130m   app=pod-demo,rel=stable,tier=backend</span><br><span class="line">[root@master basic]<span class="comment"># kubectl label pods pod-demo -n prod rel-</span></span><br><span class="line">pod/pod-demo labeled</span><br><span class="line">[root@master basic]<span class="comment"># kubectl get pods -n prod --show-labels</span></span><br><span class="line">NAME       READY   STATUS        RESTARTS   AGE    LABELS</span><br><span class="line">pod-demo   0/2     Terminating   0          130m   app=pod-demo,tier=backend</span><br></pre></td></tr></table></figure>
+
+<p>筛选具有某个特定标签的pod</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@master basic]<span class="comment"># kubectl get pods -l run(!)=myapp</span></span><br></pre></td></tr></table></figure>
+
+<p>筛选具有一组标签的某一个标签的pod</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@master basic]<span class="comment"># kubectl get pods --show-labels -l "run in (myapp,ngx-dep)"</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="pod资源注解"><a href="#pod资源注解" class="headerlink" title="pod资源注解"></a>pod资源注解</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">[root@master basic]<span class="comment"># cat pod-demo-2.yaml </span></span><br><span class="line">apiVersion: v1</span><br><span class="line">kind: Pod</span><br><span class="line">metadata: </span><br><span class="line">  name: pod-demo</span><br><span class="line">  namespace: prod</span><br><span class="line">  labels:</span><br><span class="line">    app: pod-demo</span><br><span class="line">    rel: stable</span><br><span class="line">  annotations: </span><br><span class="line">    ik8s.io/project: hello</span><br><span class="line">spec:</span><br><span class="line">  containers:</span><br><span class="line">  - name: myapp</span><br><span class="line">    image: ikubernetes/myapp:v1</span><br><span class="line">  - name: bbox</span><br><span class="line">    image: busybox:latest</span><br><span class="line">    imagePullPolicy: IfNotPresent</span><br><span class="line">    <span class="built_in">command</span>: [<span class="string">"/bin/sh"</span>,<span class="string">"-c"</span>,<span class="string">"sleep 86400"</span>]</span><br></pre></td></tr></table></figure>
+
+<h4 id="livenessProbe"><a href="#livenessProbe" class="headerlink" title="livenessProbe"></a>livenessProbe</h4><p>容器健康状态检查，一旦检查到不健康，会自动重启容器。配置spec上下文</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">livenessProbe:</span><br><span class="line">      httpGet:</span><br><span class="line">        path: /healthz</span><br><span class="line">        port: http</span><br><span class="line">        scheme: HTTP</span><br><span class="line">      periodSeconds: 2</span><br><span class="line">      failureThreshold: 2</span><br><span class="line">      initialDelaySeconds: 3</span><br></pre></td></tr></table></figure>
+
+<h4 id="readinessProbe"><a href="#readinessProbe" class="headerlink" title="readinessProbe"></a>readinessProbe</h4><p>容器就绪状态检测，没有重启容器的权利。</p>
+<h4 id="pod对象的相位"><a href="#pod对象的相位" class="headerlink" title="pod对象的相位"></a>pod对象的相位</h4><p>pod对象纵使应该处于其生命进程中以下几个相位(phase)之一</p>
+<ul>
+<li>pending：API server创建了pod资源对象并已存入etcd中，但它尚未被调度完成，或仍处于从仓库中下载镜像的过程中。</li>
+<li>running：pod已经被调度至某节点，并且所有的容器都已经被kubelet创建完成</li>
+<li>succeeded：pod中的所有容器都已经成功终止并且不会被重启</li>
+<li>failed：所有容器都已经终止，但至少有一个容器终止失败，即容器返回了非0值的退出状态或已经被系统终止。</li>
+<li>unknown：API server无法正常获取到pod对象的状态信息，通常是由于其无法与所在工作节点的kubelet通信所致。</li>
+</ul>
+<h4 id="容器的重启策略"><a href="#容器的重启策略" class="headerlink" title="容器的重启策略"></a>容器的重启策略</h4><p>pod对象因容器程序崩溃或容器申请超出限制的资源等原因都可能导致其被终止，此时是否应该重建此容器取决于其重启策略。</p>
+<ul>
+<li>Always：但凡pod对象终止就将其重启，此为默认设定。</li>
+<li>OnFailure：仅在pod对象出现错误时方才将其重启。</li>
+<li>Never：从不重启。</li>
+</ul>
+<h4 id="资源需求及资源限制"><a href="#资源需求及资源限制" class="headerlink" title="资源需求及资源限制"></a>资源需求及资源限制</h4><p>容器的计算资源配额</p>
+<ul>
+<li><p>CPU属于可压缩(compressible)型资源，即资源额度可按需收缩，而内存(当前)则是不可压缩型资源，对其执行收缩操作可能会导致某种程度的问题</p>
+</li>
+<li><p>CPU资源的计量方式</p>
+<blockquote>
+<p>一个核心相当于1000个微核心，即1=1000m，0.5=500m</p>
+</blockquote>
+</li>
+<li><p>内存资源的计量方式</p>
+<blockquote>
+<p>默认单位为字节，也可以使用E,P,T,G,M和K后缀单位。</p>
+</blockquote>
+</li>
+</ul>
+<h4 id="pod服务质量类别"><a href="#pod服务质量类别" class="headerlink" title="pod服务质量类别"></a>pod服务质量类别</h4><p>根据pod对象的requests和limits属性，kubernetes把pod对象归类到besteffort、burstable和guaranteed三个服务质量类别(Quality of Service,QoS)下</p>
+<ul>
+<li>guaranteed，每个容器都为CPU资源设置了具有相同值的requests和limits属性，以及每个容器都为CPU资源设置了具有想通知的requests和limits属性的pod资源会自动归属此类别，这类pod资源具有最高优先级</li>
+<li>burstable：至少有一个容器设置了CPU或内存资源的requests属性，但不满足guaranteed类别要求的pod资源自动归属此类别。</li>
+<li>besteffort：未为任何一个容器设置requests或limits属性的pod资源自动归属此类别。</li>
+</ul>
+<h2 id="Pod控制器"><a href="#Pod控制器" class="headerlink" title="Pod控制器"></a>Pod控制器</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">[root@master chapter5]<span class="comment"># cat rs-example.yaml </span></span><br><span class="line">apiVersion: apps/v1</span><br><span class="line">kind: ReplicaSet</span><br><span class="line">metadata:</span><br><span class="line">  name: myapp-rs</span><br><span class="line">  namespace: prod</span><br><span class="line">spec:</span><br><span class="line">  replicas: 2</span><br><span class="line">  selector:</span><br><span class="line">     matchLabels:</span><br><span class="line">       app: myapp-pod</span><br><span class="line">  template:</span><br><span class="line">    metadata:</span><br><span class="line">      labels:</span><br><span class="line">        app: myapp-pod</span><br><span class="line">    spec:</span><br><span class="line">      containers:</span><br><span class="line">      - name: myapp</span><br><span class="line">        image: ikubernetes/myapp:v1</span><br><span class="line">        ports:</span><br><span class="line">        - name: http</span><br><span class="line">          containerPort: 80</span><br></pre></td></tr></table></figure>
+
+<p>修改pod数量的命令：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@master chapter5]<span class="comment"># kubectl scale --replicas=2 rs myapp-rs -n prod</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>升级pod中容器使用的镜像的方法：</strong><br>修改rs配置文件指定image版本</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/k8s/" rel="tag"># k8s</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/08/18/ELK/" rel="next" title="ELK">
+                <i class="fa fa-chevron-left"></i> ELK
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/10/10/mysql%E8%BF%9B%E9%98%B6/" rel="prev" title="MySQL进阶">
+                MySQL进阶 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+        <!-- JiaThis Button BEGIN -->
+<div class="jiathis_style">
+<span class="jiathis_txt">分享到：</span>
+<a class="jiathis_button_fav">收藏夹</a>
+<a class="jiathis_button_copy">复制网址</a>
+<a class="jiathis_button_email">邮件</a>
+<a class="jiathis_button_weixin">微信</a>
+<a class="jiathis_button_qzone">QQ空间</a>
+<a class="jiathis_button_tqq">腾讯微博</a>
+<a class="jiathis_button_douban">豆瓣</a>
+<a class="jiathis_button_share">一键分享</a>
+
+<a href="http://www.jiathis.com/share?uid=2140465" class="jiathis jiathis_txt jiathis_separator jtico jtico_jiathis" target="_blank">更多</a>
+<a class="jiathis_counter_style"></a>
+</div>
+<script type="text/javascript" >
+var jiathis_config={
+  data_track_clickback:true,
+  summary:"",
+  shortUrl:false,
+  hideMore:false
+}
+</script>
+<script type="text/javascript" src="http://v3.jiathis.com/code/jia.js?uid=" charset="utf-8"></script>
+<!-- JiaThis Button END -->
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+    </div>
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/uploads/touxiang.jpg"
+                alt="ShengQin Miao" />
+            
+              <p class="site-author-name" itemprop="name">ShengQin Miao</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">53</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                
+                  <span class="site-state-item-count">1</span>
+                  <span class="site-state-item-name">分类</span>
+                
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">61</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#kubernetes"><span class="nav-number">1.</span> <span class="nav-text">kubernetes</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#部署k8s测试集群"><span class="nav-number">2.</span> <span class="nav-text">部署k8s测试集群</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#主机环境预设"><span class="nav-number">2.1.</span> <span class="nav-text">主机环境预设</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#安装程序包"><span class="nav-number">2.2.</span> <span class="nav-text">安装程序包</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#从集群中移除节点"><span class="nav-number">2.2.1.</span> <span class="nav-text">从集群中移除节点</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#重新生成用于节点加入几群的认证命令"><span class="nav-number">2.2.2.</span> <span class="nav-text">重新生成用于节点加入几群的认证命令</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#管理kubernetes集群"><span class="nav-number">3.</span> <span class="nav-text">管理kubernetes集群</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#kubectl命令常用操作示例"><span class="nav-number">3.1.</span> <span class="nav-text">kubectl命令常用操作示例</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#创建资源对象"><span class="nav-number">3.1.1.</span> <span class="nav-text">创建资源对象</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#查看资源对象"><span class="nav-number">3.1.2.</span> <span class="nav-text">查看资源对象</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#打印资源对象的详细信息"><span class="nav-number">3.1.3.</span> <span class="nav-text">打印资源对象的详细信息</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#打印容器中的日志信息"><span class="nav-number">3.1.4.</span> <span class="nav-text">打印容器中的日志信息</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#在容器中执行命令"><span class="nav-number">3.1.5.</span> <span class="nav-text">在容器中执行命令</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#删除资源对象"><span class="nav-number">3.1.6.</span> <span class="nav-text">删除资源对象</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#命令式容器应用编排"><span class="nav-number">3.2.</span> <span class="nav-text">命令式容器应用编排</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#pod相关操作"><span class="nav-number">3.3.</span> <span class="nav-text">pod相关操作</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#pod标签相关的操作"><span class="nav-number">3.3.1.</span> <span class="nav-text">pod标签相关的操作</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#pod资源注解"><span class="nav-number">3.3.2.</span> <span class="nav-text">pod资源注解</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#livenessProbe"><span class="nav-number">3.3.3.</span> <span class="nav-text">livenessProbe</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#readinessProbe"><span class="nav-number">3.3.4.</span> <span class="nav-text">readinessProbe</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#pod对象的相位"><span class="nav-number">3.3.5.</span> <span class="nav-text">pod对象的相位</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#容器的重启策略"><span class="nav-number">3.3.6.</span> <span class="nav-text">容器的重启策略</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#资源需求及资源限制"><span class="nav-number">3.3.7.</span> <span class="nav-text">资源需求及资源限制</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#pod服务质量类别"><span class="nav-number">3.3.8.</span> <span class="nav-text">pod服务质量类别</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Pod控制器"><span class="nav-number">4.</span> <span class="nav-text">Pod控制器</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">ShengQin Miao</span>
+
+  
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-area-chart"></i>
+    </span>
+    
+      <span class="post-meta-item-text">Site words total count&#58;</span>
+    
+    <span title="Site words total count">131.6k</span>
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Pisces</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js"></script>
+  <script>AV.initialize("vItlX9Jc2L4BuXKt6BJWW6eJ-gzGzoHsz", "IisqhTArerBOyaxKHN8TcE10");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

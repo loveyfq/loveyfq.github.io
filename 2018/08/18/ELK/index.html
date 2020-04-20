@@ -1,0 +1,1462 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="ELK,日志收集分析,kafka,zookeeper," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="ELK日志收集分析什么是ELK通俗来讲，ELK是由Elasticsearch、Logstash、Kibana 、filebeat三个开源软件的组成的一个组合体，这三个软件当中，每个软件用于完成不同的功能，ELK 又称为ELK stack，官方域名为stactic.co，ELK stack的主要优点有如下几个：处理方式灵活： elasticsearch是实时全文索引，具有强大的搜索功能配置相对简单：">
+<meta property="og:type" content="article">
+<meta property="og:title" content="ELK">
+<meta property="og:url" content="http://yoursite.com/2018/08/18/ELK/index.html">
+<meta property="og:site_name" content="漫步人生路">
+<meta property="og:description" content="ELK日志收集分析什么是ELK通俗来讲，ELK是由Elasticsearch、Logstash、Kibana 、filebeat三个开源软件的组成的一个组合体，这三个软件当中，每个软件用于完成不同的功能，ELK 又称为ELK stack，官方域名为stactic.co，ELK stack的主要优点有如下几个：处理方式灵活： elasticsearch是实时全文索引，具有强大的搜索功能配置相对简单：">
+<meta property="article:published_time" content="2018-08-17T16:00:00.000Z">
+<meta property="article:modified_time" content="2020-04-20T13:33:50.294Z">
+<meta property="article:author" content="ShengQin Miao">
+<meta property="article:tag" content="ELK">
+<meta property="article:tag" content="日志收集分析">
+<meta property="article:tag" content="kafka">
+<meta property="article:tag" content="zookeeper">
+<meta name="twitter:card" content="summary">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2018/08/18/ELK/"/>
+
+
+
+
+
+  <title>ELK | 漫步人生路</title>
+  
+
+
+
+
+
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?f076ecd4b66d3a02de923868671591de";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+<meta name="generator" content="Hexo 4.2.0"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">漫步人生路</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off"
+             placeholder="搜索..." spellcheck="false"
+             type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/08/18/ELK/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="ShengQin Miao">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/uploads/touxiang.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="漫步人生路">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">ELK</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-08-18T00:00:00+08:00">
+                2018-08-18
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+             <span id="/2018/08/18/ELK/" class="leancloud_visitors" data-flag-title="ELK">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+            <div class="post-wordcount">
+              
+                
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-file-word-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">字数统计&#58;</span>
+                
+                <span title="字数统计">
+                  5.6k
+                </span>
+              
+
+              
+                <span class="post-meta-divider">|</span>
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-clock-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">阅读时长 &asymp;</span>
+                
+                <span title="阅读时长">
+                  27
+                </span>
+              
+            </div>
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="ELK日志收集分析"><a href="#ELK日志收集分析" class="headerlink" title="ELK日志收集分析"></a>ELK日志收集分析</h2><p><strong>什么是ELK</strong><br>通俗来讲，ELK是由Elasticsearch、Logstash、Kibana 、filebeat三个开源软件的组成的一个组合体，这三个软件当中，每个软件用于完成不同的功能，ELK 又称为ELK stack，官方域名为stactic.co，ELK stack的主要优点有如下几个：<br>处理方式灵活： elasticsearch是实时全文索引，具有强大的搜索功能<br>配置相对简单：elasticsearch全部使用JSON 接口，logstash使用模块配置，kibana的配置文件部分更简单。<br>检索性能高效：基于优秀的设计，虽然每次查询都是实时，但是也可以达到百亿级数据的查询秒级响应。<br>集群线性扩展：elasticsearch和logstash都可以灵活线性扩展<br>前端操作绚丽：kibana的前端设计比较绚丽，而且操作简单</p>
+<p><strong>什么是elasticsearch</strong><br>是一个高度可扩展的开源全文搜索和分析引擎，它可实现数据的实时全文搜索搜索、支持分布式可实现高可用、提供API接口，可以处理大规模日志数据，比如Nginx、Tomcat、系统日志等功能。</p>
+<p><strong>什么是Logstash</strong><br>可以通过插件实现日志收集和转发，支持日志过滤，支持普通log、自定义json格式的日志解析。</p>
+<p><strong>什么是kibana</strong><br>主要是通过接口调用elasticsearch的数据，并进行前端数据可视化的展现。</p>
+<p><strong>为什么使用 ELK</strong><br>ELK组件在海量日志系统的运维中，可用于解决以下主要问题：</p>
+<ul>
+<li>分布式日志数据统一收集，实现集中式查询和管理</li>
+<li>故障排查</li>
+<li>安全信息和事件管理</li>
+<li>报表功能</li>
+</ul>
+<p>ELK组件在大数据运维系统中，主要可解决的问题如下：</p>
+<ul>
+<li>日志查询，问题排查，故障恢复，故障自愈</li>
+<li>应用日志分析，错误报警</li>
+<li>性能分析，用户行为分析</li>
+</ul>
+<p>架构图：</p>
+<p>kibana –&gt; ES –&gt; Logstash –&gt; Redis –&gt; Logstash –&gt; webserver + filebeat</p>
+<h2 id="elasticsearch"><a href="#elasticsearch" class="headerlink" title="elasticsearch"></a>elasticsearch</h2><h3 id="安装elasticsearch"><a href="#安装elasticsearch" class="headerlink" title="安装elasticsearch"></a>安装elasticsearch</h3><p>elasticsearch是java程序，需要预先准备jdk环境。<br>下载rpm包<br>编辑各elasticsearch服务器的服务配置文件</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">[root@node01 ~]<span class="comment"># yum -y install elasticsearch-5.6.13.rpm</span></span><br><span class="line">[root@node01 ~]<span class="comment"># grep "^[a-Z]" /etc/elasticsearch/elasticsearch.yml </span></span><br><span class="line">cluster.name: myelk <span class="comment">#ELK的集群名称，名称相同即属于是同一个集群</span></span><br><span class="line">path.data: /data/esdata/  <span class="comment">#数据保存目录</span></span><br><span class="line">path.logs: /data/esdata/eslogs/   <span class="comment">#日志保存目</span></span><br><span class="line">network.host: 192.168.34.101 <span class="comment">#监听IP</span></span><br><span class="line">bootstrap.memory_lock: <span class="literal">true</span> <span class="comment">#服务启动的时候锁定足够的内存，防止数据写入swap</span></span><br><span class="line">http.port: 9200  <span class="comment">#监听端口</span></span><br><span class="line">discovery.zen.ping.unicast.hosts: [<span class="string">"node01"</span>, <span class="string">"master"</span>]</span><br></pre></td></tr></table></figure>
+
+<p>修改内存限制，并同步配置文件</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">[root@linux-host1 ~]<span class="comment"># vim /usr/lib/systemd/system/elasticsearch.service #修改内存限制</span></span><br><span class="line">LimitMEMLOCK=infinity  <span class="comment">#最大化使用内存</span></span><br><span class="line">[root@linux-host1 ~]<span class="comment"># vim /etc/elasticsearch/jvm.options </span></span><br><span class="line">22 \-Xms2g</span><br><span class="line">23 \-Xmx2g <span class="comment">#最小和最大内存限制，为什么最小和最大设置一样大？</span></span><br></pre></td></tr></table></figure>
+
+<p>目录权限更改<br>各服务器创建数据和日志目录并修改目录权限为elasticsearch</p>
+<p>启动elasticsearch，如果启动过程中出现以下错误：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">localhost.localdomain elasticsearch[21616]: Java HotSpot(TM) 64-Bit Server VM warning: INFO: os::commit_memory(0x0000000085330000, 2060255232, 0) failed; error=<span class="string">'Cannot allocate memory'</span> (errno=12)</span><br></pre></td></tr></table></figure>
+<p>说明内存不够，可以通过调小启动内存解决：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">~]<span class="comment"># vi /etc/elasticsearch/jvm.options</span></span><br><span class="line"><span class="comment">#-Xms2g</span></span><br><span class="line"><span class="comment">#-Xmx2g</span></span><br><span class="line">-Xms256m</span><br><span class="line">-Xmx256m</span><br></pre></td></tr></table></figure>
+
+<p>启动</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">~]<span class="comment"># systemctl start elasticsearch</span></span><br></pre></td></tr></table></figure>
+<p>elasticsearch会监听9200(用户访问端口)，9300(集群内通信端口，比如master选举)端口。</p>
+<h3 id="elasticsearch的插件"><a href="#elasticsearch的插件" class="headerlink" title="elasticsearch的插件"></a>elasticsearch的插件</h3><h4 id="head插件"><a href="#head插件" class="headerlink" title="head插件"></a>head插件</h4><p>‘<br>插件是为了完成不同的功能，官方提供了一些插件但大部分是收费的，另外也有一些开发爱好者提供的插件，可以实现对elasticsearch集群的状态监控与管理配置等功能。</p>
+<p>在elasticsearch 5.x版本以后不再支持直接安装head插件，而是需要通过启动一个服务方式，git地址：<a href="https://github.com/mobz/elasticsearch-head" target="_blank" rel="noopener">https://github.com/mobz/elasticsearch-head</a></p>
+<p><strong>使用docker启动head插件</strong><br>安装docker，并下载镜像</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost tools]<span class="comment"># docker image pull mobz/elasticsearch-head:5</span></span><br></pre></td></tr></table></figure>
+
+<p>修改elasticsearch服务配置文件：<br>开启跨域访问支持，然后重启elasticsearch服务：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost tools]<span class="comment"># vi /etc/elasticsearch/elasticsearch.yml</span></span><br><span class="line">http.cors.enabled: <span class="literal">true</span></span><br><span class="line">http.cors.allow-origin: <span class="string">"*"</span></span><br></pre></td></tr></table></figure>
+
+<p>docker版本启动head插件</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost tools]<span class="comment"># docker run --name head -d -p 9100:9100 mobz/elasticsearch-head:5</span></span><br></pre></td></tr></table></figure>
+
+<p>之后在客户端浏览器访问宿主机的9100端口就可以使用mobz/ealasticsearch-head插件管理集群。</p>
+<p>Master与Slave的区别：<br>Master的职责：</p>
+<ul>
+<li>统计各node节点状态信息、集群状态信息统计、索引的创建和删除、索引分配的管理、关闭node节点等</li>
+</ul>
+<p>Slave的职责：</p>
+<ul>
+<li>从master同步数据、等待机会成为Master</li>
+</ul>
+<h4 id="kopf插件"><a href="#kopf插件" class="headerlink" title="kopf插件"></a>kopf插件</h4><p>Git地址为<a href="https://github.com/lmenezes/elasticsearch-kopf，但是目前还不支持5.x版本的elasticsearch，但是可以安装在elasticsearc" target="_blank" rel="noopener">https://github.com/lmenezes/elasticsearch-kopf，但是目前还不支持5.x版本的elasticsearch，但是可以安装在elasticsearc</a> 1.x或2.x的版本安装。</p>
+<p>监控elasticsearch集群状态</p>
+<p>通过shell命令获取集群状态</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost tools]<span class="comment">#  curl -sXGET  http://192.168.34.101:9200/_cluster/health?pretty=true</span></span><br><span class="line">&#123;</span><br><span class="line">  <span class="string">"cluster_name"</span> : <span class="string">"myelk"</span>,</span><br><span class="line">  <span class="string">"status"</span> : <span class="string">"green"</span>,</span><br><span class="line">  <span class="string">"timed_out"</span> : <span class="literal">false</span>,</span><br><span class="line">  <span class="string">"number_of_nodes"</span> : 2,</span><br><span class="line">  <span class="string">"number_of_data_nodes"</span> : 2,</span><br><span class="line">  <span class="string">"active_primary_shards"</span> : 0,</span><br><span class="line">  <span class="string">"active_shards"</span> : 0,</span><br><span class="line">  <span class="string">"relocating_shards"</span> : 0,</span><br><span class="line">  <span class="string">"initializing_shards"</span> : 0,</span><br><span class="line">  <span class="string">"unassigned_shards"</span> : 0,</span><br><span class="line">  <span class="string">"delayed_unassigned_shards"</span> : 0,</span><br><span class="line">  <span class="string">"number_of_pending_tasks"</span> : 0,</span><br><span class="line">  <span class="string">"number_of_in_flight_fetch"</span> : 0,</span><br><span class="line">  <span class="string">"task_max_waiting_in_queue_millis"</span> : 0,</span><br><span class="line">  <span class="string">"active_shards_percent_as_number"</span> : 100.0</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>获取到的是一个json格式的返回值，那就可以通过python对其中的信息进行分析，例如对status进行分析，如果等于green(绿色)就是运行在正常，等于yellow(黄色)表示副本分片丢失，red(红色)表示主分片丢失</p>
+<p>python脚本</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#!/usr/bin/env python</span></span><br><span class="line"><span class="comment">#coding:utf-8</span></span><br><span class="line"><span class="comment">#Author Msq</span></span><br><span class="line"></span><br><span class="line">import smtplib</span><br><span class="line">from email.mime.text import MIMEText</span><br><span class="line">from email.utils import formataddr</span><br><span class="line">import subprocess</span><br><span class="line">body = <span class="string">""</span></span><br><span class="line"><span class="literal">false</span>=<span class="string">"false"</span></span><br><span class="line">obj = subprocess.Popen((<span class="string">"curl -sXGET http://192.168.15.211:9200/_cluster/health?pretty=true"</span>),shell=True, stdout=subprocess.PIPE)</span><br><span class="line">data =  obj.stdout.read()</span><br><span class="line">data1 = <span class="built_in">eval</span>(data)</span><br><span class="line">status = data1.get(<span class="string">"status"</span>)</span><br><span class="line"><span class="keyword">if</span> status == <span class="string">"green"</span>:</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">"50"</span>)</span><br><span class="line"><span class="keyword">else</span>:</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">"100"</span>)</span><br></pre></td></tr></table></figure>
+
+<h2 id="logstash"><a href="#logstash" class="headerlink" title="logstash"></a>logstash</h2><p>监听9600-9700<br>环境准备，关闭selinux和firewalld，并且安装java环境</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">[root@linux-host3 ~]<span class="comment"># systemctl  stop firewalld</span></span><br><span class="line">[root@linux-host3 ~]<span class="comment"># systemctl  disable  firewalld</span></span><br><span class="line">[root@linux-host3 ~]<span class="comment"># sed -i '/SELINUX/s/enforcing/disabled/' /etc/selinux/config</span></span><br><span class="line">[root@linux-host3 ~]<span class="comment"># yum install  jdk-8u121-linux-x64.rpm</span></span><br><span class="line">[root@linux-host3 ~]<span class="comment"># java -version</span></span><br><span class="line">java version <span class="string">"1.8.0_121"</span></span><br><span class="line">Java(TM) SE Runtime Environment (build 1.8.0_121-b13)</span><br><span class="line">Java HotSpot(TM) 64-Bit Server VM (build 25.121-b13, mixed mode)</span><br><span class="line">[root@linux-host3 ~]<span class="comment"># reboot</span></span><br></pre></td></tr></table></figure>
+
+<p>安装logstash</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost tools]<span class="comment"># yum -y install logstash-5.6.13.rpm</span></span><br><span class="line">[root@localhost tools]<span class="comment"># chown  logstash.logstash /usr/share/logstash/data/queue –R #权限更改为logstash用户和组，否则启动的时候日志报错</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>测试logstash</strong><br>测试标准输入和输出</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost tools]<span class="comment"># /usr/share/logstash/bin/logstash   -e 'input &#123;  stdin&#123;&#125; &#125; output &#123; stdout&#123;  codec =&gt; rubydebug &#125;&#125;'</span></span><br><span class="line">WARNING: Could not find logstash.yml <span class="built_in">which</span> is typically located <span class="keyword">in</span> <span class="variable">$LS_HOME</span>/config or /etc/logstash. You can specify the path using --path.settings. Continuing using the defaults</span><br><span class="line">Could not find log4j2 configuration at path /usr/share/logstash/config/log4j2.properties. Using default config <span class="built_in">which</span> logs errors to the console</span><br><span class="line">The stdin plugin is now waiting <span class="keyword">for</span> input:</span><br><span class="line">hello world!</span><br><span class="line">&#123;</span><br><span class="line">      <span class="string">"@version"</span> =&gt; <span class="string">"1"</span>,</span><br><span class="line">          <span class="string">"host"</span> =&gt; <span class="string">"localhost.localdomain"</span>,</span><br><span class="line">    <span class="string">"@timestamp"</span> =&gt; 2019-03-06T14:57:58.006Z,</span><br><span class="line">       <span class="string">"message"</span> =&gt; <span class="string">"hello world!"</span></span><br><span class="line">&#125;</span><br><span class="line">中国强     </span><br><span class="line">&#123;</span><br><span class="line">      <span class="string">"@version"</span> =&gt; <span class="string">"1"</span>,</span><br><span class="line">          <span class="string">"host"</span> =&gt; <span class="string">"localhost.localdomain"</span>,</span><br><span class="line">    <span class="string">"@timestamp"</span> =&gt; 2019-03-06T14:58:11.958Z,</span><br><span class="line">       <span class="string">"message"</span> =&gt; <span class="string">"中国强"</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>测试输出到文件</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost tools]<span class="comment"># /usr/share/logstash/bin/logstash   -e 'put &#123;  stdin&#123;&#125; &#125; output &#123; file &#123; path =&gt; "/tmp/log-%&#123;+YYYY.MM.dd&#125;messages.gz"&#125;&#125;'</span></span><br><span class="line">WARNING: Could not find logstash.yml <span class="built_in">which</span> is typically located <span class="keyword">in</span> <span class="variable">$LS_HOME</span>/config or /etc/logstash. You can specify the path using --path.settings. Continuing using the defaults</span><br><span class="line">Could not find log4j2 configuration at path /usr/share/logstash/config/log4j2.properties. Using default config <span class="built_in">which</span> logs errors to the console</span><br><span class="line">The stdin plugin is now waiting <span class="keyword">for</span> input:</span><br><span class="line">这是一个测试</span><br><span class="line">^C[root@localhost tools]<span class="comment"># cat /tmp/log-2019.03.06messages.gz </span></span><br><span class="line">&#123;<span class="string">"@version"</span>:<span class="string">"1"</span>,<span class="string">"host"</span>:<span class="string">"localhost.localdomain"</span>,<span class="string">"@timestamp"</span>:<span class="string">"2019-03-06T15:00:28.838Z"</span>,<span class="string">"message"</span>:<span class="string">"这是一个测试"</span>&#125;</span><br></pre></td></tr></table></figure>
+
+<p>测试输出到elasticsearch</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost tools]<span class="comment"># /usr/share/logstash/bin/logstash   -e 'input &#123;  stdin&#123;&#125; &#125; output &#123; elasticsearch &#123;hosts =&gt; ["192.168.34.100:9200"] index =&gt; "mytest-%&#123;+YYYY.MM.dd&#125;" &#125;&#125;'</span></span><br><span class="line">WARNING: Could not find logstash.yml <span class="built_in">which</span> is typically located <span class="keyword">in</span> <span class="variable">$LS_HOME</span>/config or /etc/logstash. You can specify the path using --path.settings. Continuing using the defaults</span><br><span class="line">Could not find log4j2 configuration at path /usr/share/logstash/config/log4j2.properties. Using default config <span class="built_in">which</span> logs errors to the console</span><br><span class="line">zThe stdin plugin is now waiting <span class="keyword">for</span> input:                      这是一个测试</span><br></pre></td></tr></table></figure>
+
+<p>elasticsearch服务器验证收到数据</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost tools]<span class="comment"># ll /data/esdata/nodes/0/indices/</span></span><br><span class="line">total 0</span><br><span class="line">drwxr-xr-x. 8 elasticsearch elasticsearch 65 Mar  6 23:03 kr-hxCstTfCk_v2wI9QsAw</span><br></pre></td></tr></table></figure>
+
+<h2 id="kibana"><a href="#kibana" class="headerlink" title="kibana"></a>kibana</h2><p>监听5601端口<br>安装配置kibana</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost tools]<span class="comment"># yum -y install kibana-5.3.0-x86_64.rpm</span></span><br><span class="line">[root@localhost tools]<span class="comment"># grep "^[a-Z]" /etc/kibana/kibana.yml </span></span><br><span class="line">server.port: 5601 <span class="comment">#监听端口</span></span><br><span class="line">server.host: <span class="string">"0.0.0.0"</span> <span class="comment">#监听地址</span></span><br><span class="line">server.name: <span class="string">"mykibana"</span> <span class="comment">#名称</span></span><br><span class="line">elasticsearch.url: <span class="string">"http://192.168.34.100:9200"</span> <span class="comment">#elasticsearch服务器地址</span></span><br></pre></td></tr></table></figure>
+
+<p>启动kibana服务并验证</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost tools]<span class="comment"># systemctl  start kibana</span></span><br><span class="line">[root@localhost tools]<span class="comment"># systemctl  enable  kibana</span></span><br><span class="line">[root@localhost tools]<span class="comment"># ss -tnl | grep 5601</span></span><br></pre></td></tr></table></figure>
+
+<p>在客户端浏览器访问该页面就可以使用kibana。<br>如果默认没有显示柱状的图，可能是最近没有写入新的数据，可以查看较长日期当中的数据或者通过logstash新写入数据即可。</p>
+<h3 id="通过logstash收集日志"><a href="#通过logstash收集日志" class="headerlink" title="通过logstash收集日志"></a>通过logstash收集日志</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost conf.d]<span class="comment"># cat system-log.conf </span></span><br><span class="line">input &#123;</span><br><span class="line">  file &#123;</span><br><span class="line">    <span class="built_in">type</span> =&gt; <span class="string">"messagelog"</span></span><br><span class="line">    path =&gt; <span class="string">"/var/log/messages"</span></span><br><span class="line">    start_position =&gt; <span class="string">"beginning"</span></span><br><span class="line">    stat_interval =&gt; <span class="string">"3"</span></span><br><span class="line">  &#125;</span><br><span class="line">  file &#123;</span><br><span class="line">    <span class="built_in">type</span> =&gt; <span class="string">"securelog"</span></span><br><span class="line">    path =&gt; <span class="string">"/var/log/secure"</span></span><br><span class="line">    start_position =&gt; <span class="string">"beginning"</span></span><br><span class="line">    stat_interval =&gt; <span class="string">"3"</span></span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">output &#123;</span><br><span class="line">  <span class="keyword">if</span> [<span class="built_in">type</span>] == <span class="string">"messagelog"</span> &#123;</span><br><span class="line">    elasticsearch &#123;</span><br><span class="line">      hosts =&gt; <span class="string">"192.168.34.100:9200"</span></span><br><span class="line">      index =&gt; <span class="string">"messagelog-100-%&#123;+YYYY.MM.dd&#125;"</span></span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">if</span> [<span class="built_in">type</span>] == <span class="string">"securelog"</span> &#123;</span><br><span class="line">    elasticsearch &#123;</span><br><span class="line">      hosts =&gt; <span class="string">"192.168.34.101:9200"</span></span><br><span class="line">      index =&gt; <span class="string">"securelog-101-%&#123;+YYYY.MM.dd&#125;"</span></span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="通过logtsash收集tomcat和java日志"><a href="#通过logtsash收集tomcat和java日志" class="headerlink" title="通过logtsash收集tomcat和java日志"></a>通过logtsash收集tomcat和java日志</h3><p>配置安装java环境，并自定义一个web界面进行测试</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">[root@linux-host6 ~]<span class="comment"># yum install jdk-8u121-linux-x64.rpm</span></span><br><span class="line">[root@linux-host6 ~]<span class="comment"># cd  /usr/local/src/</span></span><br><span class="line">[root@linux-host6 src]<span class="comment"># tar xvf apache-tomcat-8.0.38.tar.gz </span></span><br><span class="line">[root@linux-host6 src]<span class="comment"># ln -sv /usr/local/src/apache-tomcat-8.0.38 /usr/local/tomcat </span></span><br><span class="line">‘/usr/<span class="built_in">local</span>/tomcat’ -&gt; ‘/usr/<span class="built_in">local</span>/src/apache-tomcat-8.0.38’</span><br><span class="line">[root@linux-host6 tomcat]<span class="comment"># cd /usr/local/tomcat/webapps/ </span></span><br><span class="line">[root@linux-host6 webapps]<span class="comment">#mkdir /usr/local/tomcat/webapps/webdir </span></span><br><span class="line">[root@linux-host6 webapps]<span class="comment"># echo "Tomcat Page" &gt; /usr/local/tomcat/webapps/webdir/index.html </span></span><br><span class="line">[root@linux-host6 webapps]<span class="comment"># ../bin/catalina.sh  start</span></span><br><span class="line">[root@linux-host6 webapps]<span class="comment"># ss -tnl | grep 8080</span></span><br><span class="line">LISTEN     0      100         :::8080                    :::*</span><br></pre></td></tr></table></figure>
+<p>确认tomcat可以正常访问。</p>
+<p>将tomcat日志转json</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">[root@node02 tomcat]<span class="comment"># vi conf/server.xml</span></span><br><span class="line">...</span><br><span class="line">&lt;Host name=<span class="string">"localhost"</span>  appBase=<span class="string">"webapps"</span></span><br><span class="line">            unpackWARs=<span class="string">"true"</span> autoDeploy=<span class="string">"true"</span>&gt;</span><br><span class="line">	 &lt;Valve className=<span class="string">"org.apache.catalina.valves.AccessLogValve"</span> directory=<span class="string">"logs"</span></span><br><span class="line">	               prefix=<span class="string">"tomcat_access_log"</span> suffix=<span class="string">".log"</span></span><br><span class="line">	               pattern=<span class="string">"&#123;&amp;quot;clientip&amp;quot;:&amp;quot;%h&amp;quot;,&amp;quot;ClientUser&amp;quot;:&amp;quot;%l&amp;quot;,&amp;quot;authenticated&amp;quot;:&amp;quot;%u&amp;quot;,&amp;quot;AccessTime&amp;quot;:&amp;quot;%t&amp;quot;,&amp;quot;method&amp;quot;:&amp;quot;%r&amp;quot;,&amp;quot;status&amp;quot;:&amp;quot;%s&amp;quot;,&amp;quot;SendBytes&amp;quot;:&amp;quot;%b&amp;quot;,&amp;quot;Query?string&amp;quot;:&amp;quot;%q&amp;quot;,&amp;quot;partner&amp;quot;:&amp;quot;%&#123;Referer&#125;i&amp;quot;,&amp;quot;AgentVersion&amp;quot;:&amp;quot;%&#123;User-Agent&#125;i&amp;quot;&#125;"</span>/&gt; </span><br><span class="line">&lt;/Host&gt;</span><br></pre></td></tr></table></figure>
+<p>重启tomcat。</p>
+<p>在tomcat主机安装logstash并编辑配置文件：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line">[root@node02 logs]<span class="comment"># cat /etc/logstash/conf.d/tomcat.conf </span></span><br><span class="line">input &#123;</span><br><span class="line">  file &#123;</span><br><span class="line">    path =&gt; <span class="string">"/usr/local/tomcat/logs/catalina.out"</span></span><br><span class="line">    start_position =&gt; <span class="string">"beginning"</span></span><br><span class="line">    stat_interval =&gt; 3</span><br><span class="line">    <span class="built_in">type</span> =&gt; <span class="string">"tomcatlog"</span></span><br><span class="line">  &#125;</span><br><span class="line">  file &#123;</span><br><span class="line">    path =&gt; <span class="string">"/usr/local/tomcat/logs/tomcat_access_log.*.log"</span></span><br><span class="line">    start_position =&gt; <span class="string">"beginning"</span></span><br><span class="line">    stat_interval =&gt; 3</span><br><span class="line">    <span class="built_in">type</span> =&gt; <span class="string">"accesslog"</span></span><br><span class="line">    codec =&gt; <span class="string">"json"</span></span><br><span class="line">&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">output &#123;</span><br><span class="line">  <span class="keyword">if</span> [<span class="built_in">type</span>] == <span class="string">"tomcatlog"</span> &#123;</span><br><span class="line">    elasticsearch &#123;</span><br><span class="line">      hosts =&gt; <span class="string">"192.168.34.100:9200"</span></span><br><span class="line">      index =&gt; <span class="string">"tomcat-102-%&#123;+YYYY.MM.dd&#125;"</span></span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">if</span> [<span class="built_in">type</span>] == <span class="string">"accesslog"</span> &#123;</span><br><span class="line">    elasticsearch &#123;</span><br><span class="line">      hosts =&gt; <span class="string">"192.168.34.101:9200"</span></span><br><span class="line">      index =&gt; <span class="string">"logstash-tomcat-accesslog-102-%&#123;+YYYY.MM.dd&#125;"</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>启动logstash</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@node02 ~]<span class="comment"># systemctl start logstash</span></span><br></pre></td></tr></table></figure>
+<p>然后在kibana加入响应索引即可收集tomcat的访问日志。</p>
+<p>关于sincedb：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[root@node02 ~]<span class="comment"># cat /var/lib/logstash/plugins/inputs/file/.sincedb_19224e5b5b842ee829563544811600e0 </span></span><br><span class="line">0 0 0 0</span><br><span class="line">34905429 0 64768 11370</span><br></pre></td></tr></table></figure>
+<p>记录了手机文件的inode信息。</p>
+<h3 id="通过logstash收集java日志"><a href="#通过logstash收集java日志" class="headerlink" title="通过logstash收集java日志"></a>通过logstash收集java日志</h3><p>使用codec的multiline插件实现多行匹配，这是一个可以将多行进行合并的插件，而且可以使用what指定将匹配到的行与前面的行合并还是和后面的行合并，<a href="https://www.elastic.co/guide/en/logstash/current/plugins-codecs-multiline.html" target="_blank" rel="noopener">https://www.elastic.co/guide/en/logstash/current/plugins-codecs-multiline.html</a></p>
+<p>在服务器部署logstash并生成测试文件进行测试</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">input &#123;</span><br><span class="line">        stdin &#123;</span><br><span class="line">        codec =&gt; multiline &#123;</span><br><span class="line">        pattern =&gt; <span class="string">"^\["</span> <span class="comment">#当遇到[开头的行时候将多行进行合并</span></span><br><span class="line">        negate =&gt; <span class="literal">true</span>  <span class="comment">#true为匹配成功进行操作，false为不成功进行操作</span></span><br><span class="line">        what =&gt; <span class="string">"previous"</span>  <span class="comment">#与上面的行合并，如果是下面的行合并就是next</span></span><br><span class="line">        &#125;&#125;</span><br><span class="line">&#125;</span><br><span class="line">filter &#123; <span class="comment">#日志过滤，如果所有的日志都过滤就写这里，如果只针对某一个过滤就写在input里面的日志输入里面</span></span><br><span class="line">&#125;</span><br><span class="line">output &#123;</span><br><span class="line">        stdout &#123;</span><br><span class="line">        codec =&gt; rubydebug</span><br><span class="line">&#125;&#125;</span><br></pre></td></tr></table></figure>
+
+<p>配置读取日志文件并将输出改为elasticsearch</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">[root@node02 conf.d]<span class="comment"># cat java.conf </span></span><br><span class="line">input &#123;</span><br><span class="line">  file &#123;</span><br><span class="line">    path =&gt; <span class="string">"/elk/logs/ELK-Cluster.log"</span></span><br><span class="line">    <span class="built_in">type</span> =&gt; <span class="string">"javalog"</span></span><br><span class="line">    start_position =&gt; <span class="string">"beginning"</span></span><br><span class="line">    codec =&gt; multiline &#123;</span><br><span class="line">      pattern =&gt; <span class="string">"^\["</span></span><br><span class="line">      negate =&gt; <span class="literal">true</span></span><br><span class="line">      what =&gt; <span class="string">"previous"</span></span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">output &#123;</span><br><span class="line">  <span class="keyword">if</span> [<span class="built_in">type</span>] == <span class="string">"javalog"</span> &#123;</span><br><span class="line">    elasticsearch &#123;</span><br><span class="line">      hosts =&gt; [<span class="string">"192.168.34.100:9200"</span>]</span><br><span class="line">      index =&gt; <span class="string">"javalog-javalog-102-%&#123;+YYYY.MM.dd&#125;"</span></span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>然后重启一下elasticsearch服务，以生成新的日志，验证logstash能否自动收集新生成的日志。<br>然后配置kibana，创建新的索引，就可以浏览收集的日志。</p>
+<h3 id="通过logstash收集nginx的访问日志"><a href="#通过logstash收集nginx的访问日志" class="headerlink" title="通过logstash收集nginx的访问日志"></a>通过logstash收集nginx的访问日志</h3><p>部署nginx服务</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">[root@linux-host6 ~]<span class="comment"># yum install gcc gcc-c++ automake pcre pcre-devel zlip zlib-devel openssl openssl-devel</span></span><br><span class="line">[root@linux-host6 ~]<span class="comment"># cd /usr/local/src/</span></span><br><span class="line">[root@linux-host6 src]<span class="comment"># wget http://nginx.org/download/nginx-1.10.3.tar.gz</span></span><br><span class="line">[root@linux-host6 src]<span class="comment"># tar xvf  nginx-1.10.3.tar.gz</span></span><br><span class="line">[root@linux-host6 src]<span class="comment"># cd nginx-1.10.3</span></span><br><span class="line">[root@linux-host6 nginx-1.10.3]<span class="comment"># ./configure  --prefix=/usr/local/nginx-1.10.3</span></span><br><span class="line">[root@linux-host6 nginx-1.10.3]<span class="comment"># make &amp;&amp; make install</span></span><br><span class="line">[root@linux-host6 nginx-1.10.3]<span class="comment"># ln -sv /usr/local/nginx-1.10.3 /usr/local/nginx</span></span><br><span class="line">‘/usr/<span class="built_in">local</span>/nginx’ -&gt; ‘/usr/<span class="built_in">local</span>/nginx-1.10.3’</span><br></pre></td></tr></table></figure>
+<p>编辑配置文件并准备web页面</p>
+<p>将nginx的访问日志转为json格式</p>
+<p>将nginx的访问日志转为json格式</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">[root@node02 ~]<span class="comment"># vi /etc/nginx/nginx.conf</span></span><br><span class="line">http&#123;</span><br><span class="line">	...</span><br><span class="line">	log_format access_json <span class="string">'&#123;"@timestamp":"$time_iso8601",'</span></span><br><span class="line">	        <span class="string">'"host":"$server_addr",'</span></span><br><span class="line">	        <span class="string">'"clientip":"$remote_addr",'</span></span><br><span class="line">	        <span class="string">'"size":$body_bytes_sent,'</span></span><br><span class="line">	        <span class="string">'"responsetime":$request_time,'</span></span><br><span class="line">	        <span class="string">'"upstreamtime":"$upstream_response_time",'</span></span><br><span class="line">	        <span class="string">'"upstreamhost":"$upstream_addr",'</span></span><br><span class="line">	        <span class="string">'"http_host":"$host",'</span></span><br><span class="line">	        <span class="string">'"url":"$uri",'</span></span><br><span class="line">	        <span class="string">'"domain":"$host",'</span></span><br><span class="line">	        <span class="string">'"xff":"$http_x_forwarded_for",'</span></span><br><span class="line">	        <span class="string">'"referer":"$http_referer",'</span></span><br><span class="line">	        <span class="string">'"status":"$status"&#125;'</span>;</span><br><span class="line">    access_log  /var/<span class="built_in">log</span>/nginx/access.log  access_json;</span><br><span class="line">    ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>配置logstash收集nginx日志：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">[root@node02 conf.d]<span class="comment"># pwd</span></span><br><span class="line">/etc/logstash/conf.d</span><br><span class="line">[root@node02 conf.d]<span class="comment"># cat nginx.conf </span></span><br><span class="line">input &#123;</span><br><span class="line">  file &#123;</span><br><span class="line">    path =&gt; <span class="string">"/var/log/nginx/access.log"</span></span><br><span class="line">    start_position =&gt; <span class="string">"end"</span></span><br><span class="line">    <span class="built_in">type</span> =&gt; <span class="string">"end"</span></span><br><span class="line">    codec =&gt; <span class="string">"json"</span></span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">output &#123;</span><br><span class="line">  elasticsearch &#123;</span><br><span class="line">    hosts =&gt; <span class="string">"192.168.34.100:9200"</span></span><br><span class="line">    index =&gt; <span class="string">"logstash-nginx-accesslog-102-%&#123;+YYYY.MM.dd&#125;"</span></span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="通过logstash收集TCP-UDP日志"><a href="#通过logstash收集TCP-UDP日志" class="headerlink" title="通过logstash收集TCP/UDP日志"></a>通过logstash收集TCP/UDP日志</h3><p>通过logstash的tcp/udp插件收集日志，通常用于在向elasticsearch日志补录丢失的部分日志，可以将丢失的日志写到一个文件，然后通过TCP日志收集方式直接发送给logstash然后再写入到elasticsearch服务器。<br><a href="https://www.elastic.co/guide/en/logstash/5.6/input-plugins.html" target="_blank" rel="noopener">https://www.elastic.co/guide/en/logstash/5.6/input-plugins.html</a></p>
+<p>编辑logstash配置文件，进行日志收集测试</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">[root@node02 conf.d]<span class="comment"># cat tcp.conf </span></span><br><span class="line">input &#123;</span><br><span class="line">  tcp &#123;</span><br><span class="line">    port =&gt; 9889</span><br><span class="line">    <span class="built_in">type</span> =&gt; <span class="string">"tcplog"</span></span><br><span class="line">    mode =&gt; <span class="string">"server"</span>  </span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">output &#123;</span><br><span class="line">  stdout &#123;</span><br><span class="line">    codec =&gt; rubydebug</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>此时端口9889处于监听状态，在其他服务器安装nc命令用于测试</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[root@node01 ~]<span class="comment"># yum -y install nc</span></span><br><span class="line">[root@node01 ~]<span class="comment"># echo "nc test" | nc 192.168.34.102 9889</span></span><br><span class="line">[root@node01 ~]<span class="comment">#  nc 192.168.15.16 9889 &lt; /etc/passwd</span></span><br></pre></td></tr></table></figure>
+
+<p>通过nc发送一个文件：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">nc 192.168.15.16 9889 &lt; /etc/passwd</span><br></pre></td></tr></table></figure>
+
+<p><strong>通过伪设备的方式发送消息</strong><br>在类Unix操作系统中，块设备有硬盘、内存的硬件，但是还有设备节点并不一定要对应物理设备，我们把没有这种对应关系的设备是伪设备，比如/dev/null，/dev/zero，/dev/random以及/dev/tcp和/dev/upd等，Linux操作系统使用这些伪设备提供了多种不通的功能，tcp通信只是dev下面众多伪设备当中的一种设备。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@linux-host1 ~]<span class="comment"># echo "伪设备"  &gt; /dev/tcp/192.168.15.16/9889</span></span><br></pre></td></tr></table></figure>
+
+<p>将输出改为elasticsearch</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">[root@node02 conf.d]<span class="comment"># cat tcp.conf </span></span><br><span class="line">input &#123;</span><br><span class="line">  tcp &#123;</span><br><span class="line">    port =&gt; 9889</span><br><span class="line">    <span class="built_in">type</span> =&gt; <span class="string">"tcplog"</span></span><br><span class="line">    mode =&gt; <span class="string">"server"</span>  </span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">output &#123;</span><br><span class="line">  elasticsearch &#123;</span><br><span class="line">    hosts =&gt; <span class="string">"192.168.34.100:9200"</span></span><br><span class="line">    index =&gt; <span class="string">"logstash-tcplog-%&#123;+YYYY.MM.dd&#125;"</span></span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>之后在kibana添加索引就可以查看收集的tcp日志</p>
+<h3 id="通过rsyslog收集haproxy日志"><a href="#通过rsyslog收集haproxy日志" class="headerlink" title="通过rsyslog收集haproxy日志"></a>通过rsyslog收集haproxy日志</h3><p>在centos 6及之前的版本叫做syslog，centos 7开始叫做rsyslog，根据官方的介绍，rsyslog(2013年版本)可以达到每秒转发百万条日志的级别，官方网址：<a href="http://www.rsyslog.com/，确认系统安装的版本命令如下：" target="_blank" rel="noopener">http://www.rsyslog.com/，确认系统安装的版本命令如下：</a></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@node02 conf.d]<span class="comment"># rpm -q rsyslog</span></span><br><span class="line">rsyslog-8.24.0-16.el7.x86_64</span><br></pre></td></tr></table></figure>
+
+<p>编辑haproxy和rsyslog的配置文件生成haproxy日志：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[root@node02 conf.d]<span class="comment"># vi /etc/haproxy/haproxy.cfg </span></span><br><span class="line">global</span><br><span class="line">	<span class="built_in">log</span> 127.0.0.1 local2 info</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">[root@node02 rsyslog.d]<span class="comment"># vi haproxy.conf</span></span><br><span class="line"><span class="variable">$ModLoad</span> imudp</span><br><span class="line"><span class="variable">$UDPServerRun</span> 514</span><br><span class="line"></span><br><span class="line"><span class="variable">$ModLoad</span> imtcp</span><br><span class="line"><span class="variable">$InputTCPServerRun</span> 514</span><br><span class="line"></span><br><span class="line">local2.* /var/<span class="built_in">log</span>/haproxy.log</span><br><span class="line">local2.* @@192.168.34.102:516</span><br></pre></td></tr></table></figure>
+<p>之后重启haproxy和rsyslog，确保正常启动。</p>
+<p>编辑logstash配置文件<br>将收集收集并传输至elasticsearch</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">[root@node02 conf.d]<span class="comment"># pwd</span></span><br><span class="line">/etc/logstash/conf.d</span><br><span class="line">[root@node02 conf.d]<span class="comment"># cat haproxy.conf </span></span><br><span class="line">input &#123;</span><br><span class="line">  syslog &#123;</span><br><span class="line">    <span class="built_in">type</span> =&gt; <span class="string">"system-rsyslog"</span></span><br><span class="line">    port =&gt; <span class="string">"516"</span></span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">output &#123;</span><br><span class="line">  elasticsearch &#123;</span><br><span class="line">    hosts =&gt; [<span class="string">"192.168.34.100:9200"</span>]</span><br><span class="line">    index =&gt; <span class="string">"logstash-rsyslog-haproxy-%&#123;+YYYY.MM.dd&#125;"</span></span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>之后在kibana计收入索引即可将haproxy的日志加入ELK。</p>
+<h3 id="logstash收集日志并写入redis"><a href="#logstash收集日志并写入redis" class="headerlink" title="logstash收集日志并写入redis"></a>logstash收集日志并写入redis</h3><p>用一台服务器安装部署redis服务，专门用于写入日志缓存使用，用于web服务器产生大量日志的场景。<br>部署如下：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br></pre></td><td class="code"><pre><span class="line">[root@linux-host2 ~]<span class="comment"># cd /usr/local/src/</span></span><br><span class="line">[root@linux-host2 src]<span class="comment"># wget http://download.redis.io/releases/redis-3.2.8.tar.gz</span></span><br><span class="line">[root@linux-host2 src]<span class="comment"># tar  xvf redis-3.2.8.tar.gz</span></span><br><span class="line">[root@linux-host2 src]<span class="comment"># ln -sv /usr/local/src/redis-3.2.8 /usr/local/redis</span></span><br><span class="line">‘/usr/<span class="built_in">local</span>/redis’ -&gt; ‘/usr/<span class="built_in">local</span>/src/redis-3.2.8’</span><br><span class="line">[root@linux-host2 src]<span class="comment">#cd  /usr/local/redis/deps</span></span><br><span class="line">[root@linux-host2 redis]<span class="comment"># yum install gcc</span></span><br><span class="line">[root@linux-host2 deps]<span class="comment"># make geohash-int hiredis jemalloc linenoise lua</span></span><br><span class="line">[root@linux-host2 deps]<span class="comment"># cd ..</span></span><br><span class="line">[root@linux-host2 redis]<span class="comment"># make</span></span><br><span class="line">[root@linux-host2 redis]<span class="comment"># vim  redis.conf</span></span><br><span class="line">[root@linux-host2 redis]<span class="comment"># grep "^[a-Z]" redis.conf  #主要改动的地方</span></span><br><span class="line">[root@node01 ~]<span class="comment"># grep "^[a-Z]" /etc/redis.conf </span></span><br><span class="line"><span class="built_in">bind</span> 0.0.0.0</span><br><span class="line">protected-mode yes</span><br><span class="line">port 6379</span><br><span class="line">tcp-backlog 511</span><br><span class="line">timeout 0</span><br><span class="line">tcp-keepalive 300</span><br><span class="line">daemonize yes</span><br><span class="line">supervised no</span><br><span class="line">pidfile /var/run/redis_6379.pid</span><br><span class="line">loglevel notice</span><br><span class="line">logfile /var/<span class="built_in">log</span>/redis/redis.log</span><br><span class="line">databases 16</span><br><span class="line">save 900 1</span><br><span class="line">save 300 10</span><br><span class="line">save 60 10000</span><br><span class="line">stop-writes-on-bgsave-error yes</span><br><span class="line">rdbcompression no</span><br><span class="line">rdbchecksum no</span><br><span class="line">dbfilename dump.rdb</span><br><span class="line">dir /var/lib/redis</span><br><span class="line">slave-serve-stale-data yes</span><br><span class="line">slave-read-only yes</span><br><span class="line">repl-diskless-sync no</span><br><span class="line">repl-diskless-sync-delay 5</span><br><span class="line">repl-disable-tcp-nodelay no</span><br><span class="line">slave-priority 100</span><br><span class="line">appendonly no</span><br><span class="line">appendfilename <span class="string">"appendonly.aof"</span></span><br><span class="line">appendfsync everysec</span><br><span class="line">no-appendfsync-on-rewrite no</span><br><span class="line">auto-aof-rewrite-percentage 100</span><br><span class="line">auto-aof-rewrite-min-size 64mb</span><br><span class="line">aof-load-truncated yes</span><br><span class="line">lua-time-limit 5000</span><br><span class="line">slowlog-log-slower-than 10000</span><br><span class="line">slowlog-max-len 128</span><br><span class="line">latency-monitor-threshold 0</span><br><span class="line">notify-keyspace-events <span class="string">""</span></span><br><span class="line"><span class="built_in">hash</span>-max-ziplist-entries 512</span><br><span class="line"><span class="built_in">hash</span>-max-ziplist-value 64</span><br><span class="line">list-max-ziplist-size -2</span><br><span class="line">list-compress-depth 0</span><br><span class="line"><span class="built_in">set</span>-max-intset-entries 512</span><br><span class="line">zset-max-ziplist-entries 128</span><br><span class="line">zset-max-ziplist-value 64</span><br><span class="line">hll-sparse-max-bytes 3000</span><br><span class="line">activerehashing yes</span><br><span class="line">client-output-buffer-limit normal 0 0 0</span><br><span class="line">client-output-buffer-limit slave 256mb 64mb 60</span><br><span class="line">client-output-buffer-limit pubsub 32mb 8mb 60</span><br><span class="line">hz 10</span><br><span class="line">aof-rewrite-incremental-fsync yes</span><br></pre></td></tr></table></figure>
+
+<p>启动redis并设置访问密码</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@node01 ~]<span class="comment"># redis-cli -h 127.0.0.1</span></span><br><span class="line">127.0.0.1:6379&gt;  CONFIG SET requirepass 123456 <span class="comment">#安全起见，生产环境中redis必须设置密码，或者在配置文件中设置：requirepass  123456 #redis.conf配置文件</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>将logstash收集的日志写入redis</strong><br>将tomcat服务器的logstash收集之后的tomcat 访问日志写入到redis服务器，然后通过另外的logstash将redis服务器的数据取出在写入到elasticsearch服务器。<br>官方文档：<a href="https://www.elastic.co/guide/en/logstash/current/plugins-outputs-redis.html" target="_blank" rel="noopener">https://www.elastic.co/guide/en/logstash/current/plugins-outputs-redis.html</a></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line">[root@node02 conf.d]<span class="comment"># cat tomcat_tcp.conf </span></span><br><span class="line">input &#123;</span><br><span class="line">  file &#123;</span><br><span class="line">    path =&gt; <span class="string">"/usr/local/tomcat/logs/tomcat_access_log.*.log"</span></span><br><span class="line">    start_position =&gt; <span class="string">"beginning"</span></span><br><span class="line">    stat_interval =&gt; 3</span><br><span class="line">    <span class="built_in">type</span> =&gt; <span class="string">"accesslog"</span></span><br><span class="line">  &#125;</span><br><span class="line">  tcp &#123;</span><br><span class="line">    port =&gt; 516</span><br><span class="line">    mode =&gt; <span class="string">"server"</span></span><br><span class="line">    <span class="built_in">type</span> =&gt; <span class="string">"tcplog-102"</span></span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">output &#123;</span><br><span class="line">  <span class="keyword">if</span> [<span class="built_in">type</span>] == <span class="string">"accesslog"</span> &#123;</span><br><span class="line">    redis &#123;</span><br><span class="line">      data_type =&gt; <span class="string">"list"</span></span><br><span class="line">      key =&gt; <span class="string">"tomcat-accesslog-102"</span></span><br><span class="line">      host =&gt; <span class="string">"192.168.34.101"</span></span><br><span class="line">      port =&gt; <span class="string">"6379"</span></span><br><span class="line">      db =&gt; <span class="string">"0"</span></span><br><span class="line">      password =&gt; <span class="string">""</span></span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">if</span> [<span class="built_in">type</span>] == <span class="string">"tcplog-102"</span> &#123;</span><br><span class="line">    redis &#123;</span><br><span class="line">      data_type =&gt; <span class="string">"list"</span></span><br><span class="line">      key =&gt; <span class="string">"tcplog-102"</span></span><br><span class="line">      host =&gt; <span class="string">"192.168.34.101"</span></span><br><span class="line">      port =&gt; <span class="string">"6379"</span></span><br><span class="line">      db =&gt; <span class="string">"1"</span></span><br><span class="line">      password =&gt; <span class="string">""</span></span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>配置其他logstash服务器从redis读取数据</strong><br>配置专门logstash服务器从redis读取指定的key的数据，并写入到elasticsearch。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line">[root@node01 conf.d]<span class="comment"># cat redis-es.conf </span></span><br><span class="line">input &#123;</span><br><span class="line">  redis &#123;</span><br><span class="line">    data_type =&gt; <span class="string">"list"</span></span><br><span class="line">    key =&gt; <span class="string">"tomcat-accesslog-102"</span></span><br><span class="line">    host =&gt; <span class="string">"192.168.34.101"</span></span><br><span class="line">    port =&gt; <span class="string">"6379"</span></span><br><span class="line">    db =&gt; <span class="string">"0"</span></span><br><span class="line">    password =&gt; <span class="string">"123456"</span></span><br><span class="line">    codec =&gt; <span class="string">"json"</span></span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  redis &#123;</span><br><span class="line">    data_type =&gt; <span class="string">"list"</span></span><br><span class="line">    key =&gt; <span class="string">"tcplog-102"</span></span><br><span class="line">    host =&gt; <span class="string">"192.168.34.101"</span></span><br><span class="line">    port =&gt; <span class="string">"6379"</span></span><br><span class="line">    db =&gt; <span class="string">"1"</span></span><br><span class="line">    password =&gt; <span class="string">"123456"</span></span><br><span class="line">    codec =&gt; <span class="string">"json"</span></span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">output &#123;</span><br><span class="line">  <span class="keyword">if</span> [<span class="built_in">type</span>] == <span class="string">"tomcat-accesslog-102"</span> &#123;</span><br><span class="line">    elasticsearch &#123;</span><br><span class="line">      hosts =&gt; <span class="string">"192.168.34.100:9200"</span></span><br><span class="line">      index =&gt; <span class="string">"redis-tomcat-102-%&#123;+YYYY.MM.dd&#125;"</span></span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">if</span> [<span class="built_in">type</span>] == <span class="string">"tcplog-102"</span> &#123;</span><br><span class="line">    elasticsearch &#123;</span><br><span class="line">      hosts =&gt; <span class="string">"192.168.34.100:9200"</span></span><br><span class="line">      index =&gt; <span class="string">"redis-tcplog-102-%&#123;+YYYY.MM.dd&#125;"</span></span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>此时，在kibana上添加指定的索引即可看到该数据。</p>
+<h3 id="logstash收集日志并写入kafka"><a href="#logstash收集日志并写入kafka" class="headerlink" title="logstash收集日志并写入kafka"></a>logstash收集日志并写入kafka</h3><p>kafka可以结合zookeeper更方便的实现扩容。<br>kafka将数据存放在分布式的存储系统zookeeper内，<br>安装kafka<br>Broker<br>Kafka集群包含一个或多个服务器，这种服务器被称为broker</p>
+<p>Topic<br>每条发布到Kafka集群的消息都有一个类别，这个类别被称为topic。（物理上不同topic的消息分开存储，逻辑上一个topic的消息虽然保存于一个或多个broker上但用户只需指定消息的topic即可生产或消费数据而不必关心数据存于何处）</p>
+<p>Partition<br>parition是物理上的概念，每个topic包含一个或多个partition，创建topic时可指定parition数量。每个partition对应于一个文件夹，该文件夹下存储该partition的数据和索引文件</p>
+<p>Producer<br>负责发布消息到Kafka broker</p>
+<p>Consumer<br>消费消息。每个consumer属于一个特定的consuer group（可为每个consumer指定group name，若不指定group name则属于默认的group）。使用consumer high level API时，同一topic的一条消息只能被同一个consumer group内的一个consumer消费，但多个consumer group可同时消费这一消息。</p>
+<p>在三台服务器上分别安装启动kafka</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">[root@linux-host1 src]<span class="comment"># tar xvf kafka_2.11-1.0.0.tgz</span></span><br><span class="line">[root@linux-host1 src]<span class="comment"># ln -sv /usr/local/src/kafka_2.11-1.0.0 /usr/local/kafka</span></span><br><span class="line">[root@linux-host1 src]<span class="comment"># vim /usr/local/kafka/config/server.properties</span></span><br><span class="line">21 broker.id=1  <span class="comment">#设置每个代理全局唯一的整数ID</span></span><br><span class="line">31 listeners=PLAINTEXT://192.168.15.211:9092</span><br><span class="line">103 log.retention.hours=24  <span class="comment">#保留指定小时的日志内容</span></span><br><span class="line">123 zookeeper.connect=192.168.15.211:2181,192.168.15.212:2181,192.168.15.213:2181 <span class="comment">#所有的zookeeper地址</span></span><br></pre></td></tr></table></figure>
+<p>启动kafka</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">~]<span class="comment"># /usr/local/kafka/bin/kafka-server-start.sh -daemon /usr/local/kafka/config/server.properties  #以守护进程的方式启动</span></span><br></pre></td></tr></table></figure>
+
+<p>测试kafka</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost <span class="built_in">local</span>]<span class="comment"># jps</span></span><br><span class="line">4789 Kafka</span><br><span class="line">1383 QuorumPeerMain</span><br><span class="line">5147 Jps</span><br></pre></td></tr></table></figure>
+
+<p><strong>测试创建topic</strong><br>创建名为logstashtest，partitions(分区)为3，replication(复制)为3的topic(主题)：<br>在任意kafaka服务器操作：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@node01 <span class="built_in">local</span>]<span class="comment"># /usr/local/kafka/bin/kafka-topics.sh --create --zookeeper 192.168.34.100:2181,192.168.34.101:2181,192.168.34102:2181 --partitions 3 --replication-factor 3 --topic logstashtest</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>测试获取topic</strong><br>可以在任意一台kafka服务器上进行测试</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost <span class="built_in">local</span>]<span class="comment"># kafka/bin/kafka-topics.sh --describe --zookeeper 192.168.34.100:2181,192.168.34.101:2181,192.168.34.102:2181 --topic logstashtest</span></span><br><span class="line">Topic:logstashtest	PartitionCount:3	ReplicationFactor:3	Configs:</span><br><span class="line">	Topic: logstashtest	Partition: 0	Leader: 3	Replicas: 3,2,1	Isr: 3,2,1</span><br><span class="line">	Topic: logstashtest	Partition: 1	Leader: 1	Replicas: 1,3,2	Isr: 1,3,2</span><br><span class="line">	Topic: logstashtest	Partition: 2	Leader: 2	Replicas: 2,1,3	Isr: 2,1,3</span><br></pre></td></tr></table></figure>
+<p>状态说明：logstashtest有三个分区分别为0、1、2，分区0的leader是3（broker.id），分区0有三个副本，并且状态都为lsr（ln-sync，表示可以参加选举成为leader）。</p>
+<p><strong>删除指定topic</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost <span class="built_in">local</span>]<span class="comment"># kafka/bin/kafka-topics.sh --delete --zookeeper 192.168.34.100:2181,192.168.34.101:2181,192.168.34102:2181 --topic logstashtest</span></span><br><span class="line">Topic logstashtest is marked <span class="keyword">for</span> deletion.</span><br><span class="line">Note: This will have no impact <span class="keyword">if</span> delete.topic.enable is not <span class="built_in">set</span> to <span class="literal">true</span>.</span><br></pre></td></tr></table></figure>
+
+<p><strong>获取所有topic</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost <span class="built_in">local</span>]<span class="comment"># kafka/bin/kafka-topics.sh --list --zookeeper 192.168.34.100:2181,192.168.34.101:2181,192.168.34.102:2181</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="kafka命令测试消息发送"><a href="#kafka命令测试消息发送" class="headerlink" title="kafka命令测试消息发送"></a>kafka命令测试消息发送</h3><p>创建topic</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost <span class="built_in">local</span>]<span class="comment"># kafka/bin/kafka-topics.sh --create --zookeeper 192.168.34.100:2181,192.168.34.101:2181,192.168.34.102:2181 --partitions 3 --replication-factor 3 --topic messagetest</span></span><br><span class="line">Created topic <span class="string">"messagetest"</span>.</span><br></pre></td></tr></table></figure>
+
+<p>发送消息</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost <span class="built_in">local</span>]<span class="comment"># kafka/bin/kafka-console-producer.sh --broker-list 192.168.34.100:9092,192.168.34.101:9092,192.168.34.102:9092 --topic messagetest</span></span><br><span class="line">&gt;hello</span><br><span class="line">&gt;kafka</span><br><span class="line">&gt;logstash</span><br><span class="line">&gt;ss</span><br><span class="line">&gt;oo</span><br><span class="line">&gt;start</span><br><span class="line">&gt;</span><br></pre></td></tr></table></figure>
+
+<p>在其他kafka服务器测试数据获取</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@node01 <span class="built_in">local</span>]<span class="comment"># kafka/bin/kafka-console-consumer.sh  --bootstrap-server 192.168.34.100:2181,192.168.34.101:2181,192.168.34.102:2181 --topic messagetest --from-beginning</span></span><br></pre></td></tr></table></figure>
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/ELK/" rel="tag"># ELK</a>
+          
+            <a href="/tags/%E6%97%A5%E5%BF%97%E6%94%B6%E9%9B%86%E5%88%86%E6%9E%90/" rel="tag"># 日志收集分析</a>
+          
+            <a href="/tags/kafka/" rel="tag"># kafka</a>
+          
+            <a href="/tags/zookeeper/" rel="tag"># zookeeper</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/07/20/kvm/" rel="next" title="KVM使用心得">
+                <i class="fa fa-chevron-left"></i> KVM使用心得
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/09/28/k8s/" rel="prev" title="k8s">
+                k8s <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+        <!-- JiaThis Button BEGIN -->
+<div class="jiathis_style">
+<span class="jiathis_txt">分享到：</span>
+<a class="jiathis_button_fav">收藏夹</a>
+<a class="jiathis_button_copy">复制网址</a>
+<a class="jiathis_button_email">邮件</a>
+<a class="jiathis_button_weixin">微信</a>
+<a class="jiathis_button_qzone">QQ空间</a>
+<a class="jiathis_button_tqq">腾讯微博</a>
+<a class="jiathis_button_douban">豆瓣</a>
+<a class="jiathis_button_share">一键分享</a>
+
+<a href="http://www.jiathis.com/share?uid=2140465" class="jiathis jiathis_txt jiathis_separator jtico jtico_jiathis" target="_blank">更多</a>
+<a class="jiathis_counter_style"></a>
+</div>
+<script type="text/javascript" >
+var jiathis_config={
+  data_track_clickback:true,
+  summary:"",
+  shortUrl:false,
+  hideMore:false
+}
+</script>
+<script type="text/javascript" src="http://v3.jiathis.com/code/jia.js?uid=" charset="utf-8"></script>
+<!-- JiaThis Button END -->
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+    </div>
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/uploads/touxiang.jpg"
+                alt="ShengQin Miao" />
+            
+              <p class="site-author-name" itemprop="name">ShengQin Miao</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">53</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                
+                  <span class="site-state-item-count">1</span>
+                  <span class="site-state-item-name">分类</span>
+                
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">61</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#ELK日志收集分析"><span class="nav-number">1.</span> <span class="nav-text">ELK日志收集分析</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#elasticsearch"><span class="nav-number">2.</span> <span class="nav-text">elasticsearch</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#安装elasticsearch"><span class="nav-number">2.1.</span> <span class="nav-text">安装elasticsearch</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#elasticsearch的插件"><span class="nav-number">2.2.</span> <span class="nav-text">elasticsearch的插件</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#head插件"><span class="nav-number">2.2.1.</span> <span class="nav-text">head插件</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#kopf插件"><span class="nav-number">2.2.2.</span> <span class="nav-text">kopf插件</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#logstash"><span class="nav-number">3.</span> <span class="nav-text">logstash</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#kibana"><span class="nav-number">4.</span> <span class="nav-text">kibana</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#通过logstash收集日志"><span class="nav-number">4.1.</span> <span class="nav-text">通过logstash收集日志</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#通过logtsash收集tomcat和java日志"><span class="nav-number">4.2.</span> <span class="nav-text">通过logtsash收集tomcat和java日志</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#通过logstash收集java日志"><span class="nav-number">4.3.</span> <span class="nav-text">通过logstash收集java日志</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#通过logstash收集nginx的访问日志"><span class="nav-number">4.4.</span> <span class="nav-text">通过logstash收集nginx的访问日志</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#通过logstash收集TCP-UDP日志"><span class="nav-number">4.5.</span> <span class="nav-text">通过logstash收集TCP&#x2F;UDP日志</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#通过rsyslog收集haproxy日志"><span class="nav-number">4.6.</span> <span class="nav-text">通过rsyslog收集haproxy日志</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#logstash收集日志并写入redis"><span class="nav-number">4.7.</span> <span class="nav-text">logstash收集日志并写入redis</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#logstash收集日志并写入kafka"><span class="nav-number">4.8.</span> <span class="nav-text">logstash收集日志并写入kafka</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#kafka命令测试消息发送"><span class="nav-number">4.9.</span> <span class="nav-text">kafka命令测试消息发送</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">ShengQin Miao</span>
+
+  
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-area-chart"></i>
+    </span>
+    
+      <span class="post-meta-item-text">Site words total count&#58;</span>
+    
+    <span title="Site words total count">131.6k</span>
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Pisces</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js"></script>
+  <script>AV.initialize("vItlX9Jc2L4BuXKt6BJWW6eJ-gzGzoHsz", "IisqhTArerBOyaxKHN8TcE10");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

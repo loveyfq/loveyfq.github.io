@@ -1,0 +1,1258 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Hexo, NexT" />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="1、查询命令java来自哪个rpm包。   1234567891011121314[root@node01 ~]#type javajava is &#x2F;usr&#x2F;bin&#x2F;java[root@node01 ~]#rpm -qf &#x2F;usr&#x2F;bin&#x2F;javafile &#x2F;usr&#x2F;bin&#x2F;java is not owned by any package&#96;&#96;&#96;  **2、yum的配置和使用，包括yum仓库的创建。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="软件包管理">
+<meta property="og:url" content="http://yoursite.com/2016/12/24/%E8%BD%AF%E4%BB%B6%E5%8C%85%E7%AE%A1%E7%90%86%E3%80%81%E7%A3%81%E7%9B%98%E5%AD%98%E5%82%A8%E5%92%8C%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F%E7%BB%83%E4%B9%A0%E9%A2%98/index.html">
+<meta property="og:site_name" content="漫步人生路">
+<meta property="og:description" content="1、查询命令java来自哪个rpm包。   1234567891011121314[root@node01 ~]#type javajava is &#x2F;usr&#x2F;bin&#x2F;java[root@node01 ~]#rpm -qf &#x2F;usr&#x2F;bin&#x2F;javafile &#x2F;usr&#x2F;bin&#x2F;java is not owned by any package&#96;&#96;&#96;  **2、yum的配置和使用，包括yum仓库的创建。">
+<meta property="article:published_time" content="2016-12-23T16:00:00.000Z">
+<meta property="article:modified_time" content="2020-04-20T13:33:54.227Z">
+<meta property="article:author" content="ShengQin Miao">
+<meta name="twitter:card" content="summary">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2016/12/24/软件包管理、磁盘存储和文件系统练习题/"/>
+
+
+
+
+
+  <title>软件包管理 | 漫步人生路</title>
+  
+
+
+
+
+
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?f076ecd4b66d3a02de923868671591de";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+<meta name="generator" content="Hexo 4.2.0"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">漫步人生路</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off"
+             placeholder="搜索..." spellcheck="false"
+             type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2016/12/24/%E8%BD%AF%E4%BB%B6%E5%8C%85%E7%AE%A1%E7%90%86%E3%80%81%E7%A3%81%E7%9B%98%E5%AD%98%E5%82%A8%E5%92%8C%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F%E7%BB%83%E4%B9%A0%E9%A2%98/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="ShengQin Miao">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/uploads/touxiang.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="漫步人生路">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">软件包管理</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2016-12-24T00:00:00+08:00">
+                2016-12-24
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+             <span id="/2016/12/24/%E8%BD%AF%E4%BB%B6%E5%8C%85%E7%AE%A1%E7%90%86%E3%80%81%E7%A3%81%E7%9B%98%E5%AD%98%E5%82%A8%E5%92%8C%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F%E7%BB%83%E4%B9%A0%E9%A2%98/" class="leancloud_visitors" data-flag-title="软件包管理">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+            <div class="post-wordcount">
+              
+                
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-file-word-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">字数统计&#58;</span>
+                
+                <span title="字数统计">
+                  2.9k
+                </span>
+              
+
+              
+                <span class="post-meta-divider">|</span>
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-clock-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">阅读时长 &asymp;</span>
+                
+                <span title="阅读时长">
+                  14
+                </span>
+              
+            </div>
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p><strong>1、查询命令java来自哪个rpm包。</strong>  </p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">[root@node01 ~]<span class="comment">#type java</span></span><br><span class="line">java is /usr/bin/java</span><br><span class="line">[root@node01 ~]<span class="comment">#rpm -qf /usr/bin/java</span></span><br><span class="line">file /usr/bin/java is not owned by any package</span><br><span class="line">```  </span><br><span class="line">**2、yum的配置和使用，包括yum仓库的创建。**  </span><br><span class="line">```bash</span><br><span class="line">[root@node01 ~]<span class="comment">#vi /etc/yum.conf</span></span><br><span class="line">yum主配置文件。</span><br><span class="line">```  </span><br><span class="line">***利用centos安装光盘创建局域网仓库***  </span><br><span class="line">a、安装Apache：</span><br><span class="line">```bash</span><br><span class="line">[root@node01 ~]<span class="comment">#yum -y install httpd</span></span><br></pre></td></tr></table></figure>
+<p>b、在/var/www/html/目录下创建挂载点。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">[root@node01 ~]<span class="comment">#cd /var/www/html/</span></span><br><span class="line">[root@node01 /var/www/html]<span class="comment">#mkdir centos/&#123;6,7&#125;/os/x86_64</span></span><br><span class="line">[root@node01 /var/www/html]<span class="comment">#tree</span></span><br><span class="line">.</span><br><span class="line">└── centos</span><br><span class="line">    ├── 6</span><br><span class="line">    │   └── os</span><br><span class="line">    │       └── x86_64</span><br><span class="line">    └── 7</span><br><span class="line">        └── os</span><br><span class="line">            └── x86_64</span><br></pre></td></tr></table></figure>
+<p>c、在虚拟机增加两个光驱，分别加载centos6和centos7的镜像，将两个镜像分别挂载到上述两个目录中。  </p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">[root@node01 /var/www/html]<span class="comment">#mount /dev/sr1 /var/www/html/centos/6/os/x86_64/</span></span><br><span class="line">mount: /dev/sr1 is write-protected, mounting <span class="built_in">read</span>-only</span><br><span class="line">[root@node01 /var/www/html]<span class="comment">#mount /dev/sr0 /var/www/html/centos/7/os/x86_64/</span></span><br><span class="line">mount: /dev/sr0 is write-protected, mounting <span class="built_in">read</span>-only</span><br></pre></td></tr></table></figure>
+<p>d、开启Apache服务。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br></pre></td><td class="code"><pre><span class="line">[root@node01 /var/www/html]<span class="comment">#systemctl start httpd</span></span><br><span class="line">[root@node01 /var/www/html]<span class="comment">#ps aux |grep httpd</span></span><br><span class="line">root       2332  0.6  0.3 230376  5164 ?        Ss   09:54   0:00 /usr</span><br><span class="line">apache     2333  0.0  0.2 232460  3148 ?        S    09:54   0:00 /usr</span><br><span class="line">apache     2334  0.0  0.2 232460  3148 ?        S    09:54   0:00 /usr</span><br><span class="line">apache     2335  0.0  0.2 232460  3148 ?        S    09:54   0:00 /usr</span><br><span class="line">apache     2336  0.0  0.2 232460  3148 ?        S    09:54   0:00 /usr</span><br><span class="line">apache     2337  0.0  0.2 232460  3148 ?        S    09:54   0:00 /usr</span><br><span class="line">root       2339  0.0  0.0 112704   972 pts/0    R+   09:54   0:00 grep</span><br><span class="line">```  </span><br><span class="line">e、在客户端备份原有yum源，新建一个以.repo结尾的yum源</span><br><span class="line">```bash</span><br><span class="line">[root@node01 ~]<span class="comment">#mkdir /etc/yum.repos.d/bak</span></span><br><span class="line">[root@node01 /var/www/html]<span class="comment">#mv /etc/yum.repos.d/* /etc/yum.repos.d/bak/</span></span><br><span class="line">[root@node01 /var/www/html]<span class="comment">#vi /etc/yum.repos.d/base.repo</span></span><br><span class="line">[root@node01 /var/www/html]<span class="comment">#cat /etc/yum.repos.d/base.repo </span></span><br><span class="line">[base]</span><br><span class="line">name=base</span><br><span class="line">baseurl=http://172.18.132.240/centos/<span class="variable">$releasever</span>/os/<span class="variable">$basearch</span>/</span><br><span class="line">gpgurl=http://172.18.132.240/centos/<span class="variable">$releasever</span>/os/<span class="variable">$basearch</span>/</span><br><span class="line"><span class="comment">#baseurl=file:///app/httpd/htdocs/centos/7/os/x86_64</span></span><br><span class="line"><span class="comment">#gpgcheck=0</span></span><br><span class="line"><span class="comment">#gpgurl=file:///app/httpd/htdocs/centos/$releasever/os/$basearch</span></span><br><span class="line">```  </span><br><span class="line">按如上方式配置好之后，一个基于centos安装光盘的局域网yum源就配置好了。可以在客户端使用 ***yum repolist*** 查看是否生效。  </span><br><span class="line">3、**编写系统初始化脚本 reset.sh，包括别名，提示符颜色，yum仓库配置文件，安装安装tree，ftp，lftp，telnet等包**  </span><br><span class="line">```bash</span><br><span class="line">[root@node01 /data/bin]<span class="comment">#cat reset.sh</span></span><br><span class="line"><span class="built_in">echo</span> PS1=<span class="string">"\[\e[1;35m\][\u@\h \w]\\$\[\e[0m\]"</span> &gt;&gt; /root/.bashrc</span><br><span class="line"><span class="built_in">echo</span> <span class="string">"alias scandisk='echo - - - &gt; /sys/class/scsi_host/host2/scan'"</span> &gt;&gt; /root/.bashrc</span><br><span class="line">cat &gt; CentOS-Bsse.repo &lt;&lt; EOF</span><br><span class="line">[base]</span><br><span class="line">name=base</span><br><span class="line">baseurl=http://172.18.132.240/centos/<span class="variable">$releasever</span>/os/<span class="variable">$basearch</span>/</span><br><span class="line">gpgurl=http://172.18.132.240/centos/<span class="variable">$releasever</span>/os/<span class="variable">$basearch</span>/</span><br><span class="line">EOF</span><br><span class="line">yum -qy install tree ftp lftp telnet </span><br><span class="line">```  </span><br><span class="line">**4、在centos7上编译安装Apache2.4源码包，并启动此服务。**  </span><br><span class="line">a、下载Apache源码包：</span><br><span class="line">```bash</span><br><span class="line">[root@node01 /data]<span class="comment">#wget http://mirrors.shu.edu.cn/apache//httpd/httpd-2.4.35.tar.bz2</span></span><br><span class="line">```  </span><br><span class="line">b、解压httpd-2.4.35.tar.bz2</span><br><span class="line">```bash</span><br><span class="line">[root@node01 /data]<span class="comment">#tar -xf httpd-2.4.35.tar.bz2</span></span><br><span class="line">```  </span><br><span class="line">c、进入解压目录执行编译安装，需要安装相关依赖库,之后编译安装Apache。</span><br><span class="line">```bash</span><br><span class="line">[root@node01 /data]<span class="comment">#yum -y install apr-devel apr-util-devel pcre-devel openssl-devel</span></span><br><span class="line">[root@node01 /data]<span class="comment">#yum -y groupinstall "development tools"</span></span><br><span class="line">[root@node01 /data]<span class="comment">#cd httpd-2.4.35/</span></span><br><span class="line">[root@node01 /data/httpd-2.4.35]<span class="comment">#./configure --prefix=/app/httpd-2.4.35 --sysconfdir=/etc/httpd24  --enable-ssl --disable-status</span></span><br><span class="line">[root@node01 /data/httpd-2.4.35]<span class="comment">#make</span></span><br><span class="line">[root@node01 /data/httpd-2.4.35]<span class="comment">#make install</span></span><br></pre></td></tr></table></figure>
+<p>d、将Apache启动脚本加入环境变量：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br></pre></td><td class="code"><pre><span class="line">[root@node01 /data/httpd-2.4.35]<span class="comment">#echo 'PATH=/app/httpd/bin:$PATH' &gt;&gt; /etc/profile.d/httpd.sh</span></span><br><span class="line">```  </span><br><span class="line">e、创建apache用户并将httpd进程用户改为apache：</span><br><span class="line">```bash</span><br><span class="line">[root@node01 /data/httpd-2.4.35]<span class="comment">#useradd -r -d /var/www/ -s /sbin/nologin -u 48 apache</span></span><br><span class="line">[root@node01 ~]<span class="comment">#cat /etc/httpd24/httpd.conf |egrep "^[User|Group]"</span></span><br><span class="line">User apache</span><br><span class="line">Group apache</span><br><span class="line">```  </span><br><span class="line">f、启动apache服务：</span><br><span class="line">```bash</span><br><span class="line">[root@node01 ~]<span class="comment">#apachectl start</span></span><br><span class="line">[root@node01 ~]<span class="comment">#ps aux |grep httpd</span></span><br><span class="line">root       3727  0.0  0.1  72788  2240 ?        Ss   10:55   0:00 /app/httpd-2.4.35/bin/httpd -k start</span><br><span class="line">apache     3728  0.0  0.3 363836  4284 ?        Sl   10:55   0:00 /app/httpd-2.4.35/bin/httpd -k start</span><br><span class="line">apache     3729  0.0  0.3 363836  4288 ?        Sl   10:55   0:00 /app/httpd-2.4.35/bin/httpd -k start</span><br><span class="line">apache     3730  0.0  0.3 429372  4284 ?        Sl   10:55   0:00 /app/httpd-2.4.35/bin/httpd -k start</span><br><span class="line">```  </span><br><span class="line">出现上述信息说明源码编译安装Apache已经成功。  </span><br><span class="line"><span class="comment"># 磁盘存储和文件系统  </span></span><br><span class="line">**1.创建一个2G的文件系统，块大小为2048byte，预留1%的可以空间，文件系统格式为ext4，卷标为TEST，要求此分区开机后自动挂载至/<span class="built_in">test</span>目录，并且默认有acl挂载选项。**  </span><br><span class="line">a、创建一个2G的文件以供实验,并在该文件上创建ext4文件系统：</span><br><span class="line">```bash</span><br><span class="line">[root@node01 ~]<span class="comment">#dd if=/dev/zero of=ext4file bs=1M count=2048</span></span><br><span class="line">[root@node01 ~]<span class="comment">#mkfs.ext4 -b 2048 -L test -m1 ext4file</span></span><br><span class="line">```  </span><br><span class="line">b、将开机自动挂载信息写入/etc/fstab：</span><br><span class="line">```bash</span><br><span class="line">[root@centos6 /data]<span class="comment">#cat /etc/fstab |grep "/test"</span></span><br><span class="line">UUID=b1d9dd07-681b-43d5-a95a-e55e5b8aaf8a	/<span class="built_in">test</span>	ext4	loop,acl	0 0</span><br><span class="line">```  </span><br><span class="line">**2.写一个脚本，完成如下功能：(1)列出当前系统识别到的所有磁盘设备，(2)如果磁盘数量为1，则显示其空间使用信息，否则显示最后一个磁盘上的空间使用信息**  </span><br><span class="line">```bash</span><br><span class="line">[root@node01 /data/bin]<span class="comment">#cat findfs.sh</span></span><br><span class="line">ls /lib/modules/`uname -r`/kernel/fs</span><br><span class="line"><span class="built_in">echo</span> <span class="string">"####################################################"</span></span><br><span class="line">num=`ls /dev/sd?|wc -l`</span><br><span class="line">[ <span class="variable">$num</span> -eq 1 ] &amp;&amp; df |grep `ls /dev/sd?` || df |grep `ls /dev/sd?|tail -1`</span><br><span class="line">```  </span><br><span class="line">**3.将CentOS6的CentOS-6.10-x86_64-bin-DVD1.iso和CentOS-6.10-x86_64-bin-DVD2.iso两个文件，合并成一个CentOS-6.10-x86_64-Everything.iso文件，并将其配置为yum源。**  </span><br><span class="line">a、将centod6的两张盘放入虚拟光驱并挂载。</span><br><span class="line">```bash</span><br><span class="line">[root@centos6 /data]<span class="comment">#mount /dev/sr0 /mnt/cdrom/</span></span><br><span class="line">mount: block device /dev/sr0 is write-protected, mounting <span class="built_in">read</span>-only</span><br><span class="line">[root@centos6 /data]<span class="comment">#mount /dev/sr1 /mnt/media/</span></span><br><span class="line">mount: block device /dev/sr1 is write-protected, mounting <span class="built_in">read</span>-only</span><br><span class="line">```  </span><br><span class="line">b、在/data目录下新建centos6_1.iso文件夹，并将/mnt/cdrom中的所有文件复制到该文件夹，然后将/mnt/media/Packages文件夹中的所有的rpm包移动到此目录，并将TRANS.TBL文件排序后合二为一。</span><br><span class="line">```bash</span><br><span class="line">[root@centos6 /data]<span class="comment">#cp -av /mnt/cdrom/* centos6_1.iso/</span></span><br><span class="line">[root@centos6 /data]<span class="comment">#cp /mnt/media/Packages/*.rpm centos6_1.iso/Packages/</span></span><br><span class="line">[root@centos6 /data]<span class="comment">#cat /mnt/media/Packages/TRANS.TBL &gt;&gt;centos6_1.iso/Packages/TRANS.TBL</span></span><br><span class="line">[root@centos6 /data]<span class="comment">#mv centos6_1.iso/Packages/TRANS.TBL&#123;,.bak&#125;</span></span><br><span class="line">[root@centos6 /data]<span class="comment">#sort centos6_1.iso/Packages/TRANS.TBL.bak &gt;centos6_1.iso/Packages/TRANS.TBL</span></span><br><span class="line">[root@centos6 /data]<span class="comment">#rm -f centos6_1.iso/Packages/TRANS.TBL.bak</span></span><br></pre></td></tr></table></figure>
+<p>c、将centos6_1.iso文件夹制作成centos6.iso文件，并挂载到/mnt/media文件夹下。(这里为手动使用mount命令临时挂载，如要开机自动挂载需要写入/etc/fstab文件。)  </p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@centos6 /data]<span class="comment">#mkisofs -r -o centos6.iso centos6_1.iso/</span></span><br><span class="line">[root@centos6 /data]<span class="comment">#mount -o loop centos6.iso /mnt/media/</span></span><br></pre></td></tr></table></figure>
+<p>可使用如下方式实现开机自动挂载：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@centos6 /data]<span class="comment">#cat /etc/fstab</span></span><br><span class="line">UUID=93c43225-f85b-4cd3-87e1-9c94a08fb70e /mnt/media                  iso9660    loop        0 0</span><br></pre></td></tr></table></figure>
+<p>d、配置yum配置文件：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">[root@centos6 /data]<span class="comment">#cat /etc/yum.repos.d/base.repo </span></span><br><span class="line">[base]</span><br><span class="line">name=base</span><br><span class="line">baseurl=file:///mnt/media</span><br><span class="line">gpgcheck=0</span><br><span class="line">[root@centos6 /data]<span class="comment">#yum clean all</span></span><br><span class="line">Loaded plugins: fastestmirror, security</span><br><span class="line">Cleaning repos: base</span><br><span class="line">Cleaning up Everything</span><br><span class="line">Cleaning up list of fastest mirrors</span><br><span class="line">[root@centos6 /data]<span class="comment">#yum repolist</span></span><br><span class="line">Loaded plugins: fastestmirror, security</span><br><span class="line">Determining fastest mirrors</span><br><span class="line">base                                      | 4.0 kB     00:00 ... </span><br><span class="line">base/primary_db                           | 4.7 MB     00:00 ... </span><br><span class="line">repo id                        repo name                   status</span><br><span class="line">base                           base                        6,713</span><br><span class="line">repolist: 6,713</span><br></pre></td></tr></table></figure>
+<p>至此，一个将两张光盘合为一个yum本地yun仓库的方法已经实现并且可用。如果要将该yum源作为局域网yum源使用，需安装httpd服务，并将centos6.iso挂在到httpd的相关目录下，有关httpd的安装上述题目中有详细步骤，这里不在赘述。<br><strong>4.创建一个可用空间为1G的RAID1设备，文件系统为ext4，有一个空闲盘，开机可自动挂载至/backup目录。</strong><br>a、在磁盘上使用fdisk命令创建三个1G空间的分区。<br>b、将三个分区组合成raid1,并将挂在信息写入/etc/fstab实现开机自动挂载：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">[root@centos6 /data]<span class="comment">#mdadm -C -n2 -x1 -l 1 /dev/md0 /dev/sda&#123;6,7,8</span></span><br><span class="line">[root@centos6 /data]<span class="comment">#blkid /dev/md0</span></span><br><span class="line">/dev/md0: UUID=<span class="string">"8f55f137-4e8f-4650-9afc-3b8f2857d2f7"</span> TYPE=<span class="string">"ext4"</span></span><br><span class="line">[root@centos6 /data]<span class="comment">#echo "UUID=8f55f137-4e8f-4650-9afc-3b8f2857d2f7   /backup ext4 defaults 0 0"&gt;&gt;/etc/fstab</span></span><br></pre></td></tr></table></figure>
+<p><strong>5.创建由三块硬盘组成的可用空间为2G的RAID5设备，要求其chunk大小为256k，文件系统为ext4，开机可自动挂载至/mydata目录。</strong><br>a、在centos虚拟机内新增三块容量为20G的硬盘以共实验，并在每块硬盘上使用fdisk命令创建一个容量为2G的分区。<br>  <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">[root@node01 ~]<span class="comment">#lsblk</span></span><br><span class="line">sdb       8:16   0   20G  0 disk  </span><br><span class="line">└─sdb1    8:17   0    1G  0 part  </span><br><span class="line">sdc       8:32   0   20G  0 disk  </span><br><span class="line">└─sdc1    8:33   0    1G  0 part   </span><br><span class="line">sdd       8:48   0   20G  0 disk  </span><br><span class="line">└─sdd1    8:49   0    1G  0 part</span><br></pre></td></tr></table></figure><br>b、利用这三个分区组合成raid5并实现开机自动挂载。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">[root@node01 ~]<span class="comment">#mdadm -C -l5 -n3 -c 256 /dev/md2 /dev/sd&#123;b,c,d&#125;1</span></span><br><span class="line">mdadm: array /dev/md2 started.</span><br><span class="line">[root@node01 ~]<span class="comment">#mkfs.ext4 /dev/md2 </span></span><br><span class="line">Writing superblocks and filesystem accounting information: <span class="keyword">done</span></span><br><span class="line">[root@node01 ~]<span class="comment">#blkid /dev/md2</span></span><br><span class="line">/dev/md2: UUID=<span class="string">"4a1e0a12-6a0c-47cf-8a27-3fe9f062703f"</span> TYPE=<span class="string">"ext4"</span></span><br><span class="line">[root@node01 ~]<span class="comment">#echo "UUID=4a1e0a12-6a0c-47cf-8a27-3fe9f062703f  /mydata  ext4  defaults  0 0" &gt;&gt; /etc/fstab</span></span><br></pre></td></tr></table></figure>
+<p><strong>6.创建一个至少有两个PV组成的大小为20G的名为testvg的VG；要求PE大小为16MB，而后在卷组中创建大小为5G的逻辑卷testlv；挂载至/users目录</strong><br>a、添加两个大小为20G的硬盘并在每个硬盘创建一个10G大小的分区：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br></pre></td><td class="code"><pre><span class="line">[root@node01 ~]<span class="comment">#lsblk</span></span><br><span class="line">sdb      8:16   0   20G  0 disk </span><br><span class="line">├─sdb1   8:17   0    1G  0 part </span><br><span class="line">└─sdb2   8:18   0   10G  0 part </span><br><span class="line">sdc      8:32   0   20G  0 disk </span><br><span class="line">├─sdc1   8:33   0    1G  0 part </span><br><span class="line">└─sdc2   8:34   0   10G  0 part </span><br><span class="line">```  </span><br><span class="line">b、创建vg，在vg中创建lv，并实现挂载。</span><br><span class="line">```bash</span><br><span class="line">[root@node01 ~]<span class="comment">#pvcreate /dev/sd&#123;b,c&#125;2</span></span><br><span class="line">  Physical volume <span class="string">"/dev/sdb2"</span> successfully created.</span><br><span class="line">  Physical volume <span class="string">"/dev/sdc2"</span> successfully created.</span><br><span class="line">[root@node01 ~]<span class="comment">#pvs</span></span><br><span class="line">  PV         VG Fmt  Attr PSize  PFree </span><br><span class="line">  /dev/sdb2     lvm2 ---  10.00g 10.00g</span><br><span class="line">  /dev/sdc2     lvm2 ---  10.00g 10.00g</span><br><span class="line">[root@node01 ~]<span class="comment">#vgcreate testvg /dev/sd&#123;b,c&#125;2</span></span><br><span class="line">  Volume group <span class="string">"testvg"</span> successfully created</span><br><span class="line">[root@node01 ~]<span class="comment">#vgdisplay</span></span><br><span class="line">  --- Volume group ---</span><br><span class="line">  VG Name               testvg</span><br><span class="line">  System ID             </span><br><span class="line">  Format                lvm2</span><br><span class="line">  Metadata Areas        2</span><br><span class="line">  Metadata Sequence No  1</span><br><span class="line">  VG Access             <span class="built_in">read</span>/write</span><br><span class="line">  VG Status             resizable</span><br><span class="line">  MAX LV                0</span><br><span class="line">  Cur LV                0</span><br><span class="line">  Open LV               0</span><br><span class="line">  Max PV                0</span><br><span class="line">  Cur PV                2</span><br><span class="line">  Act PV                2</span><br><span class="line">  VG Size               &lt;19.97 GiB</span><br><span class="line">  PE Size               16.00 MiB</span><br><span class="line">  Total PE              1278</span><br><span class="line">  Alloc PE / Size       0 / 0   </span><br><span class="line">  Free  PE / Size       1278 / &lt;19.97 GiB</span><br><span class="line">  VG UUID               SEUFJ4-70KX-Lo8o-Xysa-3EEj-sv0z-8jLBaI</span><br><span class="line">[root@node01 ~]<span class="comment">#lvcreate -L 5G -n testlv testvg</span></span><br><span class="line">  Logical volume <span class="string">"testlv"</span> created.</span><br><span class="line">[root@node01 ~]<span class="comment">#mkfs.ext4 /dev/testvg/testlv</span></span><br><span class="line">[root@node01 ~]<span class="comment">#blkid /dev/testvg/testlv</span></span><br><span class="line">/dev/testvg/testlv: UUID=<span class="string">"e51b109d-2505-4249-80a3-e607ae4c476c"</span> TYPE=<span class="string">"xfs"</span> </span><br><span class="line">[root@node01 ~]<span class="comment">#mkdir /users</span></span><br><span class="line">[root@node01 ~]<span class="comment">#mount /dev/testvg/testlv /users/</span></span><br><span class="line">[root@node01 ~]<span class="comment">#df /users/</span></span><br><span class="line">Filesystem                1K-blocks  Used Available Use% Mounted on</span><br><span class="line">/dev/mapper/testvg-testlv   5232640 32944   5199696   1% /users</span><br><span class="line">```  </span><br><span class="line">**7.新建用户archlinux，要求其家目录为/users/archlinux,而后su切换至archlinux用户，复制/etc/pam.d目录至自己的家目录**  </span><br><span class="line">a、创建用户：</span><br><span class="line">```bash</span><br><span class="line">[root@node01 ~]<span class="comment">#useradd -d /users/archlinux archlinux</span></span><br><span class="line">[root@node01 ~]<span class="comment">#getent passwd archlinux</span></span><br><span class="line">archlinux:x:1007:1010::/users/archlinux:/bin/bash</span><br><span class="line">```  </span><br><span class="line">b、切换用户并执行剩余操作：</span><br><span class="line">```bash</span><br><span class="line">[root@node01 ~]<span class="comment">#su - archlinux</span></span><br><span class="line">[archlinux@node01 ~]$ cp -a /etc/pam.d/* .</span><br><span class="line">```  </span><br><span class="line">**8.扩展testlv至7G，要求archlinux用户的文件不能丢失**</span><br><span class="line">a、扩展testlv的容量为7G  </span><br><span class="line"></span><br><span class="line">```bash</span><br><span class="line">[root@node01 ~]<span class="comment">#lvextend -L 7G /dev/testvg/testlv </span></span><br><span class="line">  Size of logical volume testvg/testlv changed from 5.00 GiB (320 extents) to 7.00 GiB (448 extents).</span><br><span class="line">  Logical volume testvg/testlv successfully resized.</span><br><span class="line">[root@node01 ~]<span class="comment">#resize2fs /dev/testvg/testlv</span></span><br><span class="line">```  </span><br><span class="line">经过上述操作，已经实现对testlv的在线扩容，并且archlinux用户文件没有丢失。  </span><br><span class="line">**9.收缩testlv至3G，要求archlinux用户的文件不能丢失**  </span><br><span class="line">```bash</span><br><span class="line">[root@centos6 ~]<span class="comment">#umount /users/</span></span><br><span class="line">[root@centos6 ~]<span class="comment">#e2fsck -f /dev/testvg/testlv</span></span><br><span class="line">[root@centos6 ~]<span class="comment">#resize2fs /dev/testvg/testlv 3G</span></span><br><span class="line">resize2fs 1.41.12 (17-May-2010)</span><br><span class="line">Resizing the filesystem on /dev/testvg/testlv to 786432 (4k) blocks.</span><br><span class="line">The filesystem on /dev/testvg/testlv is now 786432 blocks long.</span><br><span class="line">[root@centos6 ~]<span class="comment">#mount /dev/testvg/testlv /users/</span></span><br><span class="line">[root@centos6 ~]<span class="comment">#ls /users/archlinux/</span></span><br><span class="line">abrt-cli-root        remote</span><br><span class="line">atd                  run_init</span><br><span class="line">chfn                 runuser</span><br><span class="line">chsh                 runuser<span class="_">-l</span></span><br><span class="line">config-util          screen</span><br><span class="line">```  </span><br><span class="line">经过试验，在缩减容量后，用户archlinux的数据并没有丢失情况发生，暂定为正常。  </span><br><span class="line">**10.对testlv创建快照，并尝试基于快照备份数据，验证快照的功能**  </span><br><span class="line">a、给testlv创建快照</span><br><span class="line">```bash</span><br><span class="line">root@centos6 ~]<span class="comment">#lvcreate -n testlv_snap -s -p r -L 1G /dev/testvg/testlv </span></span><br><span class="line">  Logical volume <span class="string">"testlv_snap"</span> created.</span><br><span class="line">[root@centos6 ~]<span class="comment">#lvs</span></span><br><span class="line">  LV          VG     Attr       LSize Pool Origin Data%  Meta%  Move Log Cpy%Sync Convert</span><br><span class="line">  testlv      testvg owi-aos--- 3.00g                                                    </span><br><span class="line">  testlv_snap testvg sri<span class="_">-a</span><span class="_">-s</span>--- 1.00g      testlv 0.00</span><br></pre></td></tr></table></figure>
+<p>b、将lv快照挂在到/mnt，删除archlinux用户家目录下的文件做测试。</p>
+<pre><code class="bash">[root@centos6 ~]<span class="comment">#mount /dev/testvg/testlv_snap /mnt/</span>
+mount: block device /dev/mapper/testvg-testlv_snap is write-protected, mounting <span class="built_in">read</span>-only
+[root@centos6 ~]<span class="comment">#rm -f  /users/archlinux/sudo </span>
+[root@centos6 ~]<span class="comment">#ls /mnt/archlinux/sudo</span>
+/mnt/archlinux/sudo</code></pre>
+<p>从上述实验看出，删除archlinux用户家目录下的sudo文件后，在快照testlv_snap中仍能看到该文件，起到了快照的功能，实验结束。</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/11/21/%E6%90%AD%E5%BB%BADHCP%E6%9C%8D%E5%8A%A1%E5%99%A8/" rel="next" title="搭建DHCP服务器">
+                <i class="fa fa-chevron-left"></i> 搭建DHCP服务器
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2017/03/10/PAM%E8%AE%A4%E8%AF%81/" rel="prev" title="PAM认证机制">
+                PAM认证机制 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+        <!-- JiaThis Button BEGIN -->
+<div class="jiathis_style">
+<span class="jiathis_txt">分享到：</span>
+<a class="jiathis_button_fav">收藏夹</a>
+<a class="jiathis_button_copy">复制网址</a>
+<a class="jiathis_button_email">邮件</a>
+<a class="jiathis_button_weixin">微信</a>
+<a class="jiathis_button_qzone">QQ空间</a>
+<a class="jiathis_button_tqq">腾讯微博</a>
+<a class="jiathis_button_douban">豆瓣</a>
+<a class="jiathis_button_share">一键分享</a>
+
+<a href="http://www.jiathis.com/share?uid=2140465" class="jiathis jiathis_txt jiathis_separator jtico jtico_jiathis" target="_blank">更多</a>
+<a class="jiathis_counter_style"></a>
+</div>
+<script type="text/javascript" >
+var jiathis_config={
+  data_track_clickback:true,
+  summary:"",
+  shortUrl:false,
+  hideMore:false
+}
+</script>
+<script type="text/javascript" src="http://v3.jiathis.com/code/jia.js?uid=" charset="utf-8"></script>
+<!-- JiaThis Button END -->
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+    </div>
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+
+      <section class="site-overview-wrap sidebar-panel sidebar-panel-active">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/uploads/touxiang.jpg"
+                alt="ShengQin Miao" />
+            
+              <p class="site-author-name" itemprop="name">ShengQin Miao</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">53</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                
+                  <span class="site-state-item-count">1</span>
+                  <span class="site-state-item-name">分类</span>
+                
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">61</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">ShengQin Miao</span>
+
+  
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-area-chart"></i>
+    </span>
+    
+      <span class="post-meta-item-text">Site words total count&#58;</span>
+    
+    <span title="Site words total count">131.6k</span>
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Pisces</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js"></script>
+  <script>AV.initialize("vItlX9Jc2L4BuXKt6BJWW6eJ-gzGzoHsz", "IisqhTArerBOyaxKHN8TcE10");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

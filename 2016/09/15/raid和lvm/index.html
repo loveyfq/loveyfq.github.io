@@ -1,0 +1,1508 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Hexo, NexT" />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="RAIDraid简介：    raid全称为廉价的磁盘冗余阵列，利用多个磁盘合成一个“阵列”来提供更好的性能、冗余，或者两者都提供。raid优点：    提高IO能力：磁盘并行读写。    提高耐用性：磁盘冗余来实现raid的级别：    将多块磁盘组织在一起的工作方式有所不同raid的实现方式：    外接式磁盘阵列：通过扩展卡提供适配能力。    内接式raid：主板集成raid控制器，安装o">
+<meta property="og:type" content="article">
+<meta property="og:title" content="RAID和LVM">
+<meta property="og:url" content="http://yoursite.com/2016/09/15/raid%E5%92%8Clvm/index.html">
+<meta property="og:site_name" content="漫步人生路">
+<meta property="og:description" content="RAIDraid简介：    raid全称为廉价的磁盘冗余阵列，利用多个磁盘合成一个“阵列”来提供更好的性能、冗余，或者两者都提供。raid优点：    提高IO能力：磁盘并行读写。    提高耐用性：磁盘冗余来实现raid的级别：    将多块磁盘组织在一起的工作方式有所不同raid的实现方式：    外接式磁盘阵列：通过扩展卡提供适配能力。    内接式raid：主板集成raid控制器，安装o">
+<meta property="article:published_time" content="2016-09-14T16:00:00.000Z">
+<meta property="article:modified_time" content="2020-04-20T13:33:52.410Z">
+<meta property="article:author" content="ShengQin Miao">
+<meta name="twitter:card" content="summary">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2016/09/15/raid和lvm/"/>
+
+
+
+
+
+  <title>RAID和LVM | 漫步人生路</title>
+  
+
+
+
+
+
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?f076ecd4b66d3a02de923868671591de";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+<meta name="generator" content="Hexo 4.2.0"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">漫步人生路</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off"
+             placeholder="搜索..." spellcheck="false"
+             type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2016/09/15/raid%E5%92%8Clvm/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="ShengQin Miao">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/uploads/touxiang.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="漫步人生路">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">RAID和LVM</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2016-09-15T00:00:00+08:00">
+                2016-09-15
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+             <span id="/2016/09/15/raid%E5%92%8Clvm/" class="leancloud_visitors" data-flag-title="RAID和LVM">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+            <div class="post-wordcount">
+              
+                
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-file-word-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">字数统计&#58;</span>
+                
+                <span title="字数统计">
+                  5.3k
+                </span>
+              
+
+              
+                <span class="post-meta-divider">|</span>
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-clock-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">阅读时长 &asymp;</span>
+                
+                <span title="阅读时长">
+                  20
+                </span>
+              
+            </div>
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>RAID<br>raid简介：<br>    raid全称为廉价的磁盘冗余阵列，利用多个磁盘合成一个“阵列”来提供更好的性能、冗余，或者两者都提供。<br>raid优点：<br>    提高IO能力：磁盘并行读写。<br>    提高耐用性：磁盘冗余来实现<br>raid的级别：<br>    将多块磁盘组织在一起的工作方式有所不同<br>raid的实现方式：<br>    外接式磁盘阵列：通过扩展卡提供适配能力。<br>    内接式raid：主板集成raid控制器，安装os前现在BIOS里面配置。<br>    软raid：通过OS来实现。</p>
+<p>raid的实现：<br>1、 RAID0的实现：<br>    首先为虚拟机增添两个新分区:/dev/sdb1 /dev/sdc1<br>    将两个新分区做成raid0<br>        mdadm -C -l 0 -n 2 /dev/md0 /dev/sd{b,c}1<br>    为/dev/md0创建文件系统<br>        mkfs.xfs /dev/md0<br>    将/dev/md0挂载后就可以正常使用<br>        mount /dev/md0 /mnt<br>2、 RAID5的实现：<br>    为虚拟机新增四个分区用于实验：/dev/sdb2 /dev/sdc2 /dev/sdd1 /dev/sde1</p>
+<pre><code>将这四个分区合并成raid5：
+    mdadm -C -l 5 -n 3 -x 1 /dev/md1 /dev/sd{b2,c2,d1,e1}
+为创建的raid格式化文件系统：
+    mkfs.xfs /dev/md1
+将raid挂载并使用：
+    mount /dev/md1 /mnt
+模拟组成raid5的一块磁盘损坏，测试备用盘能否自动切换。
+    mdadm /dev/md1 -f /de/sdb2</code></pre><p>3、 RAID的相关管理命令：<br>    查看raid状态<br>        mdadm -D /dev/md#<br>    生成配置文件(生成配置文件后，可以将禁用的raid重新启用)<br>        mdadm -D -s &gt;&gt;/etc/mdadm.conf<br>    将磁盘从raid中移除<br>        mdadm /dev/md1 -r /dev/sdb2<br>    将磁盘加入到raid中<br>        mdadm /dev/md1 -a /dev/sdb3<br>    禁用raid<br>        mdadm -S /dev/md1<br>    启用raid<br>        mdadm -A -s /dev/md1<br>    强制启用raid<br>        mdadm -R /dev/md1</p>
+<pre><code>删除raid
+    1、将raid取消挂载： umount /mnt/
+    2、禁用raid：mdadm -S /dev/md1
+    3、清除组成raid的相关磁盘的元数据：mdadm --zero-superblock /dev/sdb2
+    4、删除分区。</code></pre><p>RAID相关知识点总结：<br>    软raid的实现通过工具mdadm进行操作。<br>    mdadm的命令语法格式为：mdadm [mode] <raiddevice> [options] <component-devices><br>        mode:<br>            创建：-C<br>            装配：-A<br>            监控：-F<br>            管理：-f,-r,-a<br>        <raiddevice>:/dev/md#<br>        <component-devices>:任意的块设备<br>            -C：创建模式<br>                -n#：使用#个块设备来创建此RAID<br>                -l#：指明要创建的raid级别<br>                -a{yes|no}：自动创建目标raid设备的设备文件<br>                -c chunk_size：指明块大小。单位为K<br>                -x#：指明空闲盘的数目<br>            -D：显示raid的详细信息<br>                mdadm -D /dev/md#<br>            管理模式：<br>                -f：标记指定的磁盘为损坏状态<br>                -r：从raid中移除指定磁盘<br>                -a：从raid中添加指定磁盘<br>            观察md的状态：cat /proc/mdstat</p>
+<p>LVM<br>lvm简介：<br>    Logical Volune Manager<br>    dm:device mapper:将一个或者多个底层设备组织成一个逻辑设备的模块<br>    设备名：/dev/dm-#<br>    软连接：<br>        /dev/mapper/VG_NAME-LV_NAME<br>            /dev/mapper/vol0-root<br>        /dev/VG_NAME/LV_NAME<br>            /dev/vol0/root</p>
+<p>创建逻辑卷：需要先将磁盘创建为pv，再讲pv组建成vg，然后在vg上创建lv。</p>
+<p>创建逻辑卷过程：<br>    1、创建pv,创建pv之前需要先对磁盘进行分区或增加新硬盘。<br>        pvcreate /dev/sdb /dev/sdc<br>    2、将pv组合成vg<br>        vgcreate -s pe_size vg_name /dev/sdb /dev/sdc<br>    3、在vg中创建一个lv<br>        lvcreate -n lv_name -L lv_size  vg_name<br>    4、为lv创建文件系统<br>        mkfs.ext4 lv_path<br>    5、将lv挂载后即可使用。<br>        mount lv_path mountpoint</p>
+<p>逻辑卷扩容：<br>    1、首先要对lv扩容，如果vg中没有剩余空间，需要先对vg进行扩容。<br>        lvextend -L +size(或者-l +100%FREE) lv_path<br>    2、同步文件系统<br>        resize2fs lv_path (只是用与ext系列文件系统，xfs文件系统需要使用xfs_gowfs /mountpoint)<br>题外话：如果vg和pv空间不足了怎么办？<br>    创建pv：pvcreate device<br>    将新建的pv加入到vg： vgextend vg_path pvPath<br>    然后在对lv进行扩容。</p>
+<p>基于与xfs文件系统的扩容<br>    首先确认vg中有足够空间<br>    扩展lv<br>        lvextend -L +size lv_name<br>    同步文件系统<br>        xfs_growfs lv_path<br>    此时扩展成功，此外，基于xfs的文件系统只能扩充lv容量但是不能缩减lv容量。</p>
+<pre><code>** warning：由于ext4和xfs文件系统的扩展容量命令不同，记起来比较麻烦。所以可以统一使用一个命令进行扩展。
+    lvextend -r -L +size lv_path(只需这一步操作，即可扩展lv容量并自动同步文件系统（ext4和xfs通用）)</code></pre><p>逻辑卷缩小容量<br>    1、取消lv挂载<br>        umount lv_path mountpoint<br>    2、缩减文件系统<br>        首先进行文件系统检查<br>            e2fsck -f lv_path<br>        然后在缩减文件系统<br>            resize2fs lv_path size(将lv的容量缩减至size大小)<br>    3、缩减lv容量<br>        lvreduce -L size lv_path(将lv的容量缩小至size大小)<br>    4、将lv进行挂载之后就可使用<br>        mount lv_path mountpoint</p>
+<p>逻辑卷的迁移：<br>    将pe使用量少的或者pv所在硬盘无法迁移的pv上的pe迁移到别的可以迁移pv上。<br>        pvmove pv_path<br>    从vg中移除无需迁移的pv<br>        vgreeduce pv_path<br>    将lv缩减至合适容量。（方法同上述缩减lv逻辑卷你容量）<br>    检查该逻辑卷或卷组的名称与将要迁移到的主机上的逻辑卷或者卷组的名称师傅冲突，如果冲突，需要修改名字。<br>        vgrename vg_name vg_newname<br>        lvrename lv_name lv_newname<br>    禁用该vg<br>        vgchange -an vg_name<br>    将vg状态设为导出状态<br>        vaexport vg_name<br>    将对应硬盘拔出并插到新的主机上面<br>    将vg设为导入状态<br>        vgimport vg_newname<br>    激活lv<br>        vgchange -ay vg_newname<br>    将该lv挂载后即可正常使用</p>
+<p>lvm管理快照：</p>
+<p>lvm快照简介：<br>        逻辑卷快照是特殊的逻辑卷，它是在生成快照时存在的逻辑卷的准确拷贝<br>        对于需要备份或者复制的现有数据临时拷贝以及其他操作来说，快照是最合适的选择。<br>        快照只有在他们和原来的逻辑卷不同时才会消耗空间<br>            再生成快照时会分配给它一定的空间，但是只有在原来的逻辑卷或者快照有所改变时才会使用这些空间<br>            当原来的逻辑卷中内容有所改变时，会将旧的数据复制到快照中<br>            快照中只含有原来的逻辑卷中更改的数据或者自生成快照后的快照中更改的数据<br>            建立快照的卷的大小只需原始逻辑卷的15%~20%就够了，也可以使用lvextend放大快照</p>
+<p>使用lvm快照：<br>    为现有逻辑卷创建快照<br>        lvcreate -n lv_snap_name -L size -p r lv_path<br>    挂载快照：<br>        mount -o ro lv_snap_path mountpoint<br>    恢复快照：<br>        先取消挂载<br>            umount lv_snap_mountpoint<br>            umount lv_mountpoint<br>        将快照合并到对应逻辑卷中<br>            lvconvert –merge lv_snap_path(执行此操作后快照会自动删除)<br>    手动删除快照<br>        取消快照挂载<br>            umount lv_snap_mountpoint<br>        删除快照<br>            lvremove lv_snap_path</p>
+<p>warning: centos7创建快照后，挂载时需要加–nouuid选项，因为快照和源逻辑卷的uuid是同一个，而xfs文件系统默认不能同时挂载相同uuid的分区。</p>
+<p>磁盘存储和文件系统：</p>
+<p>磁盘分区：<br>    分区方式：<br>        MBR,GPT<br>    MBR分区方式要求分区不能超过两个G，硬盘也不能超过两个G，最多4个主分区，3个主分区和一个扩展分区，扩展分区内可以创建多个逻辑分区。<br>MBR分区结构：<br>    硬盘主引导记录MBR由4个部分组成<br>    主引导程序（偏移地址0000H–0088H），它负责从活动分区中装载，并运行系统引导程序<br>    出错信息数据区，偏移地址0089H–00E1H为出错信息，00E2H–01BDH全为0字节<br>    分区表（DPT,Disk Partation Table）含4个分区项，偏移地址01BEH–01FDH，每个分区表项长16个字节，共64个字节为分区项1、2、3、4。<br>    结束标志字，偏移地址01FE–01FF的连那个歌字节值为结束标志55AA<br>GPT分区结构：<br>    支持128个分区，使用64位，支持8Z（512Byte/block） 64Z(4096Byte/block)<br>    使用128位UUID表示磁盘和分区GPT分区表自动备份在头和尾两份，并有CRC校验位<br>    UEFI（统一扩展固件接口）硬件支持GPT，使操作系用启动</p>
+<p>分区管理<br>    列出块设备：<br>        lsblk<br>    创建分区：<br>        fdisk DEVICE 创建MBR分区<br>        gdisk DEVICE 创建GPT分区<br>        parted 高级分区操作<br>    重新设置内存中的内核分区表版本<br>        partprobe（将硬盘分区工具同步到内核）<br>parted命令：<br>    parted命令的操作都是实时生效的，小心使用。<br>    用法：parted [选项]… [设备[命令[参数]…]…]<br>        parted /dev/sdb mklabel gpt|msdos<br>        parted /dev/sdb print<br>        parted /dev/sdb mkpart primary 1 200 (默认M)<br>        parted /dev/sdb rm 1<br>        parted -l 列出分区信息<br>分区工具fdisk和gdisk<br>    gdisk /dev/sdb 类fdisk的GPT分区工具<br>    fdisk -l [-u] [device…] 查看分区<br>    fdisk /dev/sdb 管理分区<br>    子命令<br>        p 分区列表<br>        t 更改分区类型<br>        n 创建新分区<br>        d 删除已经创建的分区<br>        v 校验分区<br>        u 转换单位<br>        w 保存并退出<br>        q 不保存退出<br>同步分区表<br>    查看内核是否已经识别新的分区<br>        cat /proc/partations<br>    centos6 通知内核重新读取硬盘分区表<br>        新增分区用<br>            partx -a /dev/DEVICE<br>            kpartx -a /dev/DEVICE -f:force<br>        删除分区用<br>            partx -d –nr M-N /dev/DEVICE<br>    centos5, 7 用partprobe<br>        partprobe [/dev/DEVICE]</p>
+<p>文件系统：<br>    文件系统是操作系统用于明确存储设备或分区上的文件的方法和数据结构；即在存储设备上组织文件的方法。<br>    操作系统中负责管理和存储文件信息的软件结构称为文件管理系统，简称文件系统。<br>    从操作系统来看，文件系统是对文件存储设备的空间进行组织和分配，负责文件存储并对存入文件进行保护和检索的系统。<br>    具体地说，它负责为用户建立文件，存入、读出、修改、转储文件，控制文件的存取，安全控制，日志，压缩加密等<br>    查看系统支持的文件系统，<br>    /lib/modules/<code>uname -r</code>/kernel/fs </p>
+<pre><code>创建文件系统：
+    mkfs.FS_TYPE /dev/DEVICE -L &apos;LABEL&apos; (创建文件系统并设定卷标为LABEL)
+    创建ext系列文件系统专用工具：
+        mke2fs:
+            -t {ext2|ext3|ext4} 指定文件系统类型
+            -b {1024|2048|4096} 指定块大小
+            -L &apos;LABEL&apos; 设置卷标
+            -j 相当于-t 恶ext3
+                mkfs.ext3 = mkfs -t ext3 = mke2fs -j = mke2fs -t ext3
+            -i  num 为数据空间中没多少字节创建一个inode；不应该小于block大小
+            -N num 指定分区中创建多少个inode
+            -l 一个inode记录占用的磁盘空间大小，128--4096
+            -m num 默认5%，为管理人员预留的空间占总空间的百分比
+            -O FEATURE[,...] 启用指定特性
+            -O ^FEATURE 关闭指定特性
+文件系统标签：
+    指向设备的另一种方法
+    与设备无关
+    blkid:块设备属性信息查看
+    blkid [option] [DEVICE]
+        -U UUID 根据指定的UUID来查找对应的设备
+        -L LABEL 根据指定的LABEL来查找对应的设备
+    e2label：管理ext系列文件系统的LABEL
+        e2label DEVICE [LABEL]
+    findfs:查找分区
+        findfs [options] LABEL=&lt;label&gt;
+        findfs [options] UUID=&lt;uuid&gt;
+    turn2fs:重新设定ext系列文件系统可调整参数的值
+        -l 查看指定文件系统的超级快信息；super block
+        -L &apos;label&apos; 修改卷标
+        -m num 修改预留给管理员的空间百分比
+        -j 将ext2文件系统升级为ext3
+        -O 文件系统属性启用或禁用，-O ^has_journal
+        -o 调整文件系统的默认挂载选项 -o ^acl
+        -U UUID 修改UUID号
+    dump2fs:快分组管理，32768块
+    -h：查看超级块信息，不显示分组信息
+文件系统的检测和修复：
+    常发生于司机或者非正常关机之后
+    挂载为文件系统标记为&quot;no clean&quot;
+    注意：
+        一定不要在挂载状态下修复
+    fsck:File System Check
+        fsck.FS_TYPE
+        fsck -t FS_TYPE
+        -p 自动修复错误
+        -r：交互式修复错误
+        FS_TYPE：一定要与分区上已经存在文件类型相同
+    e2fsck:ext系列文件系统专用的检测修复工具
+        -y 自动回答yes
+        -f 强制修复
+挂载mount：
+    挂载：将额外文件系统与跟文件系统某现存目录建立起关联联系，进而使得此目录作为其他文件访问该文件系统的入口的行为。
+        挂载意味着使外来的文件系统看起来如同是主目录树的一部分
+        访问前，介质必须被挂载
+        摘除时，介质必须被卸载
+        按照默认设置，非根用户只能挂载某些设备（光盘，DVD，软盘，USB等等）
+        挂载点通常在/media或/mnt下
+    卸载:解除此关联关系的过程
+    把设备关联挂载点：mount Point
+        mount
+    卸载时：可使用设备，也可以使用挂载点
+        umount 
+    挂载点下原有文件在挂载完成后会被临时隐藏
+    挂载点目录一般为空
+    挂载方法：
+        mount DEVICE MOUNT_POINT
+    mount命令：
+        通过查看/etc/fstab文件显示当前已经挂载的所有设备
+        查看内核追踪到的已挂载的所有设备
+            cat /proc/mounts 
+    mount [-fnrsvw] [-t vfstype] [-o options] device dir
+        device:指明要挂载的设备
+            1、设备文件：例如/dev/sda1
+            2、卷标：-L &apos;LABEL&apos;，例如：-L &apos;MYDATA&apos;
+            3、UUID，-U &apos;UUID&apos;：例如：-U &apos;UUID&apos;
+            4、伪文件系统名称：proc sysfs devtmpfs configfs
+        dir：挂载点
+            事先存在，建议使用空目录
+            进程正在使用中的设备无法被卸载
+        mount常用命令选项：
+            -t vfstype：指定要挂载的设备上文件系统类型
+            -r：readonly，只读挂载
+            -w：read and write，读写挂载
+            -n：不更新/etc/mtab，mount不可见
+            -a：自动挂载所有支持自动挂载的设备（定义在了/etc/fstab文件中，且挂载选项中由auto功能）
+            -L &apos;LABEL&apos;：以卷标指定挂载设备
+            -U &apos;UUID&apos;：以UUID指定要挂载的设备
+            -B，--bind：绑定目录到另一个目录上
+            -o options：（挂载文件系统的选项），多个选项使用逗号分隔
+                async 异步模式    sync 同步模式，内存更改时，同时写磁盘
+                atime/noatime    包含目录和文件
+                diratime/nodiratime    目录的访问时间戳
+                auto/noauto    是否支持自动挂载，是否支持-a选项
+                exec/noexec    是否支持在此文件系统上运行程序
+                dev/nodev    是否支持在此文件系统上使用设备文件
+                suid/nosuid    是否支持suid和sgid权限
+                remount    重新挂在
+                ro 只读 rw 读写
+                user/nouser 是否允许普通用户挂载此设备，/etc/fstab使用
+                acl    启用此文件系统上的acl功能
+                loop    使用loop设备
+            default：相当于rw suid dev exec auto nouser async
+    卸载命令：
+        查看挂载情况：
+            findmnt MOUNT_POINT|device
+        查看正在访问指定文件系统的进程：
+            lsof MOUNT_POINT
+            fuser -v MOUNT_POINT
+        终止所有正在访问指定的文件系统的进程
+            fuser -km MOUNT_POINT
+        卸载： 
+            umount DEVICE
+            umount MOUNT_POINT
+挂载点和/etc/fstab 
+    配置文件系统体系
+    被mount、fsck和其他程序使用
+    系统重启时保留文件系统体系
+    可以在设备栏使用文件系统卷标
+    使用mount -a 命令挂载/etc/fstab中的所有文件系统
+    /etc/fstab每行定义一个要挂载的文件系统：
+        1、要挂载的设备或伪文件系统
+            LABEL：LABEL=&quot;&quot;
+            UUID：UUID=&quot;&quot;
+            伪文件系统名称：proc sysfs
+        2、挂载点
+        3、文件系统类型：
+            ext4,xfs,nfs,none
+        4、挂载选项：
+            defaults acl bind
+        5、转储频率：
+            0：不做备份
+            1：每天转储
+            2：每隔一天转储
+        6、fsck检查的文件系统的顺序：允许的数字是0，1，2
+            0：不自检
+            1：首先自检；一般只有rootfs才用
+            2：非rootfs使用
+处理交换文件和分区：
+    交换分区是系统RAM的补充
+    基本设置包括：
+        创建交换分区或者文件
+        使用mkswap写入特殊签名
+        在/etc/fstab文件中添加适当的条目
+        使用swapon -a 激活交换空间
+    挂载交换分区：
+        启用：swapon
+            swapon [OPTION]... [DEVICE]
+                -a:激活所有的交换分区
+                -p PRIORITY:指定优先级
+                /etc/fstab:pri=value
+        禁用：swapoff
+            swapoff [OPTION]... [DEVICE]
+    swap的优先级：
+        可以指定swap分区0到32767的优先级，值越大优先级越高。
+        如果用户没有指定，那么核心会自动给swap指定一个优先级，这个优先级从-1开始，每加入一个新的没有用户指定优先级的额swap，会给这个优先级减1.
+        先添加的swap的缺省优先级比较高，除非用户自己指定一个优先级，而用户指定的优先级（是正数）永远高于核心缺省指定的优先级（是负数）
+        性能优化：分布存放，高性能磁盘存放
+使用光盘：
+    在图形环境下自动挂载：
+        /run/media/&lt;user&gt;/&lt;label&gt;
+    否则就必须被手工挂载
+        mount /dev/cdrom /mnt 
+    eject命令卸载或弹出磁盘
+    创建ISO文件：
+        cp /dev/cdrom /root/centos7.iso 
+        mkisofs -r -o /root/etc.iso /etc 
+    刻录光盘：
+        wodim -v -eject centos.iso 
+挂载USB介质：
+    查看USB介质
+        lsusb
+    被内核探测为SCSI设备：
+        /dev/sdaX,/dev/sdbX,或类似的设备文件
+    在图形环境中自动挂载
+        图标在[计算机]窗口中创建
+        挂载在/run/media/&lt;user&gt;/&lt;label&gt;
+    手动挂载：
+        mount /dev/sdb1 /mnt 
+常见工具：
+    df [OPTION]... [FILE]...    文件系统空间占用等信息的查看工具
+        -H 以1000位单位
+        -T 文件系统类型
+        -h human-readable人类可读
+        -i inode instead of blocks显示inode节点使用情况
+        -P 以Posix兼容的格式输出
+    du [OPTION]... DIR    查看某目录总体空间占用状态
+        -h human-readable 人类可读
+        -s summary --mex-depth 显示总空间占用情况
+    dd命令：convert and copy a file 
+        用法： 
+            dd if=/PATH/FROM/SRC of=/PATH/TO/DEST bs=# count=#
+                bs:bloack size,复制单元大小
+                count:复制多少个bs
+                of=file 写到所命名的文件而不是到标准输出
+                if=file 从所命名的文件读取而不是从标准输入
+                bs=size 指定块大小（既是ibs也是obs）
+                ibs=size 一次读size个byte
+                obs=size 一次写size个byte
+                cbs=size 一次转化size个byte
+                skip=blocks 从开头忽略blocks个ibs大小的块
+                seek=blocks 从开头忽略blocks个obs大小的块
+                count=n 只拷贝n个记录
+                conv=conversion[,conversion...] 用指定的参数转换文件
+                    转换参数：
+                        ascii 转换 EBCDIC 为 ASCII
+                        ebcdic 转换 ASCII 为 EBCDIC
+                        lcase 把大写字符转换为小写字符
+                        ucase 把小写字符转换为大写字符
+                        nocreat 不创建输出文件
+                        noerror 出错时不停止
+                        notrunc 不截短输出文件
+                        sync 把每个输入块填充到ibs个字节，不足部分用空(NUL)字符补齐
+                        Fdatasync 写完成前，物理写入输出文件
+            备份MBR：
+                dd if=/dev/sda of=/tmp/mbr.bak bs=512 count=1
+            破坏MBR中的bootloader
+                dd if=/dev/zero of=/dev/sda bs=64 count=1 seek=446
+            备份磁盘：
+                dd if=/dev/sdX of=/dev/sdy 将本地的/dev/sdX整盘备份到/dev/sdy
+                dd if=/dev/sdx of=/path/to/image 将/dev/sdx全盘数据备份到指定路径的image文件
+                dd if=/dev/sdx|gzip &gt; /path/to/image.gz 备份/dev/sdx全盘数据，并利用gzip压缩，保存到指定路径
+            恢复： 
+                dd if=/path/to/image of=/dev/sdx 将备份文件恢复到指定盘
+                gzip -dc /path/to/image.gz | dd of=/dev/sdx 将压缩的备份文件恢复到指定盘
+            拷贝内存资料到硬盘：
+                dd if=/dev/mem of=/root/mem.bin bs=1024 将内存中数据拷贝到root目录下的mem.bin文件
+            从光盘拷贝iso镜像
+                dd if=/dev/cdrom of=/root/cd.iso
+                拷贝光盘数据到root文件夹下，并保存为cd.iso文件
+            销毁磁盘数据
+                dd if=/dev/urandom of=/dev/sda1
+                利用随机的数据填充硬盘，在某些必要的场合可以用来销毁数据，执行此操作以后，
+                /dev/sda1将无法挂载，创建和拷贝操作无法执行    
+            得到最恰当的block size：
+                dd if=/dev/zero of=/root/1Gb.file bs=1024 count=1000000
+                dd if=/dev/zero of=/root/1Gb.file bs=2048 count=500000
+                dd if=/dev/zero of=/root/1Gb.file bs=4096 count=250000
+                通过比较dd指令输出中命令的执行时间，即可确定系统最佳的block size大小
+            测试硬盘写速度
+                dd if=/dev/zero of=/root/1Gb.file bs=1024 count=1000000
+            测试硬盘读速度
+                dd if=/root/1Gb.file bs=64k | dd of=/dev/null    
+            修复硬盘
+                dd if=/dev/sda of=/dev/sda
+                当硬盘较长时间（比如1,2年）放置不使用后，磁盘上会产生消磁点。当磁头读
+                到这些区域时会遇到困难，并可能导致I/O错误。当这种情况影响到硬盘的第一
+                个扇区时，可能导致硬盘报废。上边的命令有可能使这些数据起死回生,且这个
+                过程是安全高效的</code></pre>
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/08/21/sed/" rel="next" title="Sed入门">
+                <i class="fa fa-chevron-left"></i> Sed入门
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2016/10/12/raid/" rel="prev" title="Raid">
+                Raid <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+        <!-- JiaThis Button BEGIN -->
+<div class="jiathis_style">
+<span class="jiathis_txt">分享到：</span>
+<a class="jiathis_button_fav">收藏夹</a>
+<a class="jiathis_button_copy">复制网址</a>
+<a class="jiathis_button_email">邮件</a>
+<a class="jiathis_button_weixin">微信</a>
+<a class="jiathis_button_qzone">QQ空间</a>
+<a class="jiathis_button_tqq">腾讯微博</a>
+<a class="jiathis_button_douban">豆瓣</a>
+<a class="jiathis_button_share">一键分享</a>
+
+<a href="http://www.jiathis.com/share?uid=2140465" class="jiathis jiathis_txt jiathis_separator jtico jtico_jiathis" target="_blank">更多</a>
+<a class="jiathis_counter_style"></a>
+</div>
+<script type="text/javascript" >
+var jiathis_config={
+  data_track_clickback:true,
+  summary:"",
+  shortUrl:false,
+  hideMore:false
+}
+</script>
+<script type="text/javascript" src="http://v3.jiathis.com/code/jia.js?uid=" charset="utf-8"></script>
+<!-- JiaThis Button END -->
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+    </div>
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+
+      <section class="site-overview-wrap sidebar-panel sidebar-panel-active">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/uploads/touxiang.jpg"
+                alt="ShengQin Miao" />
+            
+              <p class="site-author-name" itemprop="name">ShengQin Miao</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">53</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                
+                  <span class="site-state-item-count">1</span>
+                  <span class="site-state-item-name">分类</span>
+                
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">61</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">ShengQin Miao</span>
+
+  
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-area-chart"></i>
+    </span>
+    
+      <span class="post-meta-item-text">Site words total count&#58;</span>
+    
+    <span title="Site words total count">131.6k</span>
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Pisces</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js"></script>
+  <script>AV.initialize("vItlX9Jc2L4BuXKt6BJWW6eJ-gzGzoHsz", "IisqhTArerBOyaxKHN8TcE10");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

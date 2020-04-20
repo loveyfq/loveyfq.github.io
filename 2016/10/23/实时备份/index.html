@@ -1,0 +1,1356 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="实时备份,rsync,inotify," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="本实验使用A（192.168.34.108）作为客户端，B（192.168.34.103）作为实时备份服务器，利用inotify对同步数据目录信息进行监控，当监控到目录相应内容变化时，利用rsync完成对数据的同步。记录利用inotify+rsync实现实时备份的过程。 基础知识梳理inotify基础知识linux内核高于2.6.13的版本，默认支持inotify，可使用ll &#x2F;proc&#x2F;sys&#x2F;">
+<meta property="og:type" content="article">
+<meta property="og:title" content="inotify+rsync实现实时备份">
+<meta property="og:url" content="http://yoursite.com/2016/10/23/%E5%AE%9E%E6%97%B6%E5%A4%87%E4%BB%BD/index.html">
+<meta property="og:site_name" content="漫步人生路">
+<meta property="og:description" content="本实验使用A（192.168.34.108）作为客户端，B（192.168.34.103）作为实时备份服务器，利用inotify对同步数据目录信息进行监控，当监控到目录相应内容变化时，利用rsync完成对数据的同步。记录利用inotify+rsync实现实时备份的过程。 基础知识梳理inotify基础知识linux内核高于2.6.13的版本，默认支持inotify，可使用ll &#x2F;proc&#x2F;sys&#x2F;">
+<meta property="article:published_time" content="2016-10-22T16:00:00.000Z">
+<meta property="article:modified_time" content="2020-04-20T13:33:53.634Z">
+<meta property="article:author" content="ShengQin Miao">
+<meta property="article:tag" content="实时备份">
+<meta property="article:tag" content="rsync">
+<meta property="article:tag" content="inotify">
+<meta name="twitter:card" content="summary">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2016/10/23/实时备份/"/>
+
+
+
+
+
+  <title>inotify+rsync实现实时备份 | 漫步人生路</title>
+  
+
+
+
+
+
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?f076ecd4b66d3a02de923868671591de";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+<meta name="generator" content="Hexo 4.2.0"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">漫步人生路</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off"
+             placeholder="搜索..." spellcheck="false"
+             type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2016/10/23/%E5%AE%9E%E6%97%B6%E5%A4%87%E4%BB%BD/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="ShengQin Miao">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/uploads/touxiang.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="漫步人生路">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">inotify+rsync实现实时备份</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2016-10-23T00:00:00+08:00">
+                2016-10-23
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+             <span id="/2016/10/23/%E5%AE%9E%E6%97%B6%E5%A4%87%E4%BB%BD/" class="leancloud_visitors" data-flag-title="inotify+rsync实现实时备份">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+            <div class="post-wordcount">
+              
+                
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-file-word-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">字数统计&#58;</span>
+                
+                <span title="字数统计">
+                  1.6k
+                </span>
+              
+
+              
+                <span class="post-meta-divider">|</span>
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-clock-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">阅读时长 &asymp;</span>
+                
+                <span title="阅读时长">
+                  6
+                </span>
+              
+            </div>
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>本实验使用A（192.168.34.108）作为客户端，B（192.168.34.103）作为实时备份服务器，利用inotify对同步数据目录信息进行监控，当监控到目录相应内容变化时，利用rsync完成对数据的同步。记录利用inotify+rsync实现实时备份的过程。</p>
+<h2 id="基础知识梳理"><a href="#基础知识梳理" class="headerlink" title="基础知识梳理"></a>基础知识梳理</h2><h3 id="inotify基础知识"><a href="#inotify基础知识" class="headerlink" title="inotify基础知识"></a>inotify基础知识</h3><p>linux内核高于2.6.13的版本，默认支持inotify，可使用ll /proc/sys/fs/inotify查看该目录下的文件，如果有以下文件说明服务器内核支持inotify。</p>
+<pre><code>-rw-r--r-- 1 root root 0 Dec 7 10:10 max_queued_events #inotify时间队列的最大长度，如果此值太小会出现Event Queue Overflow错误，默认值为16384
+-rw-r--r-- 1 root root 0 Dec 7 10:10 max_user_instances #可以监视的文件数量（单进程），默认值为8192
+-rw-r--r-- 1 root root 0 Dec 6 05:54 max_user_watches #每个用户创建inotify实例最大值，默认值为128
+详细的参数说明可已通过man 7 inotify查看</code></pre><p>inotify参考文档</p>
+<pre><code>https://github.com/rvoicilas/inotify-tools/wiki</code></pre><p><strong>inotify-tools包主要的文件</strong></p>
+<ul>
+<li>inotifywait：在被监控的文件或目录上等待特定文件系统时间(open close delete等)发生，常用于实时同步的目录监控</li>
+<li>inotifywatch：收集被监控的文件系统使用的统计数据，指文件系统时间发生的次数统计。</li>
+</ul>
+<p><strong>inotifywait命令的常用选项</strong></p>
+<pre><code>-m，--monitor    始终保持事件监听
+-d，--daemon        以守护进程的方式执行，和-m相似，配合-o使用
+-r，--recursive    递归监控目录数据信息变化
+-q，--quiet        输出少量信息事件
+--timefmt &lt;fmt&gt;    指定时间输出格式
+--format &lt;fmt&gt;    指定输出的格式；即市级监控输出的内容
+-e                 指定监听的时间，如果省略，表示监听所有时间
+--exclude &lt;pattern&gt;    指定排除文件或目录，使用扩展的正则表达式匹配的模式实现
+--excludei &lt;pattern&gt;    和exclude相似，不区分大小写
+-o，--outfile &lt;file&gt;        打印时间到文件中，相当于标准正确输出
+-s，--syslogoutput        发送错误到syslog，相当于标准错误输出</code></pre><p><strong>其中–timefmt &lt; fmt&gt; 的格式，可以参考man 3 strftime，主要选项如下</strong></p>
+<pre><code>%Y 年份信息，包含世纪信息
+%y 年份信息，不包括世纪信息
+%m 显示月份，范围 01-12
+%d 每月的第几天，范围是 01-31
+%H 小时信息，使用 24小时制，范围 00-23
+%M 分钟，范围 00-59</code></pre><p>例如：–timefmt “%Y-%m-%d %H:%M” 表示按时间年-月-日 时-分的格式输出时间</p>
+<p><strong>–format &lt; fmt&gt; 的格式定义的相关选项如下</strong></p>
+<pre><code>%T 输出时间格式中定义的时间格式信息，通过 --timefmt option 语法格式指定时间信息
+%w 事件出现时，监控文件或目录的名称信息
+%f 事件出现时，将显示监控目录下触发事件的文件或目录信息，否则为空
+%e 显示发生的事件信息，不同的事件默认用逗号分隔
+%Xe 显示发生的事件信息，不同的事件指定用X进行分隔</code></pre><p>例如：</p>
+<ul>
+<li>–format “%T %w%f event: %;e”</li>
+<li>–format ‘%T %w %f’</li>
+</ul>
+<p><strong>-e选项指定的时间类型如下</strong></p>
+<pre><code>create 文件或目录创建
+delete 文件或目录被删除
+modify 文件或目录内容被写入
+attrib 文件或目录属性改变
+close_write 文件或目录关闭，在写入模式打开之后关闭的
+close_nowrite 文件或目录关闭，在只读模式打开之后关闭的
+close 文件或目录关闭，不管读或是写模式
+open 文件或目录被打开
+moved_to 文件或目录被移动到监控的目录中
+moved_from 文件或目录从监控的目录中被移动
+move 文件或目录不管移动到或是移出监控目录都触发事件
+access 文件或目录内容被读取
+delete_self 文件或目录被删除，目录本身被删除
+unmount 取消挂载</code></pre><p>例如：-e create,delete,moved_to,close_write 表示当目录内有创建，删除，移动，修改时记录</p>
+<p><strong>使用inotidy监控时间示例</strong></p>
+<ul>
+<li><p>监控一次性事件</p>
+<blockquote>
+<p>inotifywait /data</p>
+</blockquote>
+</li>
+<li><p>持续监控</p>
+<blockquote>
+<p>inotifywait -mrq /data</p>
+</blockquote>
+</li>
+<li><p>持续后台监控，并记录日志</p>
+<blockquote>
+<p>inotifywait -o /root/inotify.log -drq /data –timefmt “%Y-%m-%d %H:%M” –format “%T %w%f event: %e” </p>
+</blockquote>
+</li>
+<li><p>持续后台监控特定事件</p>
+<blockquote>
+<p>inotifywait -mrq /data –timefmt “%F %H:%M” –format “%T %w%f event: %;e” -e create,delete,moved_to,close_write</p>
+</blockquote>
+</li>
+</ul>
+<h2 id="配置B服务器"><a href="#配置B服务器" class="headerlink" title="配置B服务器"></a>配置B服务器</h2><h3 id="修改配置文件"><a href="#修改配置文件" class="headerlink" title="修改配置文件"></a>修改配置文件</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">[root@ansible ~]<span class="comment">#cd /etc/</span></span><br><span class="line">[root@ansible etc]<span class="comment">#cp rsyncd.conf&#123;,.bak&#125; </span></span><br><span class="line">[root@ansible etc]<span class="comment">#vi rsyncd.conf</span></span><br><span class="line">uid = root <span class="comment">#以root身份执行进程</span></span><br><span class="line">gid = root <span class="comment">#进程所属组</span></span><br><span class="line">use chroot = no <span class="comment">#</span></span><br><span class="line">max connections = 0 <span class="comment">#最大连接数不限制</span></span><br><span class="line">ignore errors <span class="comment">#忽略错误</span></span><br><span class="line">exclude = lost+found/ <span class="comment">#排除该文件夹</span></span><br><span class="line"><span class="built_in">log</span> file = /var/<span class="built_in">log</span>/rsyncd.log <span class="comment">#日志文件存放位置</span></span><br><span class="line">pid file = /var/run/rsyncd.pid <span class="comment">#进程pid存放位置</span></span><br><span class="line">lock file = /var/run/rsyncd.lock <span class="comment">#进程锁文件存放位置</span></span><br><span class="line">reverse lookup = no <span class="comment">#不启用反向名字解析服务</span></span><br><span class="line">hosts allow = 192.168.8.0/24 <span class="comment">#允许哪个网段访问</span></span><br><span class="line">[backup] <span class="comment">#备份的模块，可以有多个</span></span><br><span class="line">path = /backup/ <span class="comment">#接收的备份存放目录</span></span><br><span class="line">comment = backup <span class="comment">#注释信息</span></span><br><span class="line"><span class="built_in">read</span> only = no <span class="comment">#可写</span></span><br><span class="line">auth users = rsyncuser <span class="comment">#同步时使用的虚拟用户账号</span></span><br><span class="line">secrets file = /etc/rsync.pass <span class="comment">#口令存放文件</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="生成服务器端口令验证文件"><a href="#生成服务器端口令验证文件" class="headerlink" title="生成服务器端口令验证文件"></a>生成服务器端口令验证文件</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@ansible etc]<span class="comment">#echo "rsyncuser:centos" &gt; /etc/rsync.pass</span></span><br><span class="line">[root@ansible etc]<span class="comment">#chmod 600 /etc/rsync.pass</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="准备服务器端存放备份的目录"><a href="#准备服务器端存放备份的目录" class="headerlink" title="准备服务器端存放备份的目录"></a>准备服务器端存放备份的目录</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ mkdir /backup</span><br></pre></td></tr></table></figure>
+
+<h3 id="服务器端启动rsync服务"><a href="#服务器端启动rsync服务" class="headerlink" title="服务器端启动rsync服务"></a>服务器端启动rsync服务</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ rsync --daemon   <span class="comment">#监听873端口</span></span><br><span class="line">$ <span class="built_in">echo</span> <span class="string">"rsync --daemon"</span> &gt; /etc/rc.d/rc.local <span class="comment">#加入开机自启</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="配置客户端A"><a href="#配置客户端A" class="headerlink" title="配置客户端A"></a>配置客户端A</h2><h3 id="客户端配置密码文件"><a href="#客户端配置密码文件" class="headerlink" title="客户端配置密码文件"></a>客户端配置密码文件</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ <span class="built_in">echo</span> <span class="string">"centos"</span> &gt; /etx/rsync.pass</span><br><span class="line">$ chmod 600 /etc/rsync.pass</span><br></pre></td></tr></table></figure>
+
+<h3 id="在客户端测试同步数据"><a href="#在客户端测试同步数据" class="headerlink" title="在客户端测试同步数据"></a>在客户端测试同步数据</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ rsync -avz --password-file=/etc/rsync.pass /data/ rsyncuser@192.168.34.103::backup</span><br></pre></td></tr></table></figure>
+
+<h3 id="创建客户端inotify-rsync-sh脚本，实现后台监控实时备份"><a href="#创建客户端inotify-rsync-sh脚本，实现后台监控实时备份" class="headerlink" title="创建客户端inotify_rsync.sh脚本，实现后台监控实时备份"></a>创建客户端inotify_rsync.sh脚本，实现后台监控实时备份</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">[root@apache bin]<span class="comment">#vi backup.sh </span></span><br><span class="line">SRC=<span class="string">'/data/'</span></span><br><span class="line">DEST=<span class="string">'rsyncuser@192.168.34.103::backup'</span></span><br><span class="line">inotifywait -mrq --timefmt <span class="string">'%Y-%m-%d %H-%M'</span> --format <span class="string">'%T %w %f'</span> -e \</span><br><span class="line">attrib,create,delete,moved_to,close_write <span class="variable">$&#123;SRC&#125;</span> |<span class="keyword">while</span> <span class="built_in">read</span> DATE TIME DIR \</span><br><span class="line">FILE;<span class="keyword">do</span></span><br><span class="line">        FILEPATH=<span class="variable">$&#123;DIR&#125;</span><span class="variable">$&#123;FILE&#125;</span></span><br><span class="line">        rsync -az --delete --password-file=/etc/rsync.pass <span class="variable">$&#123;SRC&#125;</span> $&#123; \</span><br><span class="line">       	DEST&#125; &amp;&amp; <span class="built_in">echo</span> <span class="string">"At <span class="variable">$&#123;TIME&#125;</span> on <span class="variable">$&#123;DATE&#125;</span>,file <span class="variable">$&#123;FILEPATH&#125;</span> was \</span></span><br><span class="line"><span class="string">       	backuped up via rsync"</span> &gt;&gt; /var/<span class="built_in">log</span>/changelist.log                    </span><br><span class="line"><span class="keyword">done</span></span><br><span class="line">[root@apache bin]<span class="comment">#bash /data/bin/backup.sh &amp;</span></span><br><span class="line">[root@apache bin]<span class="comment">#echo "bash /data/bin/backup.sh" &gt;&gt; /etc/rc.d/rc.local</span></span><br></pre></td></tr></table></figure>
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/%E5%AE%9E%E6%97%B6%E5%A4%87%E4%BB%BD/" rel="tag"># 实时备份</a>
+          
+            <a href="/tags/rsync/" rel="tag"># rsync</a>
+          
+            <a href="/tags/inotify/" rel="tag"># inotify</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/10/12/raid/" rel="next" title="Raid">
+                <i class="fa fa-chevron-left"></i> Raid
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2016/10/29/sudo/" rel="prev" title="sudo管理">
+                sudo管理 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+        <!-- JiaThis Button BEGIN -->
+<div class="jiathis_style">
+<span class="jiathis_txt">分享到：</span>
+<a class="jiathis_button_fav">收藏夹</a>
+<a class="jiathis_button_copy">复制网址</a>
+<a class="jiathis_button_email">邮件</a>
+<a class="jiathis_button_weixin">微信</a>
+<a class="jiathis_button_qzone">QQ空间</a>
+<a class="jiathis_button_tqq">腾讯微博</a>
+<a class="jiathis_button_douban">豆瓣</a>
+<a class="jiathis_button_share">一键分享</a>
+
+<a href="http://www.jiathis.com/share?uid=2140465" class="jiathis jiathis_txt jiathis_separator jtico jtico_jiathis" target="_blank">更多</a>
+<a class="jiathis_counter_style"></a>
+</div>
+<script type="text/javascript" >
+var jiathis_config={
+  data_track_clickback:true,
+  summary:"",
+  shortUrl:false,
+  hideMore:false
+}
+</script>
+<script type="text/javascript" src="http://v3.jiathis.com/code/jia.js?uid=" charset="utf-8"></script>
+<!-- JiaThis Button END -->
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+    </div>
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/uploads/touxiang.jpg"
+                alt="ShengQin Miao" />
+            
+              <p class="site-author-name" itemprop="name">ShengQin Miao</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">53</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                
+                  <span class="site-state-item-count">1</span>
+                  <span class="site-state-item-name">分类</span>
+                
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">61</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#基础知识梳理"><span class="nav-number">1.</span> <span class="nav-text">基础知识梳理</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#inotify基础知识"><span class="nav-number">1.1.</span> <span class="nav-text">inotify基础知识</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#配置B服务器"><span class="nav-number">2.</span> <span class="nav-text">配置B服务器</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#修改配置文件"><span class="nav-number">2.1.</span> <span class="nav-text">修改配置文件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#生成服务器端口令验证文件"><span class="nav-number">2.2.</span> <span class="nav-text">生成服务器端口令验证文件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#准备服务器端存放备份的目录"><span class="nav-number">2.3.</span> <span class="nav-text">准备服务器端存放备份的目录</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#服务器端启动rsync服务"><span class="nav-number">2.4.</span> <span class="nav-text">服务器端启动rsync服务</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#配置客户端A"><span class="nav-number">3.</span> <span class="nav-text">配置客户端A</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#客户端配置密码文件"><span class="nav-number">3.1.</span> <span class="nav-text">客户端配置密码文件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#在客户端测试同步数据"><span class="nav-number">3.2.</span> <span class="nav-text">在客户端测试同步数据</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#创建客户端inotify-rsync-sh脚本，实现后台监控实时备份"><span class="nav-number">3.3.</span> <span class="nav-text">创建客户端inotify_rsync.sh脚本，实现后台监控实时备份</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">ShengQin Miao</span>
+
+  
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-area-chart"></i>
+    </span>
+    
+      <span class="post-meta-item-text">Site words total count&#58;</span>
+    
+    <span title="Site words total count">131.6k</span>
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Pisces</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js"></script>
+  <script>AV.initialize("vItlX9Jc2L4BuXKt6BJWW6eJ-gzGzoHsz", "IisqhTArerBOyaxKHN8TcE10");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

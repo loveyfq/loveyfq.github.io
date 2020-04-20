@@ -1,0 +1,1398 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="负载均衡器,lvs,LB cluster," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="LB cluster一个创业公司刚刚起步的时候一般都是单机在跑，但是随着公司规模的不断扩大，当前的服务器已经不能够满足实际需要的时候，就需要扩展(Scale)，扩展的方式有两种：Up，向上扩展，又称垂直扩展，即提升硬件水平Out，向外扩展，横向扩展，提升服务器数量，即采用集群的方式提供服务 然而，受制于技术水平，向上扩展很快会受限，大部分正常的选择是向外扩展，当服务其数量达到一定规模，形成一个集群">
+<meta property="og:type" content="article">
+<meta property="og:title" content="lvs">
+<meta property="og:url" content="http://yoursite.com/2018/06/18/lvs/index.html">
+<meta property="og:site_name" content="漫步人生路">
+<meta property="og:description" content="LB cluster一个创业公司刚刚起步的时候一般都是单机在跑，但是随着公司规模的不断扩大，当前的服务器已经不能够满足实际需要的时候，就需要扩展(Scale)，扩展的方式有两种：Up，向上扩展，又称垂直扩展，即提升硬件水平Out，向外扩展，横向扩展，提升服务器数量，即采用集群的方式提供服务 然而，受制于技术水平，向上扩展很快会受限，大部分正常的选择是向外扩展，当服务其数量达到一定规模，形成一个集群">
+<meta property="article:published_time" content="2018-06-17T16:00:00.000Z">
+<meta property="article:modified_time" content="2020-04-20T13:33:51.349Z">
+<meta property="article:author" content="ShengQin Miao">
+<meta property="article:tag" content="负载均衡器">
+<meta property="article:tag" content="lvs">
+<meta property="article:tag" content="LB cluster">
+<meta name="twitter:card" content="summary">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2018/06/18/lvs/"/>
+
+
+
+
+
+  <title>lvs | 漫步人生路</title>
+  
+
+
+
+
+
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?f076ecd4b66d3a02de923868671591de";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+<meta name="generator" content="Hexo 4.2.0"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">漫步人生路</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off"
+             placeholder="搜索..." spellcheck="false"
+             type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/06/18/lvs/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="ShengQin Miao">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/uploads/touxiang.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="漫步人生路">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">lvs</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-06-18T00:00:00+08:00">
+                2018-06-18
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+             <span id="/2018/06/18/lvs/" class="leancloud_visitors" data-flag-title="lvs">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+            <div class="post-wordcount">
+              
+                
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-file-word-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">字数统计&#58;</span>
+                
+                <span title="字数统计">
+                  3.6k
+                </span>
+              
+
+              
+                <span class="post-meta-divider">|</span>
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-clock-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">阅读时长 &asymp;</span>
+                
+                <span title="阅读时长">
+                  14
+                </span>
+              
+            </div>
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="LB-cluster"><a href="#LB-cluster" class="headerlink" title="LB cluster"></a>LB cluster</h2><p>一个创业公司刚刚起步的时候一般都是单机在跑，但是随着公司规模的不断扩大，当前的服务器已经不能够满足实际需要的时候，就需要扩展(Scale)，扩展的方式有两种：<br>Up，向上扩展，又称垂直扩展，即提升硬件水平<br>Out，向外扩展，横向扩展，提升服务器数量，即采用集群的方式提供服务</p>
+<p>然而，受制于技术水平，向上扩展很快会受限，大部分正常的选择是向外扩展，<br>当服务其数量达到一定规模，形成一个集群时，就需要做一个负载均衡集群(LB cluster)(Load balance cluster)，此时就需要一个director负责调度分发请求，让各个web服务器根据分配的weighted进行接收处理请求。</p>
+<p>如果有对个Web服务器，就涉及到会话保持的问题，即http是无状态的，而应用程序有事却需要状态追踪，那么如何进行状态追踪呢？<br>session 会话保持的三种方法</p>
+<ul>
+<li>session sticky 会话粘滞，同一用户始终调度到同一服务器，会损害负载均衡的效果，如果某服务器突然宕机，还会导致session丢失</li>
+<li>session replication 会话共享，即将session传输到所有的服务器上，每个服务器中都保存所有的session，但是会大大web服务器的负载。</li>
+<li>session server 搭建session服务器，将所有的session都放在专门的服务器上，所有的web服务器都要到session服务器上读取session，session可以采用redis、memcached等高性能存储解决方案。此时要考虑session server的高可用问题。</li>
+</ul>
+<h3 id="LB-cluster集群的实现"><a href="#LB-cluster集群的实现" class="headerlink" title="LB cluster集群的实现"></a>LB cluster集群的实现</h3><p>LB cluster需要使用调度器实现调度功能<br>七层调度：工作在应用层，由于七层调度每调度一次都要使用一个套接字进行主机到主机之间通信，而主机的端口又是有限制的，所以七层调度调度能力低，支持并发量小于4w<br>四层调度：内核级调度，调度能力高</p>
+<p>负载的分类<br>硬负载：F5的big ip，A10的A10<br>软负载：</p>
+<ul>
+<li>四层：LVS,Nginx(stream),HAProxy(mod tcp)…</li>
+<li>七层：Nginx,HAProxy,Envoy…</li>
+</ul>
+<h2 id="LVS"><a href="#LVS" class="headerlink" title="LVS"></a>LVS</h2><p>LVS,是四层负载均衡器，全称Linux Virtual Server<br>LVS有两部分组成<br><strong>ipvsadm</strong>：用户空间的命令行工具，规则管理器，用于管理集群服务及相关的RealServer<br><strong>ipvs</strong>：工作于内核空间的netfilter的INPUT钩子之上的框架，ipvs工作于INPUT链上，如果数据报文符合ipvsadm定义的规则，则ipvs会强行将请求转换到FORWARD链上，甚至直接转换到postrouting链上。<br>ipvs是直接被整合到内核中的一个模块，使用只需装载一下即可(modeprobe ip_vs).</p>
+<h3 id="LVS的算法"><a href="#LVS的算法" class="headerlink" title="LVS的算法"></a>LVS的算法</h3><p>ipvs的调度算法(10种)，根据其调度室是否考虑各RS当前负载状态，可分为静态方法和动态方法两种。<br><strong>静态算法</strong>：仅根据算法本身和请求报文特征进行调度，注重起点公平</p>
+<ul>
+<li><p>rr：round-robin，轮询，依次将请求调度到各RS，</p>
+</li>
+<li><p>wrr：weighted-round-robin，加权轮询，对每个RS分配权重，权重越大的承载能力越高，将请求按照权重的比例调度到各RS，wrr算法是短链接无状态的最好算法(http)。</p>
+</li>
+<li><p>sh：source ip hashing 源地址哈希，即对请求的源地址进行哈希计算，将计算结果对权重之和取模之后，将请求调度给排在取模之后的数值对应的RS上(RS从0开始计数)，来自同一个客户端的请求每次都调度给同一个服务器，对需要会话追踪的连接，例如fpm集群，电商站点，应用程序服务器等情况下比较实用，因为sh能实现同一客户端始终绑定到同一real server上。</p>
+<blockquote>
+<p>sh算法的缺点<br>  如果RS宕机会造成session丢失<br>  增加RS服务器负载<br>  如果一个公网ip背后有多个私网主机进行访问，那么这些主机会被当成同一个client，这会对负载均衡的效果产生严重的负面影响。</p>
+</blockquote>
+</li>
+<li><p>dh：destination ip hashing 目标地址哈希，用在内网访问外网的情况，例如内网很多台主机，为了提高访问速度，对内网用户做集群，通过调度分别分发道不同的代理服务器上向外发送请求报文，此时对内网发出的请求报文做dh，就能保证对同一目标服务器的访问始终都通过同一代理服务器发出，此时代理服务器上的缓存使用率就更高。</p>
+</li>
+</ul>
+<p><strong>动态算法</strong>：额外考虑后端个RS的当前的负载状态，注重结果公平</p>
+<ul>
+<li>lc：least connection,最少连接算法，将请求调度给负载最低的RS，如果各RS的负载相同，则调度给最上面的服务器，计算RS负载的算法为：overhead=activeconns*256+inactiveconns;</li>
+<li>wlc:weighted lc：加权最少连接算法，将请求调度给负载最低的RS，算法为：overhead=(activeconns+*256+inactiveconns)/weighted；wlc算法是lvs的默认算法。长连接的mysql连接的最好算法。</li>
+<li>sed:shortest expect delay最短期望延迟，如果后端RS的负载相同时，将请求调度给权重最大的RS。算法为：overhead=((activeconns+1)*256+inactiveconns)/weighted</li>
+<li>nq：never queue永不排队，将请求先按权重从大小依次分一个给各RS，然后将后面的请求再按照权重分给各RS。</li>
+<li>lblc：locality-based LC,动态的DH算法；缺点：影响负载均衡的效果。</li>
+<li>lblcr：LBLC with Replication，带复制功能的LBLC</li>
+</ul>
+<h3 id="LVS-Type"><a href="#LVS-Type" class="headerlink" title="LVS Type"></a>LVS Type</h3><p>LVS集群的四种类型</p>
+<ul>
+<li><p>lvs-nat：修改请求报文的目标ip(和端口)，多目标ip的DNAT；通过将请求报文中的目标地址和目标端口修改为某挑出的RS的rip和port实现转发</p>
+<blockquote>
+<p>rip和dip必须在同一个ip网络，且应该使用私网地址，RS的网关要指向dip<br>请求报文和响应报文都必须经由director转发，director易于称为系统瓶颈<br>支持端口映射，可修改请求报文的目标port<br>vs必须是linux系统，rs可以使任意系统</p>
+</blockquote>
+</li>
+<li><p>lvs-dr：director routing，直接路由。通过为请求报文重新封装一个MAC首部进行转发，源MAC是DIP所在的接口的MAC，目标MAC是某挑选出的RS的rip所在接口的MAC地址，源ip/port，以及目标ip/port均保持不变<br>director和各RS都得配置实用VIP</p>
+<blockquote>
+<p>确保前端路由器将目标ip为vip的请求报文发往director，做法有以下几种：1.在前端网关做静态绑定；2.在RS上使用arptables；3.在RS上修改内核参数以限制arp通告及应答级别：</p>
+</blockquote>
+<blockquote>
+<p>arp_announce<br>  0：默认值，表示可使用本地任意接口上配置的任意地址进行响应；<br>  1: 仅在请求的目标IP配置在本地主机的接收到请求报文接口上时，才给予响应；</p>
+</blockquote>
+<blockquote>
+<p>arp_ignore<br>  0：默认值，把本机上的所有接口的所有信息向每个接口上的网络进行通告；<br>  1：尽量避免向非直接连接网络进行通告；<br>  2：必须避免向非本网络通告；</p>
+</blockquote>
+<blockquote>
+<p>RS的rip可以使用私网地址，也可以是公网地址；rip与dip在同一ip网络，rip的网关不能指向dip，以确保响应报文不会经由director</p>
+</blockquote>
+<blockquote>
+<p>RS跟director要在同一个物理网络</p>
+</blockquote>
+<blockquote>
+<p>请求报文要经由director，但是响应报文不能经由director，而是有RS直接发往client</p>
+</blockquote>
+<blockquote>
+<p>不支持端口映射</p>
+</blockquote>
+</li>
+<li><p>lvs-tun：转发方式：不修改请求报文的ip首部(源ip为cip，目标ip为vip)，而是在源ip报文之外再封装一个ip首部(源ip是dip，目标ip是rip)，将报文发往挑选出的目标RS，RS直接响应给客户端(源ip是vip，目标ip是cip)；采用ip隧道的方式</p>
+<blockquote>
+<p>DIP,VIP,RIP都应该是公网地址<br>  RS的网关不能也不可能指向DIP<br>  请求报文要经由director，但是响应报文不能经由director<br>  不支持端口映射<br>  RS的OS得支持隧道功能</p>
+</blockquote>
+</li>
+<li><p>lvs-fullnat：通过同时修改请求报文的源ip地址和目标ip地址进行转发，此类型默认不支持<br>CIP &lt;–&gt; DIP<br>VIP &lt;–&gt; RIP</p>
+<blockquote>
+<p>VIP是公网地址，RIP和DIP是私网地址，且通常不在同一IP网段，因此，RIP的网关一般不会指向DIP<br>  RS收到的请求报文源地址是DIP，因此，只能响应给DIP；但是director还要将其发往client<br>  请求和响应报文都经由director<br>  支持端口映射</p>
+</blockquote>
+</li>
+</ul>
+<p><strong>总结</strong>：<br>lvs-nat, lvs-fullnat：请求和响应报文都经由Director；</p>
+<ul>
+<li>lvs-nat：RIP的网关要指向DIP；</li>
+<li>lvs-fullnat：RIP和DIP未必在同一IP网络，但要能通信；</li>
+</ul>
+<p>lvs-dr, lvs-tun：请求报文要经由Director，但响应报文由RS直接发往Client；</p>
+<ul>
+<li>lvs-dr：通过封装新的MAC首部实现，通过MAC网络转发；</li>
+<li>lvs-tun：通过在原IP报文之外封装新的IP首部实现转发，支持远距离通信；</li>
+</ul>
+<h3 id="实验：LVS-nat模式验证"><a href="#实验：LVS-nat模式验证" class="headerlink" title="实验：LVS-nat模式验证"></a>实验：LVS-nat模式验证</h3><p>在主机上建立两个容器运行web服务，在宿主机上做ipvs规则，把宿主机当做director，测试nat模式的负载均衡效果。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">[root@docker ~]<span class="comment">#docker run --name web1 -d -v /data/volumes/web1:/usr/shsre/nginx/html/ nginx:1.15-alpine </span></span><br><span class="line">[root@docker ~]<span class="comment">#docker run --name web2 -d -v /data/volumes/web2:/usr/share/nginx/html/ nginx:1.15-alpine</span></span><br><span class="line">[root@docker ~]<span class="comment">#echo web1 &gt; /data/volums/web1/index.html</span></span><br><span class="line">[root@docker ~]<span class="comment">#echo web2 &gt; data/volumes/web2/index.html</span></span><br><span class="line">[root@docker ~]<span class="comment">#ipvsadm -A -t 192.168.34.102:80(vip) -s mrr</span></span><br><span class="line">[root@docker ~]<span class="comment">#ipvsadm -a -t 192.168.34.102:80 -r 172.17.0.3(rip1) -m</span></span><br><span class="line">[root@docker ~]<span class="comment">#ipvsadm -a -t 192.168.34.102:80 -r 172.17.0.4(rip2) -m</span></span><br><span class="line">[root@docker ~]<span class="comment">#for i in `seq 10`;do curl 192.168.34.102;sleep .5 ;done #在客户端做访问测试，此时可以看到nat模式的工作效果</span></span><br></pre></td></tr></table></figure>
+<p>这里存在一个问题，就是docker会自动将FORWARD链的默认策略修改为DROP，这就可能导致调度存在问题，可以通过修改docker的unit文件，在每次docker启动后都自动把FORWARD链的默认策略改为ACCEPT。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ vi /var/lib/systemcd/system/docker.service</span><br><span class="line">[Service]</span><br><span class="line">ExecStartPost=/usr/sbin/iptables -P FORWARD -j ACCEPT</span><br></pre></td></tr></table></figure>
+
+
+<h3 id="实验：lvs-dr模式验证"><a href="#实验：lvs-dr模式验证" class="headerlink" title="实验：lvs-dr模式验证"></a>实验：lvs-dr模式验证</h3><p>本实验采用三台服务器演示分别为ansible(192.168.34.103)做director，apache(192.168.34.108)做RS1，docker(192.168.34.102)做RS2<br>在RS1和RS2上分别部署web服务<br>采用dr模式，需要在每台服务器都配置vip，这会造成IP地址冲突的现象，所以要在RS修改内核参数，隐藏vip，而只将director的vip公布出来。</p>
+<p>配置RS1,RS2的web服务，这里为了体现负载均衡效果，分别采用各自主机名做站点内容。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">[root@docker ~]<span class="comment">#echo docker &gt; /var/www/html/index.html</span></span><br><span class="line">[root@docker ~]<span class="comment">#curl 192.168.34.102</span></span><br><span class="line">docker</span><br><span class="line">[root@apache ~]<span class="comment">#echo apache &gt; /var/www/html/index.html</span></span><br><span class="line">[root@apache ~]<span class="comment">#curl 192.168.34.108</span></span><br><span class="line">apache</span><br></pre></td></tr></table></figure>
+
+<p>配置director的vip</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@ansible ~]<span class="comment">#ifconfig ens33:0 192.168.34.123 netmask 255.255.255.255 broadcast 192.168.34.123 #现在director上配置vip，配置32位的子网掩码，并将广播只发给自己，防止干扰局域网通信。</span></span><br></pre></td></tr></table></figure>
+
+<p>采用脚本的方式修改RS的内核参数并配置RS的vip，并将该脚本在各RS上分别执行</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line">[root@docker scripts]<span class="comment">#cat setlpara.sh </span></span><br><span class="line"><span class="meta">#!/bin/bash</span></span><br><span class="line"><span class="comment"># </span></span><br><span class="line">vip=192.168.34.123</span><br><span class="line">mask=255.255.255.255</span><br><span class="line">interface=<span class="string">"lo:0"</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">case</span> <span class="variable">$1</span> <span class="keyword">in</span></span><br><span class="line">start)</span><br><span class="line">	<span class="built_in">echo</span> 1 &gt; /proc/sys/net/ipv4/conf/all/arp_ignore</span><br><span class="line">	<span class="built_in">echo</span> 2 &gt; /proc/sys/net/ipv4/conf/all/arp_announce</span><br><span class="line">	<span class="built_in">echo</span> 1 &gt; /proc/sys/net/ipv4/conf/lo/arp_ignore</span><br><span class="line">	<span class="built_in">echo</span> 2 &gt; /proc/sys/net/ipv4/conf/lo/arp_announce</span><br><span class="line"></span><br><span class="line">	ifconfig <span class="variable">$interface</span> <span class="variable">$vip</span> netmask <span class="variable">$mask</span> broadcast <span class="variable">$vip</span> up</span><br><span class="line">	route add -host <span class="variable">$vip</span> dev lo:0</span><br><span class="line">	;;</span><br><span class="line">stop)</span><br><span class="line">	ifconfig <span class="variable">$interface</span> down	</span><br><span class="line">	<span class="built_in">echo</span> 0 &gt; /proc/sys/net/ipv4/conf/all/arp_ignore</span><br><span class="line">	<span class="built_in">echo</span> 0 &gt; /proc/sys/net/ipv4/conf/all/arp_announce</span><br><span class="line">	<span class="built_in">echo</span> 0 &gt; /proc/sys/net/ipv4/conf/lo/arp_ignore</span><br><span class="line">	<span class="built_in">echo</span> 0 &gt; /proc/sys/net/ipv4/conf/lo/arp_announce</span><br><span class="line">	;;</span><br><span class="line">*)</span><br><span class="line">	<span class="built_in">echo</span> <span class="string">"Usage <span class="variable">$(basename $0)</span> start|stop"</span></span><br><span class="line">	<span class="built_in">exit</span> 1</span><br><span class="line">	;;</span><br><span class="line"><span class="keyword">esac</span></span><br></pre></td></tr></table></figure>
+
+<p>在director上做ipvs规则</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[root@ansible yum.repos.d]<span class="comment">#ipvsadm -A -t 192.168.34.123:80 -s wrr</span></span><br><span class="line">[root@ansible yum.repos.d]<span class="comment">#ipvsadm -a -t 192.168.34.123:80 -r 192.168.34.102 -g -w 2</span></span><br><span class="line">[root@ansible yum.repos.d]<span class="comment">#ipvsadm -a -t 192.168.34.123:80 -r 192.168.34.108 -g -w 1</span></span><br></pre></td></tr></table></figure>
+
+<p>之后在客户端测试，</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">[root@node03 ~]<span class="comment">#for i in `seq 10` ;do curl 192.168.34.123;sleep .5;done</span></span><br><span class="line">docker</span><br><span class="line">docker</span><br><span class="line">apache</span><br><span class="line">docker</span><br><span class="line">docker</span><br><span class="line">apache</span><br><span class="line">docker</span><br><span class="line">docker</span><br><span class="line">apache</span><br><span class="line">docker</span><br></pre></td></tr></table></figure>
+<p>至此，dr模式的测试成功。</p>
+<h3 id="LVS多端口绑定"><a href="#LVS多端口绑定" class="headerlink" title="LVS多端口绑定"></a>LVS多端口绑定</h3><p>LVS可以利用防火墙标记实现多端口绑定的功能，将多个应用程序绑定到一起进行调度。<br>firewallMark为服务实现分类器，从而实现将多个服务归类为一个服务。<br>在各RS上通过虚拟主机创建,模板如下</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">[root@docker scripts]<span class="comment">#cd /etc/httpd/conf.d/</span></span><br><span class="line">[root@docker conf.d]<span class="comment">#vi vhost.conf</span></span><br><span class="line">Listen 8080</span><br><span class="line"></span><br><span class="line">&lt;VirtualHost *:80&gt;</span><br><span class="line">	ServerName docker.80.com</span><br><span class="line">	DocumentRoot <span class="string">"/data/vhost1"</span></span><br><span class="line">	&lt;Directory <span class="string">"/data/vhost1"</span>&gt;</span><br><span class="line">		Options None</span><br><span class="line">		AllowOverride None</span><br><span class="line">		Require all granted</span><br><span class="line">	&lt;/Directory&gt;</span><br><span class="line">&lt;/Virtualhost&gt;</span><br><span class="line">&lt;VirtualHost *:8080&gt;</span><br><span class="line">        ServerName docker.8080.com</span><br><span class="line">        DocumentRoot <span class="string">"/data/vhost2"</span></span><br><span class="line">        &lt;Directory <span class="string">"/data/vhost2"</span>&gt;</span><br><span class="line">                Options None</span><br><span class="line">                AllowOverride None</span><br><span class="line">                Require all granted</span><br><span class="line">        &lt;/Directory&gt;</span><br><span class="line">&lt;/Virtualhost&gt;</span><br><span class="line">[root@docker conf.d]<span class="comment">#echo docker.80 &gt; /data/vhost1/index.html</span></span><br><span class="line">[root@docker conf.d]<span class="comment">#echo docker.8080 &gt; /data/vhost2/index.html</span></span><br></pre></td></tr></table></figure>
+<p>在director上做规则</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">[root@ansible ~]<span class="comment">#iptables -t mangle -A PREROUTING -d 192.168.34.123 -p tcp -m multiport --dports 80,8080 -j MARK --set-mark 7 #对目标地址是192.168.34.123的80和8080端口的tcp请求做防火墙标记，标记号为7</span></span><br><span class="line">[root@ansible yum.repos.d]<span class="comment">#ipvsadm -A -f 7 -s wrr</span></span><br><span class="line">[root@ansible yum.repos.d]<span class="comment">#ipvsadm -a -f 7 -r 192.168.34.102 -g -w 1</span></span><br><span class="line">[root@ansible yum.repos.d]<span class="comment">#ipvsadm -a -f 7 -r 192.168.34.108 -g -w 2</span></span><br></pre></td></tr></table></figure>
+<p>此时在客户端请求，80和8080端口就可以被统一调度了。</p>
+<h3 id="lvs持久连接"><a href="#lvs持久连接" class="headerlink" title="lvs持久连接"></a>lvs持久连接</h3><p>持久连接能实现不论是用何种调度算法，在一段时间内，都能够实现将来自同一客户端的请求始终发往同一RS<br>Usage：</p>
+<ul>
+<li>ipvsadm -A|E -t|u|f service-address [-s scheduler] [-p [timeout]]</li>
+</ul>
+<p>port Affinity:<br>每端口持久PPC：每个端口对应定义为一个集群服务，每集群服务单独调度；<br>每防火墙标记持久PFWM：基于防火墙标记集群服务，可实现将多个端口上的应用统一调度，即所谓的port Affinity；<br>每客户端持久PCC：基于0端口定义集群服务，即将客户端对所有应用的请求统统调度至后端主机，必须定义为持久模式。</p>
+<h3 id="LVS保存及重载规则"><a href="#LVS保存及重载规则" class="headerlink" title="LVS保存及重载规则"></a>LVS保存及重载规则</h3><p><strong>保存规则</strong><br>建议保存至/etc/sysconfig/ipvsadm</p>
+<ul>
+<li>ipvsadm-save &gt; /PATH/TO/IPVSADM_FILE</li>
+<li>ipvsadm -S &gt; /PATH/TO/IPVSADM_FILE</li>
+</ul>
+<p><strong>重载规则</strong></p>
+<ul>
+<li>ipvsadm-restore &lt; /PATH/FROM/IPVSADM_FILE</li>
+<li>ipvsadm -R &lt; /PATH/FROM/IPVSADM_FILE</li>
+</ul>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/%E8%B4%9F%E8%BD%BD%E5%9D%87%E8%A1%A1%E5%99%A8/" rel="tag"># 负载均衡器</a>
+          
+            <a href="/tags/lvs/" rel="tag"># lvs</a>
+          
+            <a href="/tags/LB-cluster/" rel="tag"># LB cluster</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/06/15/redis-cluster/" rel="next" title="redis">
+                <i class="fa fa-chevron-left"></i> redis
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/06/20/docker/" rel="prev" title="docker">
+                docker <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+        <!-- JiaThis Button BEGIN -->
+<div class="jiathis_style">
+<span class="jiathis_txt">分享到：</span>
+<a class="jiathis_button_fav">收藏夹</a>
+<a class="jiathis_button_copy">复制网址</a>
+<a class="jiathis_button_email">邮件</a>
+<a class="jiathis_button_weixin">微信</a>
+<a class="jiathis_button_qzone">QQ空间</a>
+<a class="jiathis_button_tqq">腾讯微博</a>
+<a class="jiathis_button_douban">豆瓣</a>
+<a class="jiathis_button_share">一键分享</a>
+
+<a href="http://www.jiathis.com/share?uid=2140465" class="jiathis jiathis_txt jiathis_separator jtico jtico_jiathis" target="_blank">更多</a>
+<a class="jiathis_counter_style"></a>
+</div>
+<script type="text/javascript" >
+var jiathis_config={
+  data_track_clickback:true,
+  summary:"",
+  shortUrl:false,
+  hideMore:false
+}
+</script>
+<script type="text/javascript" src="http://v3.jiathis.com/code/jia.js?uid=" charset="utf-8"></script>
+<!-- JiaThis Button END -->
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+    </div>
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/uploads/touxiang.jpg"
+                alt="ShengQin Miao" />
+            
+              <p class="site-author-name" itemprop="name">ShengQin Miao</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">53</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                
+                  <span class="site-state-item-count">1</span>
+                  <span class="site-state-item-name">分类</span>
+                
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">61</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#LB-cluster"><span class="nav-number">1.</span> <span class="nav-text">LB cluster</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#LB-cluster集群的实现"><span class="nav-number">1.1.</span> <span class="nav-text">LB cluster集群的实现</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#LVS"><span class="nav-number">2.</span> <span class="nav-text">LVS</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#LVS的算法"><span class="nav-number">2.1.</span> <span class="nav-text">LVS的算法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#LVS-Type"><span class="nav-number">2.2.</span> <span class="nav-text">LVS Type</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#实验：LVS-nat模式验证"><span class="nav-number">2.3.</span> <span class="nav-text">实验：LVS-nat模式验证</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#实验：lvs-dr模式验证"><span class="nav-number">2.4.</span> <span class="nav-text">实验：lvs-dr模式验证</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#LVS多端口绑定"><span class="nav-number">2.5.</span> <span class="nav-text">LVS多端口绑定</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#lvs持久连接"><span class="nav-number">2.6.</span> <span class="nav-text">lvs持久连接</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#LVS保存及重载规则"><span class="nav-number">2.7.</span> <span class="nav-text">LVS保存及重载规则</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">ShengQin Miao</span>
+
+  
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-area-chart"></i>
+    </span>
+    
+      <span class="post-meta-item-text">Site words total count&#58;</span>
+    
+    <span title="Site words total count">131.6k</span>
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Pisces</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js"></script>
+  <script>AV.initialize("vItlX9Jc2L4BuXKt6BJWW6eJ-gzGzoHsz", "IisqhTArerBOyaxKHN8TcE10");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

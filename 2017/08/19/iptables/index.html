@@ -1,0 +1,1521 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="iptables,防火墙," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="防火墙的作用是阻止非授权网络的访问，防患于未然。只能识别事先定义好的规则。杀毒软件的作用是杀毒，是治病的，当电脑遭受到攻击之后才起作用。入侵检测与管理系统 防火墙端口：进程地址互联网主机间进程通讯的过程：传输层封装报文是会将进程端口写在报文上，ip封装时会写上源ip和目标ip，数据链路层会在报文外层再加一层帧封装，在报文传输过程中，MAC层首部会不断变换，而ip层首部始终不变，直到经过层层转发，到">
+<meta property="og:type" content="article">
+<meta property="og:title" content="iptables">
+<meta property="og:url" content="http://yoursite.com/2017/08/19/iptables/index.html">
+<meta property="og:site_name" content="漫步人生路">
+<meta property="og:description" content="防火墙的作用是阻止非授权网络的访问，防患于未然。只能识别事先定义好的规则。杀毒软件的作用是杀毒，是治病的，当电脑遭受到攻击之后才起作用。入侵检测与管理系统 防火墙端口：进程地址互联网主机间进程通讯的过程：传输层封装报文是会将进程端口写在报文上，ip封装时会写上源ip和目标ip，数据链路层会在报文外层再加一层帧封装，在报文传输过程中，MAC层首部会不断变换，而ip层首部始终不变，直到经过层层转发，到">
+<meta property="article:published_time" content="2017-08-18T16:00:00.000Z">
+<meta property="article:modified_time" content="2020-04-20T13:33:50.539Z">
+<meta property="article:author" content="ShengQin Miao">
+<meta property="article:tag" content="iptables">
+<meta property="article:tag" content="防火墙">
+<meta name="twitter:card" content="summary">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2017/08/19/iptables/"/>
+
+
+
+
+
+  <title>iptables | 漫步人生路</title>
+  
+
+
+
+
+
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?f076ecd4b66d3a02de923868671591de";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+<meta name="generator" content="Hexo 4.2.0"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">漫步人生路</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off"
+             placeholder="搜索..." spellcheck="false"
+             type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/08/19/iptables/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="ShengQin Miao">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/uploads/touxiang.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="漫步人生路">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">iptables</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-08-19T00:00:00+08:00">
+                2017-08-19
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+             <span id="/2017/08/19/iptables/" class="leancloud_visitors" data-flag-title="iptables">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+            <div class="post-wordcount">
+              
+                
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-file-word-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">字数统计&#58;</span>
+                
+                <span title="字数统计">
+                  3.5k
+                </span>
+              
+
+              
+                <span class="post-meta-divider">|</span>
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-clock-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">阅读时长 &asymp;</span>
+                
+                <span title="阅读时长">
+                  14
+                </span>
+              
+            </div>
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>防火墙的作用是阻止非授权网络的访问，防患于未然。只能识别事先定义好的规则。<br>杀毒软件的作用是杀毒，是治病的，当电脑遭受到攻击之后才起作用。<br>入侵检测与管理系统</p>
+<h2 id="防火墙"><a href="#防火墙" class="headerlink" title="防火墙"></a>防火墙</h2><p>端口：进程地址<br>互联网主机间进程通讯的过程：传输层封装报文是会将进程端口写在报文上，ip封装时会写上源ip和目标ip，数据链路层会在报文外层再加一层帧封装，在报文传输过程中，MAC层首部会不断变换，而ip层首部始终不变，直到经过层层转发，到达目的主机。</p>
+<p>防火墙的分类：<br>主机防火墙，服务范围为当前主机<br>网络防火墙，服务范围为防火墙一侧的局域网</p>
+<p>硬件防火墙<br>软件防火墙</p>
+<p>网络层防火墙，OSI模型下四层</p>
+<h3 id="hook"><a href="#hook" class="headerlink" title="hook"></a>hook</h3><p>prerouting：所有到达本机的数据包都要首先经过此hook，它的位置在本机内核边缘。<br>input ：所有发给本机的数据包都要经过此hook<br>output：所有由本机出去的数据包都要经过此hook<br>forward：所有经过本机转发的数据包都要经过此hook<br>postrouting：所有经由本机出去的额数据包都要经过此hook</p>
+<h3 id="iptables表"><a href="#iptables表" class="headerlink" title="iptables表"></a>iptables表</h3><p>iptables默认包含5张表，分别具有不同的功能，大部分情况仅需使用filter和nat，其余用于更加复杂的情况，例如多路有哦和路由判定等<br><strong>raw</strong></p>
+<ul>
+<li>用于配置数据包，raw中的数据包不会被系统跟踪</li>
+</ul>
+<p><strong>filter</strong></p>
+<ul>
+<li>用于存放所有域防火墙相关操作的默认表</li>
+</ul>
+<p><strong>nat</strong></p>
+<ul>
+<li>用于网络地址转换，即端口转发</li>
+</ul>
+<p><strong>mangle</strong></p>
+<ul>
+<li>用于对特定数据包的修改</li>
+</ul>
+<p><strong>security</strong></p>
+<ul>
+<li>用于强制访问控制网络规则，如selinux</li>
+</ul>
+<h3 id="报文流向"><a href="#报文流向" class="headerlink" title="报文流向"></a>报文流向</h3><p>到本机内部</p>
+<ul>
+<li>prerouting-&gt; input</li>
+</ul>
+<p>由本机发出</p>
+<ul>
+<li>output -&gt; postrouting</li>
+</ul>
+<p>由本机转发</p>
+<ul>
+<li>prerouting -&gt; forward</li>
+</ul>
+<p>安装iptables-services包，可以开启系统服务管理规则，</p>
+<h3 id="table与chains之间的映射关系"><a href="#table与chains之间的映射关系" class="headerlink" title="table与chains之间的映射关系"></a>table与chains之间的映射关系</h3><p>filter：INPUT,FORWARD,OUTPUT<br>nat：PREROUTING,INPUT,OUTPUT,POSTROUTING<br>mangle:PREROUTING,INPUT,OUTPUT,FORWARD,POSTROUTING<br>raw:PREROUTING,OUTPUT</p>
+<h3 id="iptables命令详解"><a href="#iptables命令详解" class="headerlink" title="iptables命令详解"></a>iptables命令详解</h3><p><strong>命令使用格式</strong><br>iptables [ -t table] SUBCOMMAND chain [ num|rule-spec]</p>
+<p>SUBCOMMAND自命令介绍</p>
+<ul>
+<li><p>管理规则</p>
+<blockquote>
+<p>-A:append,追加，追加到最后一条<br>  -I：insert，插入，默认插入到第一条，可以指定插到第几条<br>  -D:删除<br>  -R:替换</p>
+</blockquote>
+</li>
+<li><p>管理链</p>
+<blockquote>
+<p>-N:new，新增一条链<br>  -X:删除一条自定义的、空的、引用计数为0的链。<br>  -E:<br>  -P:policy，创建链的默认策略<br>  -F:flush，清空链上的所有策略，不包括默认策略<br>  -Z:zero，计数器置零，iptables的每条规则和每个链都有专用的两个计数器：pkts，bytes<br>  -L:查看表中的链上定义的策略，加上-n选项，表示不经过地址解析，直接以数字的方式显示主机地址和端口,加上-v，显示详细信息，加上-x显示精确的匹配到的数据大小，–line-numbers显示每条规则的编号</p>
+</blockquote>
+</li>
+</ul>
+<p>检查报文，检查报文的tcp/udp首部、ip首部，MAC首部格式中的某个数据。</p>
+<ul>
+<li>tcp/udp首部：源端口，目标端口</li>
+<li>ip首部：sip、dip</li>
+<li>MAC首部：源MAC，目的MAC</li>
+</ul>
+<p>匹配条件</p>
+<ul>
+<li>通用匹配<blockquote>
+<p>[!] -s,–sip,–source-ip：报文源地址，其值可以是单个ip或一个网段，但不能是离散单个ip，前面加！表示取反。<br>  [!] -d,–dip,–destnation-ip:目标ip<br>  -i，–in-interface报文流入的接口；只能应用于数据报文流入环节，只应用于INPUT、FORWARD、PREROUTING链<br>  -o,–out-interface,报文流出的接口；只能应用于数据报文流出的环节，只应用于FORWARD、OUTPUT、POSTROUTING链<br>  -p protocol:四层协议，例如tcp,udp,icmp</p>
+</blockquote>
+</li>
+</ul>
+<ul>
+<li>扩展匹配<blockquote>
+<p>隐式扩展<br>  显式扩展，需要使用-m选项指明要调用的扩展模块的扩展机制，要手动加载扩展模块。模块可以通过ls /lib/modules/`uname -r`/kernel/net/netfilter 命令查看</p>
+</blockquote>
+</li>
+</ul>
+<p>隐式扩展：在使用-p选项指明了特定的协议时，无需再用-m选项指明扩展模块的扩展机制，不需要手动加载扩展模块</p>
+<ul>
+<li><p>基于tcp的隐式扩展</p>
+<blockquote>
+<p>[!] –source-port, –sport port[:port]：匹配报文源端口,可为端口范围<br>  [!] –destination-port,–dport port[:port]：匹配报文目标端口,可为范围<br>  [!] –tcp-flags mask comp</p>
+</blockquote>
+</li>
+<li><p>基于icmp的隐式扩展</p>
+<blockquote>
+<p>[!] –icmp-type {type[/code]|typename}<br>  type/code<br>  0/0 echo-reply icmp应答<br>  8/0 echo-request icmp请求</p>
+</blockquote>
+</li>
+</ul>
+<p>处理动作</p>
+<ul>
+<li>DROP:丢弃</li>
+<li>REJECT：拒绝</li>
+<li>ACCEPT:接受</li>
+<li>RETURN:返回调用链</li>
+<li>REDIRECT</li>
+<li>SNAT</li>
+<li>DNAT</li>
+<li>MASQURADE</li>
+<li>LOG</li>
+</ul>
+<h3 id="iptables实战"><a href="#iptables实战" class="headerlink" title="iptables实战"></a>iptables实战</h3><p><strong>查看规则</strong></p>
+<ul>
+<li>iptables -t filter -vnL</li>
+</ul>
+<p><strong>将某个链的计数置零</strong></p>
+<ul>
+<li>iptables -t fileter -Z INPUT</li>
+</ul>
+<p><strong>拒绝web服务被某个特定的网段访问</strong></p>
+<ul>
+<li>iptables -I INPUT -p tcp -s 192.168.34.0/16 -d 192.168.34.108 –dport 80 -j REJECT</li>
+</ul>
+<p><strong>允许发出dns请求</strong></p>
+<ul>
+<li>iptables -I OUTPUT -p udp –dport 53 -j ACCEPT</li>
+<li>iptables -I INPIT -p udp –sport 53 -j ACCEPT</li>
+</ul>
+<p><strong>当本机作为Samba服务器时，开放相关端口允许访问，udp:137,138 tcp:139,445</strong></p>
+<ul>
+<li>iptables -A cifs_rules -p tcp –dport 139 -j ACCEPT</li>
+<li>iptables -A cifs_rules -p tcp –dport 445 -j ACCEPT</li>
+<li>iptables -A cifs_rules -p udp –dport 137:138 -j ACCEPT</li>
+<li>iptables -A cifs_rules -j RETURN (如果本链中没有规则被匹配到，则将请求返回给调用者)</li>
+<li>iptables -I INPUT 5 -S 172.18.0.0/16 -j cifs_rules</li>
+</ul>
+<p>如果要删除该自定义链，则</p>
+<ul>
+<li>iptables -D INPUT 5 </li>
+<li>iptables -F cifs_rules</li>
+<li>iptables -X cifs_rules</li>
+</ul>
+<h4 id="显式扩展实战"><a href="#显式扩展实战" class="headerlink" title="显式扩展实战"></a>显式扩展实战</h4><p><strong>multiport扩展：以离散的方式定义多个端口匹配，最多指定15个端口，用：隔开的算作一个端口</strong><br>[!] –sports port[,port,port:port,…] 指定多个源端口<br>[!] –destination-ports,–dports port[,port|,port:port]…指定多个目标端口<br>[!] –ports port[,port|,port:port]…多个源或目标端口<br><strong>示例</strong></p>
+<ul>
+<li>iptables -A INPUT -s 172.16.0.0/16 -d 172.16.100.10 -p tcp -m multiport –dports 20:22,80 -j ACCEPT</li>
+</ul>
+<p><strong>iprange扩展：指明连续的(但一般不是整个网段)ip地址范围</strong><br>[!] –src-range from[-to] 源IP地址范围<br>[!] –dst-range from[-to] 目标IP地址范围<br><strong>示例</strong></p>
+<ul>
+<li>iptables -A INPUT -d 172.16.1.100 -p tcp –dport 80 -m iprange –src-range 172.16.1.5-172.16.1.10 -j DROP</li>
+</ul>
+<p><strong>mac扩展：指明源MAC地址，适用于：PREROUTING,FORWARD,INPUT</strong><br>[!] –mac-source XX:XX:XX:XX:XX:XX<br><strong>示例</strong></p>
+<ul>
+<li>iptables -A INPUT -s 172.16.0.100 -m mac –mac-source 00:50:56:12:34:56 -j ACCEPT</li>
+<li>iptables -A INPUT -s 172.16.0.100 -j REJECT</li>
+</ul>
+<p><strong>set扩展</strong><br>set扩展依赖ipset工具，需要安装ipset包<br>yum -y install ipset<br>使用ipset创建一个集合，如果是网段使用hash:net,如果是单个网址使用hash:ip。<br>创建集合后，向集合内添加元素，然后利用该集合创建策略。<br><strong>示例</strong></p>
+<ul>
+<li>ipset create allowpinghosts hash:ip</li>
+<li>ipset list #查看创建的列表</li>
+<li>ipset add allowpinghosts 172.18.0.100</li>
+<li>ipset add allowpinghosts 172.18.0.200</li>
+<li>iptables -I INPUT 4 -p icmp –icmp-type 8 -m set –match-set allowpinghosts src -j ACCEPT</li>
+<li>iptables -I OUTPUT 4 -p icmp –icmp-type 0 -m set –match-set allowpinghosts dst -j ACCEPT</li>
+</ul>
+<p><strong>string扩展：对报文中的应用层数据做字符创模式匹配检测</strong><br>–algo {bm|kmp} 字符串匹配检测算法</p>
+<pre><code>bm:Boyer-Moore
+kmp:Knuth-Pratt-Morris</code></pre><p>–from offset 开始偏移<br>–to offset 结束偏移<br>[!] –string pattern 要检测的字符串模式<br>[!] –hex-string pattern要检测字符串模式，16进制格式<br><strong>示例</strong></p>
+<ul>
+<li>iptables -I INPUT -m string –string “sex” –algo bm -j REJECT</li>
+<li>iptables -I OUTPUT -m string –string “sex” –algo bm -j REJECT</li>
+</ul>
+<p><strong>time扩展</strong><br>根据报文达到的时间与指定的时间范围进行匹配度检测<br>–datestart YYYY[-MM[-DD[Thh[:mm[:ss]]]]] 日期<br>–datestop YYYY[-MM[-DD[Thh[:mm[:ss]]]]]<br>–timestart hh:mm[:ss] 时间<br>–timestop hh:mm[:ss]<br>[!] –monthdays day[,day…] 每个月的几号<br>[!] –weekdays day[,day…] 星期几，1 – 7 分别表示星期一到星期日<br>–kerneltz：内核时区，不建议使用，CentOS7系统默认为UTC</p>
+<p><strong>connlimit扩展</strong><br>根据客户端ip做并发连接数量匹配<br>可防止CC(Challenge Collapsar挑战黑洞)攻击<br>–connlimit-upto #：连接的数量小于等于#时匹配<br>–connlimit-above #：连接的数量大于#时匹配<br>通常分别与默认的拒绝或允许策略配合使用<br><strong>例如</strong></p>
+<ul>
+<li>iptables -I INPUT -p tcp –dport 22 -m connlimit –connlimit-above 2 -j REJECT</li>
+</ul>
+<p><strong>limit扩展</strong><br>基于收发报文速率的匹配<br>令牌桶过滤器<br>–limit #[/second|/minute|/hour|/day]<br>–limit-burst number<br><strong>示例</strong></p>
+<ul>
+<li>iptables -I INPUT -p icmp –icmp-type 8 -m limit –limit 6/minute –limite-burst 5 -j ACCEPT</li>
+</ul>
+<p><strong>state扩展</strong><br>根据”连接追踪机制”去检查连接的状态，比较消耗资源<br>[!] –state state<br>conntrack机制：追踪本机上的请求和响应之间的关系<br>state状态有如下几种：<br><strong>NEW</strong>：新发出请求；连接追踪信息库中不存在此链接的相关信息条目，因此，将其识别为第一次发出的请求<br><strong>ESTABLISHED</strong>：NEW状态之后，连接追踪信息库中为其建立的条目失效之前期间内所进行的通信状态<br><strong>RELATED</strong>：新发起的但与已有连接相关联的连接，如：ftp协议中的数据连接与命令连接之间的关系<br><strong>INVALID</strong>：无效的连接，如flag标记不正确<br><strong>UNTRACKED</strong>：未进行追踪的连接，如raw表中关闭追踪</p>
+<p><strong>示例</strong></p>
+<ul>
+<li>iptables -t filter -A INPUT -s 172.18.0.0/16 -p tcp –dport 22 -m state –state NEW,ESTABLISHED -j ACCEPT</li>
+<li>iptables -t filter -d 182.18.0.230 -p tcp –dport 80 -m state –state NEW,ESTABLISHED -j ACCEPT</li>
+</ul>
+<p>已经追踪到的并记录下来的连接信息库</p>
+<ul>
+<li>/proc/net/nf_conntrack</li>
+</ul>
+<p>调整连接追踪功能所能够容纳的最大连接数量</p>
+<ul>
+<li><p>/proc/sys/net/nf_conntrack_max,各种状态的超时连接会从表中删除，当模板满载时，后续连接可能会超时，解决办法有两个</p>
+<blockquote>
+<p>加大nf_conntrack_max的值<br>  vi /etc/sysctl.conf<br>  net.nf_conntrack_max = 393216<br>  net.netfilter.nf_conntrack_max = 393216</p>
+</blockquote>
+<blockquote>
+<p>减低nf_conntrack timeout时间<br>  vi /etc/sysctl.conf<br>  net.netfilter.nf_conntrack_tcp_timeout_established = 300<br>  net.netfilter.nf_conntrack_tcp_timeout_time_wait = 120<br>  net.netfilter.nf_conntrack_tcp_timeout_close_wait = 60<br>  net.netfilter.nf_conntrack_tcp_timeout_fin_wait = 120</p>
+</blockquote>
+</li>
+</ul>
+<p>不同的协议的连接追踪时长</p>
+<ul>
+<li>/proc/sys/net/netfilter/</li>
+</ul>
+<p>注意：centos7需要加载模块：modeprob nf_conntrack</p>
+<p>开放被动模式的ftp服务</p>
+<ol>
+<li>装载ftp连接追踪的专用模块：<br>跟踪模块路径：/lib/modules/kernelversion/kernel/net/netfilter<br>vim /etc/sysconfig/iptables-config 配置文件<br>IPTABLES_MODULES=“nf_conntrack_ftp”<br>modproble nf_conntrack_ftp</li>
+<li>放行请求报文：<br>命令连接：NEW, ESTABLISHED<br>数据连接：RELATED, ESTABLISHED<br>iptables –I INPUT -d LocalIP -p tcp -m state –state ESTABLISHED,RELATED -j<br>ACCEPT<br>iptables -A INPUT -d LocalIP -p tcp –dport 21 -m state –state NEW -j ACCEPT</li>
+<li>放行响应报文：<br>iptables -I OUTPUT -s LocalIP -p tcp -m state –state ESTABLISHED -j ACCEPT</li>
+</ol>
+<p><strong>示例</strong><br>开放被动模式的ftp服务示例</p>
+<pre><code>yum install vsftpd
+systemctl start vsftpd
+modprobe nf_conntrack_ftp
+iptables -F
+iptables -A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
+iptables -A INPUT -p tcp --dport 21 -m state --state NEW -j ACCEPT
+iptables -A OUTPUT -m state --state ESTABLISHED -j ACCEPT
+iptables -P INPUT DROP
+iptables -P OUTPUT DROP
+iptables -vnL</code></pre><p>最后的动作包括：ACCEPT,DROP,REJECT,RETURN,LOG,SNAT,DNAT,REDIRECT,MASQUERADE…<br>其中<br>LOG:非中断target，本身不拒绝和允许，放在拒绝和允许规则之前，并将日志记录在/var/log/messages系统日志中<br> –log-level level 级别有：debug,info,notice,warning,error,crit,alert,emerg<br> –log-prefix prefix日志前缀，用于区别不同的日志，最多29个字符<br> <strong>示例</strong></p>
+<ul>
+<li>iptables -I INPUT -s 10.0.1.0/24 -p tcp -m multiport –dports 21:23,80 -m state –state NEW -j LOG –log-prefix “new connections:”</li>
+</ul>
+<p><strong>iptables策略的优化</strong>：<br>任何不允许的访问，应该在请求到达时给予拒绝<br>规则在链上的次序即为其检查时的生效次序</p>
+<ol>
+<li>按去哪个放行所有入栈和出站的状态为ESTABLISHED状态连接</li>
+<li>谨慎放行入栈的新情求</li>
+<li>有特殊目的限制访问功能，要在放行规则之前加以拒绝</li>
+<li>同类规则(访问同一应用)，匹配范围小的放在前面，用于特殊处理</li>
+<li>不同类的规则（访问不同应用），匹配范围大的放在前面</li>
+<li>应该将那些可由一条规则能够描述的多个规则合并为一条</li>
+<li>设置默认策略，建议白名单（只放行特定连接）<ul>
+<li>iptables -P，不建议</li>
+<li>建议在规则的最后定义规则做为默认策略</li>
+</ul>
+</li>
+</ol>
+<p>策略有效期限：使用iptables命令定义的规则，手动删除之前，其生效期限为kernel存活期限<br>将规则保存至指定文件</p>
+<ul>
+<li><p>centos6</p>
+<blockquote>
+<p>service iptables save<br>  规则将覆盖把哦哦存执/etc/sysconfig/iptables文件中</p>
+</blockquote>
+</li>
+<li><p>centos7</p>
+<blockquote>
+<p>iptables-save &gt; /PATH/TO/SOME_RULES_FILE</p>
+</blockquote>
+</li>
+</ul>
+<p>将文件中的规则载入到iptables中</p>
+<ul>
+<li><p>centos6</p>
+<blockquote>
+<p>service iptables restart<br>  会自动从/etc/sysconfig/iptables重载规则</p>
+</blockquote>
+</li>
+<li><p>centos7</p>
+<blockquote>
+<p>iptables-restore &lt; /PATH/FROM/SOME_RULES_FILE<br>  -n,–noflush:不清除原有规则<br>  -t,–test:仅分析生成规则集，但不提交</p>
+</blockquote>
+</li>
+</ul>
+<h3 id="iptables的网络地址转发功能"><a href="#iptables的网络地址转发功能" class="headerlink" title="iptables的网络地址转发功能"></a>iptables的网络地址转发功能</h3><p>NAT：network address translation<br>可以在PREROUTING,INPUT,OUTPUT,POSTROUTING链上做网络地址转发的相关策略，比较常见的是在PREROUTING和POSTROUTING链上做策略。<br>请求报文：修改源/目标ip，由定义如何修改<br>响应报文：修改源/目标ip，根据跟踪机制自动实现</p>
+<h4 id="SNAT：source-nat-POSTROUTING-INPUT"><a href="#SNAT：source-nat-POSTROUTING-INPUT" class="headerlink" title="SNAT：source nat POSTROUTING,INPUT"></a>SNAT：source nat POSTROUTING,INPUT</h4><p>让本地网络中的主机通过某一特定地址访问外部网络，实现地址伪装，也解决了地址不够用的问题。<br>对请求报文修改源ip<br>SNAT只能在POSTROUTING链上做报文修改，因为如果在PREROUTING链上做修改，主机会认为是发给自己的报文。postrouting位置在报文刚要离开本机还未进行路由的地方。<br>iptables -t nat -A POSTROUTING  -s 172.18.0.0/16 ! -d 172.18.0.0/16 -j SNAT –to-source localhost-ip</p>
+<h4 id="DNAT"><a href="#DNAT" class="headerlink" title="DNAT:"></a>DNAT:</h4><p>prerouting，位置在报文刚刚到达本机还未进行路由的地方<br>DNAT还可以做端口映射<br>iptables -t nat -A PREROUTING -d serverip -p tcp –dport 80 -j DNAT –to-destination real-serverip[:port]</p>
+<h4 id="REDIRECT"><a href="#REDIRECT" class="headerlink" title="REDIRECT"></a>REDIRECT</h4><p>NAT表<br>可用于：PREROUTING OUTPUT 自定义链<br>通过改变目标IP和端口，将接受的包转发至不同端口<br>–to-ports port[-port]<br>REDIRECT可以实现对本机端口访问的报文做端口转换，例如本机的httpd监听的端口是8080，而客户端只能通过80访问，此时就可以在本机PREROUTING链上做端口转换。<br>iptables -t nat -A PREROUTING -d 本机ip –dport 80 -j REDIRECT –to-ports 8080</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/iptables/" rel="tag"># iptables</a>
+          
+            <a href="/tags/%E9%98%B2%E7%81%AB%E5%A2%99/" rel="tag"># 防火墙</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/06/11/%E5%8A%A0%E5%AF%86%E5%92%8C%E5%AE%89%E5%85%A8/" rel="next" title="CA和证书">
+                <i class="fa fa-chevron-left"></i> CA和证书
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2017/08/20/redis1/" rel="prev" title="redis">
+                redis <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+        <!-- JiaThis Button BEGIN -->
+<div class="jiathis_style">
+<span class="jiathis_txt">分享到：</span>
+<a class="jiathis_button_fav">收藏夹</a>
+<a class="jiathis_button_copy">复制网址</a>
+<a class="jiathis_button_email">邮件</a>
+<a class="jiathis_button_weixin">微信</a>
+<a class="jiathis_button_qzone">QQ空间</a>
+<a class="jiathis_button_tqq">腾讯微博</a>
+<a class="jiathis_button_douban">豆瓣</a>
+<a class="jiathis_button_share">一键分享</a>
+
+<a href="http://www.jiathis.com/share?uid=2140465" class="jiathis jiathis_txt jiathis_separator jtico jtico_jiathis" target="_blank">更多</a>
+<a class="jiathis_counter_style"></a>
+</div>
+<script type="text/javascript" >
+var jiathis_config={
+  data_track_clickback:true,
+  summary:"",
+  shortUrl:false,
+  hideMore:false
+}
+</script>
+<script type="text/javascript" src="http://v3.jiathis.com/code/jia.js?uid=" charset="utf-8"></script>
+<!-- JiaThis Button END -->
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+    </div>
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/uploads/touxiang.jpg"
+                alt="ShengQin Miao" />
+            
+              <p class="site-author-name" itemprop="name">ShengQin Miao</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">53</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                
+                  <span class="site-state-item-count">1</span>
+                  <span class="site-state-item-name">分类</span>
+                
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">61</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#防火墙"><span class="nav-number">1.</span> <span class="nav-text">防火墙</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#hook"><span class="nav-number">1.1.</span> <span class="nav-text">hook</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#iptables表"><span class="nav-number">1.2.</span> <span class="nav-text">iptables表</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#报文流向"><span class="nav-number">1.3.</span> <span class="nav-text">报文流向</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#table与chains之间的映射关系"><span class="nav-number">1.4.</span> <span class="nav-text">table与chains之间的映射关系</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#iptables命令详解"><span class="nav-number">1.5.</span> <span class="nav-text">iptables命令详解</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#iptables实战"><span class="nav-number">1.6.</span> <span class="nav-text">iptables实战</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#显式扩展实战"><span class="nav-number">1.6.1.</span> <span class="nav-text">显式扩展实战</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#iptables的网络地址转发功能"><span class="nav-number">1.7.</span> <span class="nav-text">iptables的网络地址转发功能</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#SNAT：source-nat-POSTROUTING-INPUT"><span class="nav-number">1.7.1.</span> <span class="nav-text">SNAT：source nat POSTROUTING,INPUT</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#DNAT"><span class="nav-number">1.7.2.</span> <span class="nav-text">DNAT:</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#REDIRECT"><span class="nav-number">1.7.3.</span> <span class="nav-text">REDIRECT</span></a></li></ol></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">ShengQin Miao</span>
+
+  
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-area-chart"></i>
+    </span>
+    
+      <span class="post-meta-item-text">Site words total count&#58;</span>
+    
+    <span title="Site words total count">131.6k</span>
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Pisces</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js"></script>
+  <script>AV.initialize("vItlX9Jc2L4BuXKt6BJWW6eJ-gzGzoHsz", "IisqhTArerBOyaxKHN8TcE10");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

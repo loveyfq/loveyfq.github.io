@@ -1,0 +1,1375 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="lamp,web框架," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="实现lamp框架有两种方案，一是将php作为Apache的一个模块使用，另一个是将php作为一个单独的守护进程，请求静态资源时，由Apache提供服务，请求动态资源时，由Apache通过fastcgi转发给php处理。这两种方式在centos7默认都支持，在不能同时使用，只能使用其中一种方式。 使用yum安装的方式搭建lamp使用php模块化方式搭建lamp安装php,mariadb,httpd1">
+<meta property="og:type" content="article">
+<meta property="og:title" content="LAMP搭建">
+<meta property="og:url" content="http://yoursite.com/2018/03/20/lamp/index.html">
+<meta property="og:site_name" content="漫步人生路">
+<meta property="og:description" content="实现lamp框架有两种方案，一是将php作为Apache的一个模块使用，另一个是将php作为一个单独的守护进程，请求静态资源时，由Apache提供服务，请求动态资源时，由Apache通过fastcgi转发给php处理。这两种方式在centos7默认都支持，在不能同时使用，只能使用其中一种方式。 使用yum安装的方式搭建lamp使用php模块化方式搭建lamp安装php,mariadb,httpd1">
+<meta property="article:published_time" content="2018-03-19T16:00:00.000Z">
+<meta property="article:modified_time" content="2020-04-20T13:33:51.063Z">
+<meta property="article:author" content="ShengQin Miao">
+<meta property="article:tag" content="lamp">
+<meta property="article:tag" content="web框架">
+<meta name="twitter:card" content="summary">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2018/03/20/lamp/"/>
+
+
+
+
+
+  <title>LAMP搭建 | 漫步人生路</title>
+  
+
+
+
+
+
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?f076ecd4b66d3a02de923868671591de";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+<meta name="generator" content="Hexo 4.2.0"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">漫步人生路</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off"
+             placeholder="搜索..." spellcheck="false"
+             type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/03/20/lamp/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="ShengQin Miao">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/uploads/touxiang.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="漫步人生路">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">LAMP搭建</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-03-20T00:00:00+08:00">
+                2018-03-20
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+             <span id="/2018/03/20/lamp/" class="leancloud_visitors" data-flag-title="LAMP搭建">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+            <div class="post-wordcount">
+              
+                
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-file-word-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">字数统计&#58;</span>
+                
+                <span title="字数统计">
+                  2.8k
+                </span>
+              
+
+              
+                <span class="post-meta-divider">|</span>
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-clock-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">阅读时长 &asymp;</span>
+                
+                <span title="阅读时长">
+                  13
+                </span>
+              
+            </div>
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>实现lamp框架有两种方案，一是将php作为Apache的一个模块使用，另一个是将php作为一个单独的守护进程，请求静态资源时，由Apache提供服务，请求动态资源时，由Apache通过fastcgi转发给php处理。这两种方式在centos7默认都支持，在不能同时使用，只能使用其中一种方式。</p>
+<h2 id="使用yum安装的方式搭建lamp"><a href="#使用yum安装的方式搭建lamp" class="headerlink" title="使用yum安装的方式搭建lamp"></a>使用yum安装的方式搭建lamp</h2><h3 id="使用php模块化方式搭建lamp"><a href="#使用php模块化方式搭建lamp" class="headerlink" title="使用php模块化方式搭建lamp"></a>使用php模块化方式搭建lamp</h3><h4 id="安装php-mariadb-httpd"><a href="#安装php-mariadb-httpd" class="headerlink" title="安装php,mariadb,httpd"></a>安装php,mariadb,httpd</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ yum -y install php mariadb httpd</span><br></pre></td></tr></table></figure>
+<p><strong>php安装包携带文件</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">[root@apache conf.d]<span class="comment">#rpm -ql php</span></span><br><span class="line">/etc/httpd/conf.d/php.conf <span class="comment">#php模块配置文件</span></span><br><span class="line">/etc/httpd/conf.modules.d/10-php.conf <span class="comment">#配置加载php模块</span></span><br><span class="line">/usr/lib64/httpd/modules/libphp5.so <span class="comment">#php模块存放位置</span></span><br><span class="line">/usr/share/httpd/icons/php.gif <span class="comment">#php图标存放位置</span></span><br><span class="line">/var/lib/php/session</span><br></pre></td></tr></table></figure>
+<p><strong>配置php模块</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">[root@apache conf.d]<span class="comment">#egrep -v "^#|^$" /etc/httpd/conf.d/php.conf  </span></span><br><span class="line">&lt;FilesMatch \.php$&gt;</span><br><span class="line">    SetHandler application/x-httpd-php <span class="comment">#将以.php结尾的请求转发给x-httpd-php处理</span></span><br><span class="line">&lt;/FilesMatch&gt;</span><br><span class="line">AddType text/html .php <span class="comment">#增加php文件的匹配</span></span><br><span class="line">DirectoryIndex index.php <span class="comment">#配置默认主页，可重复使用</span></span><br><span class="line">php_value session.save_handler <span class="string">"files"</span> <span class="comment">#配置php保存会话</span></span><br><span class="line">php_value session.save_path    <span class="string">"/var/lib/php/session"</span> <span class="comment">#会话保存路径</span></span><br></pre></td></tr></table></figure>
+<p><strong>php模块加载文件</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">[root@apache conf.d]<span class="comment">#grep -v "^#" ../conf.modules.d/10-php.conf </span></span><br><span class="line">&lt;IfModule prefork.c&gt; <span class="comment">#当httpd运行在prefork模式下时才启用php模块</span></span><br><span class="line">  LoadModule php5_module modules/libphp5.so</span><br><span class="line">&lt;/IfModule&gt;</span><br></pre></td></tr></table></figure>
+<p><strong>重启httpd后就可以使用php模块了</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@apache conf.d]<span class="comment">#systemctl restart httpd</span></span><br></pre></td></tr></table></figure>
+<p><strong>生成php测试文件</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">[root@apache conf.d]<span class="comment">#cat /var/www/html/index.php</span></span><br><span class="line">&lt;?php</span><br><span class="line">	phpinfo() <span class="comment">#可以查看php的环境信息</span></span><br><span class="line">?&gt;</span><br></pre></td></tr></table></figure>
+<p>此时，在浏览器访问该服务器，就可以看到php信息，说明php模块已经正常工作。<br><strong>安装php-mysql模块，以使php和mysql可以建立连接</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ yum -y install php-mysql</span><br></pre></td></tr></table></figure>
+<p><strong>生成php-mysql连接测试文件</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">[root@apache html]<span class="comment">#cat conn.php </span></span><br><span class="line">&lt;?php</span><br><span class="line"><span class="variable">$conn</span> = mysql_connect(<span class="string">'192.168.34.102'</span>,<span class="string">'test'</span>,<span class="string">'centos'</span>);</span><br><span class="line"><span class="keyword">if</span> (<span class="variable">$conn</span>)</span><br><span class="line"><span class="built_in">echo</span> <span class="string">"OK"</span>;</span><br><span class="line"><span class="keyword">else</span></span><br><span class="line"><span class="built_in">echo</span> <span class="string">"Failure"</span>;</span><br><span class="line"><span class="comment">#echo mysql_error();</span></span><br><span class="line">mysql_close();</span><br><span class="line">?&gt;</span><br></pre></td></tr></table></figure>
+<p>此时在浏览器中访问该文件，如果出现OK，则表明php已经可以和mariadb正常连接。</p>
+<h2 id="lamp结合第三方工具的应用"><a href="#lamp结合第三方工具的应用" class="headerlink" title="lamp结合第三方工具的应用"></a>lamp结合第三方工具的应用</h2><h3 id="lamp-wordpress搭建个人站点"><a href="#lamp-wordpress搭建个人站点" class="headerlink" title="lamp+wordpress搭建个人站点"></a>lamp+wordpress搭建个人站点</h3><p>本次实验以/data/blog/目录为站点根目录进行;以A(192.168.34.108)作为lap主机，以(192.168.34.102)作为数据库服务器。<br><strong>下载WordPress</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ wget https://wordpress.org/latest.tar.gz</span><br></pre></td></tr></table></figure>
+<p><strong>解压文件并将解压后的文件夹放入httpd指定的站点主目录下</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ tar xf latest.tar.gz</span><br></pre></td></tr></table></figure>
+<p><strong>在B服务器创建专用数据库，并授权专有用户进行管理</strong></p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">MariaDB [(none)]&gt; create database wpdb;</span><br><span class="line">MariaDB [(none)]&gt; grant all on wpdb.* to 'wpuser'@'192.168.34.%' identified by 'centos';</span><br></pre></td></tr></table></figure>
+<p><strong>编辑WordPress配置文件指向数据库</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">[root@apache htdocs]<span class="comment">#vi wp-config.php</span></span><br><span class="line">define(<span class="string">'DB_NAME'</span>, <span class="string">'wpdb'</span>);</span><br><span class="line">define(<span class="string">'DB_USER'</span>, <span class="string">'wpuser'</span>);</span><br><span class="line">define(<span class="string">'DB_PASSWORD'</span>, <span class="string">'centos'</span>);</span><br><span class="line">define(<span class="string">'DB_HOST'</span>, <span class="string">'192.168.34.102'</span>);</span><br></pre></td></tr></table></figure>
+<p>之后按步骤创建站点，就可以拥有自己的个人网站了。</p>
+<h3 id="php-fpm模式搭建web应用"><a href="#php-fpm模式搭建web应用" class="headerlink" title="php-fpm模式搭建web应用"></a>php-fpm模式搭建web应用</h3><h4 id="安装php-fpm、mariadb-server、httpd"><a href="#安装php-fpm、mariadb-server、httpd" class="headerlink" title="安装php-fpm、mariadb-server、httpd"></a>安装php-fpm、mariadb-server、httpd</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ yum -y install php-fpm mariadb-server httpd</span><br></pre></td></tr></table></figure>
+<p><strong>php-fpm相关配置文件</strong><br>/etc/php-fpm.conf<br>/etc/php-fpm.d/* .conf</p>
+<h4 id="配置php"><a href="#配置php" class="headerlink" title="配置php"></a>配置php</h4><p>修改php-fpm配置文件</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">[root@apache ~]<span class="comment">#vi /etc/php-fpm.d/www.conf</span></span><br><span class="line">listen = 127.0.0.1:9000 <span class="comment">#监听主机的哪个网卡的9000端口，可按需修改</span></span><br><span class="line">listen.allowed_clients = 127.0.0.1 <span class="comment">#允许哪些主机进行访问，默认只允许本机访问，可按处修改，可修改为网段，如172.18.0.0/16或0.0.0.0</span></span><br><span class="line">user = apache <span class="comment">#程序运行的用户</span></span><br><span class="line">group = apache <span class="comment">#程序运行的用户组</span></span><br><span class="line">pm = dynamic <span class="comment">#程序以什么方式运行，dynamic表示以动态方式运行；static表示以静态方式运行</span></span><br><span class="line">pm.max_children = 50 <span class="comment">#最大子进程数</span></span><br><span class="line">pm.start_servers = 5 <span class="comment">#初始生成的子进程数</span></span><br><span class="line">pm.min_spare_servers = 5 <span class="comment">#最小空闲进程 仅dynamic模式有效</span></span><br><span class="line">pm.max_spare_serevrs = 35 <span class="comment">#最大空闲进程树 仅dynamic模式有效</span></span><br><span class="line">pm.max_requwsts = 500 <span class="comment">#每个子进程最大服务的请求书，在此数值到达时，该子进程将关闭</span></span><br><span class="line">ping.path = /ping <span class="comment">#存活性探测</span></span><br><span class="line">ping.response = pong <span class="comment">#存活性探测时期望得到的恢复</span></span><br><span class="line">php_admin_value[error_log] = /var/<span class="built_in">log</span>/php-fpm/www-error.log <span class="comment">#错误日志存放位置</span></span><br><span class="line">php_value[session.save_handler] = files <span class="comment">#php会话管理方式</span></span><br><span class="line">php_value[session.save_path] = /var/lib/php/session <span class="comment">#php会话存放目录，默认没有需手动创建</span></span><br></pre></td></tr></table></figure>
+
+<p>创建php会话存放目录</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@apache ~]<span class="comment">#mkdir /var/lib/php/session</span></span><br><span class="line">[root@apache ~]<span class="comment">#chown apache.apache /var/lib/php/session/</span></span><br></pre></td></tr></table></figure>
+
+<p>启动php服务</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@apache ~]<span class="comment">#systemctl start php-fpm.service</span></span><br></pre></td></tr></table></figure>
+<h4 id="配置apache"><a href="#配置apache" class="headerlink" title="配置apache"></a>配置apache</h4><p>这里以虚拟主机的方式配置</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">[root@apache /data/blog/htdocs]<span class="comment">#vi /etc/httpd/conf.d/blog.conf</span></span><br><span class="line">&lt;VirtualHost *:80&gt;</span><br><span class="line">        DocumentRoot <span class="string">"/data/blog/htdocs"</span></span><br><span class="line">        ServerName blog.msq.com</span><br><span class="line">        DirectoryIndex index.php                                 </span><br><span class="line">        ProxyRequests off</span><br><span class="line">        ProxyPassMatch ^/(.*\.php)$ fcgi://127.0.0.1:9000/data/blog/htdocs/<span class="variable">$1</span></span><br><span class="line">        &lt;Directory <span class="string">"/data/blog/htdocs"</span>&gt;</span><br><span class="line">                Options followsymlinks</span><br><span class="line">                AllowOverride none</span><br><span class="line">                require all granted</span><br><span class="line">        &lt;/Directory&gt;</span><br><span class="line">&lt;/VirtualHost&gt;</span><br></pre></td></tr></table></figure>
+<p>此时，以fastcgi方式运行的lamp架构已经搭建完成</p>
+<h4 id="phpMyadmin使用"><a href="#phpMyadmin使用" class="headerlink" title="phpMyadmin使用"></a>phpMyadmin使用</h4><p>下载phpMyadmin并解压到站点主目录下。<br>配置phpMyadmin</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@apache htdocs]<span class="comment">#cp config.sample.inc.php config.inc.php</span></span><br><span class="line"><span class="variable">$cfg</span>[<span class="string">'blowfish_secret'</span>] = <span class="string">'a8bsajcnsjkdbc7c6d'</span>; <span class="comment">#将此行的随机数换一个，不要使用默认的，其余的设置可保持不变</span></span><br></pre></td></tr></table></figure>
+<p>安装php-mbstring,php-mysql模块</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@apache htdocs]<span class="comment">#yum -y install php-mbstring php-mysql</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="使用编译安装的方式搭建lamp架构"><a href="#使用编译安装的方式搭建lamp架构" class="headerlink" title="使用编译安装的方式搭建lamp架构"></a>使用编译安装的方式搭建lamp架构</h2><h3 id="编译安装httpd"><a href="#编译安装httpd" class="headerlink" title="编译安装httpd"></a>编译安装httpd</h3><p><strong>安装相关包组</strong><br>Development Tools #开发相关包组<br>Server Platform Development #老版本需要安装，7.5已经集成到Development Tools中<br>pcre-devel #purl扩展的正则表达式<br>apr-devel #apache portable runtime Apache的可移植环境<br>apr-util-devel #apr工具<br>openssl-devel #实现http加密</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@apache htdocs]<span class="comment">#yum -y install  pcre-devel apr-devel apr-util-devel openssl-devel</span></span><br><span class="line">[root@apache htdocs]<span class="comment">#yum groupinstall "development tools"</span></span><br></pre></td></tr></table></figure>
+<p><strong>开始安装httpd,请自行下载如下所示相关软件包</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">[root@apache tools]<span class="comment">#ls</span></span><br><span class="line">apr-1.5.0              httpd-2.4.37</span><br><span class="line">apr-1.5.0.tar.bz2      httpd-2.4.37.tar.bz2</span><br><span class="line">apr-util-1.6.1         phpMyAdmin-4.0.10.20-all-languages.tar.gz</span><br><span class="line">apr-util-1.6.1.tar.gz  phpMyAdmin-4.7.1-all-languages.zip</span><br><span class="line">[root@apache tools]<span class="comment">#mv apr-1.5.0 httpd-2.4.37/srclib/apr</span></span><br><span class="line">[root@apache tools]<span class="comment">#mv apr-util-1.6.1 httpd-2.4.37/srclib/apr-util</span></span><br><span class="line">[root@apache tools]<span class="comment">#cd httpd-2.4.37/</span></span><br><span class="line">[root@apache httpd-2.4.37]<span class="comment"># ./configure --prefix=/app/httpd24 \ #指定默认安装目录</span></span><br><span class="line">--<span class="built_in">enable</span>-so \ <span class="comment">#启用模块功能</span></span><br><span class="line">--<span class="built_in">enable</span>-ssl \</span><br><span class="line">--<span class="built_in">enable</span>-cgi \</span><br><span class="line">--<span class="built_in">enable</span>-rewrite \</span><br><span class="line">--with-zlib \ <span class="comment">#结合zlib库，在传输过程中压缩</span></span><br><span class="line">--with-pcre \</span><br><span class="line">--<span class="built_in">enable</span>-modules=most \</span><br><span class="line">--<span class="built_in">enable</span>-mpms-shared=all \ <span class="comment">#把所有的mpm编译进来</span></span><br><span class="line">--with-mpm=prefork \ <span class="comment">#默认启用prefork</span></span><br><span class="line">--with-included-apr</span><br><span class="line">$ make <span class="comment">#make是一个项目管理工具，解决项目件的依赖关系。gcc是编译器</span></span><br><span class="line"><span class="variable">$make</span> install</span><br></pre></td></tr></table></figure>
+<p><strong>如果想开启本地帮助页面需要修改配置文件,打开以下两项</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ vi /app/httpd/conf/httpd.conf </span><br><span class="line">Include conf/extra/httpd-manual.conf</span><br><span class="line">LoadModule negotiation_module modules/mod_negotiation.so</span><br></pre></td></tr></table></figure>
+
+<h3 id="编译安装php-php-7-1-7"><a href="#编译安装php-php-7-1-7" class="headerlink" title="编译安装php(php-7.1.7)"></a>编译安装php(php-7.1.7)</h3><p><strong>安装相关依赖包</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@apache php-7.1.18]<span class="comment">#yum install libxml2-devel bzip2-devel libmcrypt-devel</span></span><br></pre></td></tr></table></figure>
+<p>到官方站点下载php源码包之后解压</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ tar tar xf php-7.1.18.tar.bz2</span><br><span class="line">$ <span class="built_in">cd</span> php-7.1.18</span><br></pre></td></tr></table></figure>
+<p><strong>编译安装php</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">$ ./configure --prefix=/app/php \ <span class="comment">#安装目录</span></span><br><span class="line">--<span class="built_in">enable</span>-mysqlnd \ <span class="comment">#启用MySQL</span></span><br><span class="line">--with-mysqli=mysqlnd \ <span class="comment">#连接mysql的方式</span></span><br><span class="line">--with-openssl \ <span class="comment">#开启openssl加密</span></span><br><span class="line">--with-pdo-mysql=mysqlnd \ <span class="comment">#</span></span><br><span class="line">--<span class="built_in">enable</span>-mbstring \ <span class="comment">#支持中文字符集</span></span><br><span class="line">--withfreetype-dir \ <span class="comment">#字体相关库</span></span><br><span class="line">--with-jpeg-dir \ <span class="comment">#图形相关库</span></span><br><span class="line">--with-png-dir \</span><br><span class="line">--with-zlib \ <span class="comment">#压缩和解压缩相关库</span></span><br><span class="line">--with-libxmldir=/usr \ <span class="comment">#</span></span><br><span class="line">--<span class="built_in">enable</span>-xml \</span><br><span class="line">--<span class="built_in">enable</span>-sockets \</span><br><span class="line">--withapxs2=/app/httpd24/bin/apxs \ <span class="comment">#使用该扩展编译httpd</span></span><br><span class="line">--with-config-file-path=/etc \</span><br><span class="line">--withconfig-file-scan-dir=/etc/php.d \</span><br><span class="line">--<span class="built_in">enable</span>-maintainer-zts \ <span class="comment">#如果mpm为prefork不能启用该选项，如果是worker或event则必须启用该选项</span></span><br><span class="line">--<span class="built_in">disable</span>-fileinfo <span class="comment">#禁止显示file信息</span></span><br><span class="line">$ make &amp;&amp; make install</span><br></pre></td></tr></table></figure>
+<p>注意：php-7.0以上版本使用–enable-mysqlnd –with-mysqli=mysqlnd ，<br>原–with-mysql不再支持</p>
+<p><strong>配置php</strong><br>编译安装php后，默认不生成配置文件，需要手动copy一个配置文件到指定位置(/etc)</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@apache php-7.1.18]<span class="comment">#cp php.ini-production /etc/php.ini</span></span><br></pre></td></tr></table></figure>
+<p>修改httpd配置文件使其支持php,需更改如下三项</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">$ vi /app/httpd/conf/httpd.conf </span><br><span class="line">AddType application/x-httpd-php .php</span><br><span class="line">AddType application/x-httpd-php-source .phps</span><br><span class="line">为DirectoryIndex index.php index.html</span><br></pre></td></tr></table></figure>
+<p>此时httpd和php已经可以正常工作。</p>
+<p>生成如下测试文件,在浏览器输入服务器地址，如果出现php信息页面内，说明安装成功。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">[root@apache httpd]<span class="comment">#cat /app/httpd/htdocs/index.php </span></span><br><span class="line">&lt;?php</span><br><span class="line">	phpinfo()</span><br><span class="line">?&gt;</span><br></pre></td></tr></table></figure>
+
+<h3 id="编译安装mariadb"><a href="#编译安装mariadb" class="headerlink" title="编译安装mariadb"></a>编译安装mariadb</h3><p><strong>先安装mariadb的相关依赖包</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@ansible ~]<span class="comment">#yum install bison bison-devel zlib-devel libcurl-devel libarchive-devel boostdeve</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>创建相关用户和数据目录</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[root@ansible ~]<span class="comment">#uaeradd -r -s /sbin/nologin -d /data/mysql mysql</span></span><br><span class="line">[root@ansible ~]<span class="comment">#mkdir /data/mysql</span></span><br><span class="line">[root@ansible ~]<span class="comment">#chown mysql.mysql /data/mysql</span></span><br></pre></td></tr></table></figure>
+
+
+<p><strong>到官方网站下载mariadb源码包</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@ansible ~]<span class="comment">#wget -p tools/ https://downloads.mariadb.org/interstitial/mariadb-10.3.11/source/mariadb-10.3.11.tar.gz/from/http%3A//mirrors.neusoft.edu.cn/mariadb/mariadb-10.2.19.tar.gz</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>解压源码包</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[root@ansible ~]<span class="comment">#cd tools/</span></span><br><span class="line">[root@ansible ~]<span class="comment">#tar xf mariadb-10.2.19.tar.gz</span></span><br><span class="line">[root@ansible ~]<span class="comment">#cd mariadb-10.2.19</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>执行编译安装</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">[root@ansible mriadb-10.2.19]<span class="comment">#cmake . \</span></span><br><span class="line">-DCMAKE_INSTALL_PREFIX=/app/mysql \</span><br><span class="line">-DMYSQL_DATADIR=/data/mysql/ \</span><br><span class="line">-DSYSCONFDIR=/etc \</span><br><span class="line">-DMYSQL_USER=mysql \</span><br><span class="line">-DWITH_INNOBASE_STORAGE_ENGINE=1 \</span><br><span class="line">-DWITH_ARCHIVE_STORAGE_ENGINE=1 \</span><br><span class="line">-DWITH_BLACKHOLE_STORAGE_ENGINE=1 \</span><br><span class="line">-DWITH_PARTITION_STORAGE_ENGINE=1 \</span><br><span class="line">-DWITHOUT_MROONGA_STORAGE_ENGINE=1 \</span><br><span class="line">-DWITH_DEBUG=0 \</span><br><span class="line">-DWITH_READLINE=1 \</span><br><span class="line">-DWITH_SSL=system \</span><br><span class="line">-DWITH_ZLIB=system \</span><br><span class="line">-DWITH_LIBWRAP=0 \</span><br><span class="line">-DENABLED_LOCAL_INFILE=1 \</span><br><span class="line">-DMYSQL_UNIX_ADDR=/data/mysql/mysql.sock \</span><br><span class="line">-DDEFAULT_CHARSET=utf8 \</span><br><span class="line">-DDEFAULT_COLLATION=utf8_general_ci</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@ansible mriadb-10.2.19]<span class="comment">#make &amp;&amp; make install</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>准备环境变量</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">echo</span> <span class="string">'PATH=/app/mysql/bin:$PATH'</span> &gt; /etc/profile.d/mysql.sh</span><br></pre></td></tr></table></figure>
+
+<p><strong>生成数据库文件</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@ansible ~]<span class="comment">#cd /app/mysql</span></span><br><span class="line">[root@ansible mysql]<span class="comment">#./scripts/mysql_install_db --datadir=/data/mysql/ --user=mysql</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>准备配置文件</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@ansible mysql]<span class="comment">#cp /app/mysql/support-files/my-huge.cnf /etc/my.cnf</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>准备启动脚本</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@ansible mysql]<span class="comment">#cp /app/mysql/support-files/mysql.server /etc/init.d/mysqld</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>启动服务</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@ansible mysql]<span class="comment">#chkconfig --add mysqld ;service mysqld start</span></span><br></pre></td></tr></table></figure>
+<p>此时，mariadb编译安装已经完成。</p>
+<p><strong>生成php-mysql连接测试文件并测试</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">$ vi /app/httpd/htdocs/conn.php</span><br><span class="line">&lt;?php</span><br><span class="line"><span class="variable">$mysql</span> = new mysqli();</span><br><span class="line"><span class="variable">$mysql</span>-&gt;connect(<span class="string">'192.168.34.102'</span>,<span class="string">'root'</span>,<span class="string">'centos'</span>);</span><br><span class="line"><span class="keyword">if</span>(<span class="variable">$mysql</span>)&#123;</span><br><span class="line">            <span class="built_in">echo</span> <span class="string">"连接成功了!"</span>;</span><br><span class="line">&#125;<span class="keyword">else</span>&#123;</span><br><span class="line">        <span class="built_in">echo</span> <span class="string">"连接挂掉了"</span>;</span><br><span class="line">&#125;</span><br><span class="line">phpinfo();</span><br><span class="line">?&gt;</span><br></pre></td></tr></table></figure>
+<p>在浏览器输入服务器ip/conn.php即可测试。</p>
+<h3 id="以fpm的方式编译安装php"><a href="#以fpm的方式编译安装php" class="headerlink" title="以fpm的方式编译安装php"></a>以fpm的方式编译安装php</h3><p>使用fpm编译安装pph时，需要加上–enable-fpm选项，并去掉–enable-maintainer-zts和–with-apxs2=/app/httpd24/bin/apxs。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">[root@apache tools]<span class="comment">#tar xf php-7.1.18.tar.bz2 </span></span><br><span class="line">[root@apache tools]<span class="comment">#cd php-7.1.18/</span></span><br><span class="line">[root@apache php-7.1.18]<span class="comment">#./configure --prefix=/app/php-fpm-7.1.18 \</span></span><br><span class="line">--<span class="built_in">enable</span>-mysqlnd \</span><br><span class="line">--with-mysqli=mysqlnd \</span><br><span class="line">--with-openssl \</span><br><span class="line">--with-pdo-mysql=mysqlnd \</span><br><span class="line">--<span class="built_in">enable</span>-mbstring \</span><br><span class="line">--with-freetype-dir \</span><br><span class="line">--with-jpeg-dir \</span><br><span class="line">--with-png-dir \</span><br><span class="line">--with-zlib \</span><br><span class="line">--with-libxml-dir=/usr \</span><br><span class="line">--<span class="built_in">enable</span>-xml \</span><br><span class="line">--<span class="built_in">enable</span>-sockets \</span><br><span class="line">--<span class="built_in">enable</span>-fpm \</span><br><span class="line">--with-config-file-path=/etc \</span><br><span class="line">--with-config-file-scan-dir=/etc/php.d \</span><br><span class="line">--<span class="built_in">enable</span>-maintainer-zts \</span><br><span class="line">--<span class="built_in">disable</span>-fileinfo</span><br></pre></td></tr></table></figure>
+<p>配置php-fpm(注意：以下路径php代表php的安装路径，php-7.1.18代表php源码包解压后的路径)</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">[root@apache php]<span class="comment">#cd /app/php/etc/</span></span><br><span class="line">[root@apache etc]<span class="comment">#cp php-fpm.conf&#123;.default,&#125;</span></span><br><span class="line">[root@apache etc]<span class="comment">#vi php-fpm.conf </span></span><br><span class="line">pid = run/php-fpm.pid</span><br><span class="line">error_log = <span class="built_in">log</span>/php-fpm.log</span><br><span class="line">[root@apache php]<span class="comment">#cp /root/tools/php-7.1.18/php.ini-production /etc/php.ini</span></span><br><span class="line">[root@apache php-7.1.18]<span class="comment">#cp sapi/fpm/init.d.php-fpm /etc/init.d/php-fpm</span></span><br><span class="line">[root@apache php-7.1.18]<span class="comment">#cp sapi/fpm/php-fpm.service /usr/lib/systemd/system/</span></span><br></pre></td></tr></table></figure>
+<p>采用php-fpm方式结合httpd时，httpd的配置有一定变化，如下</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">vi /app/httpd/conf/httpd.conf </span><br><span class="line">LoadModule proxy_fcgi_module modules/mod_proxy_fcgi.so</span><br><span class="line">LoadModule proxy_http_module modules/mod_proxy_http.so</span><br><span class="line">LoadModule proxy_module modules/mod_proxy.so </span><br><span class="line">ProxyRequests off</span><br><span class="line">ProxyPassMatch ^/(.*\.php)$ fcgi://127.0.0.1:9000/app/httpd/htdocs/<span class="variable">$1</span> </span><br><span class="line">&lt;IfModule dir_module&gt;</span><br><span class="line"> DirectoryIndex index.php index.html</span><br><span class="line">&lt;/IfModule&gt;</span><br><span class="line">AddType application/x-httpd-php .php</span><br><span class="line">AddType application/x-httpd-php-source .phps</span><br></pre></td></tr></table></figure>
+
+<h4 id="对编译安装的php使用xcache加速-php7不可用"><a href="#对编译安装的php使用xcache加速-php7不可用" class="headerlink" title="对编译安装的php使用xcache加速,php7不可用"></a>对编译安装的php使用xcache加速,php7不可用</h4><p>到官方网站下载xcache源码包，之后解压进入该目录，以上面安装的php-fpm为例演示。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">[root@apache xcache-3.2.0]<span class="comment">#/app/php/bin/phpize</span></span><br><span class="line">[root@apache xcache-3.2.0]<span class="comment">#./configure --enable-xcache --with-php-config=/app/php/bin/php-config</span></span><br><span class="line">[root@apache xcache-3.2.0]<span class="comment">#make &amp;&amp; make install</span></span><br><span class="line">[root@apache xcache-3.2.0]<span class="comment">#cp xcache.ini /app/php/php.d/</span></span><br><span class="line">[root@apache xcache-3.2.0]<span class="comment">#vi /app/php/php.d/xcache.ini</span></span><br></pre></td></tr></table></figure>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/lamp/" rel="tag"># lamp</a>
+          
+            <a href="/tags/web%E6%A1%86%E6%9E%B6/" rel="tag"># web框架</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/03/16/loganalyze/" rel="next" title="使用loganalyzer展示数据库中的日志">
+                <i class="fa fa-chevron-left"></i> 使用loganalyzer展示数据库中的日志
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/04/19/nginx/" rel="prev" title="Nginx">
+                Nginx <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+        <!-- JiaThis Button BEGIN -->
+<div class="jiathis_style">
+<span class="jiathis_txt">分享到：</span>
+<a class="jiathis_button_fav">收藏夹</a>
+<a class="jiathis_button_copy">复制网址</a>
+<a class="jiathis_button_email">邮件</a>
+<a class="jiathis_button_weixin">微信</a>
+<a class="jiathis_button_qzone">QQ空间</a>
+<a class="jiathis_button_tqq">腾讯微博</a>
+<a class="jiathis_button_douban">豆瓣</a>
+<a class="jiathis_button_share">一键分享</a>
+
+<a href="http://www.jiathis.com/share?uid=2140465" class="jiathis jiathis_txt jiathis_separator jtico jtico_jiathis" target="_blank">更多</a>
+<a class="jiathis_counter_style"></a>
+</div>
+<script type="text/javascript" >
+var jiathis_config={
+  data_track_clickback:true,
+  summary:"",
+  shortUrl:false,
+  hideMore:false
+}
+</script>
+<script type="text/javascript" src="http://v3.jiathis.com/code/jia.js?uid=" charset="utf-8"></script>
+<!-- JiaThis Button END -->
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+    </div>
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/uploads/touxiang.jpg"
+                alt="ShengQin Miao" />
+            
+              <p class="site-author-name" itemprop="name">ShengQin Miao</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">53</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                
+                  <span class="site-state-item-count">1</span>
+                  <span class="site-state-item-name">分类</span>
+                
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">61</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#使用yum安装的方式搭建lamp"><span class="nav-number">1.</span> <span class="nav-text">使用yum安装的方式搭建lamp</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#使用php模块化方式搭建lamp"><span class="nav-number">1.1.</span> <span class="nav-text">使用php模块化方式搭建lamp</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#安装php-mariadb-httpd"><span class="nav-number">1.1.1.</span> <span class="nav-text">安装php,mariadb,httpd</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#lamp结合第三方工具的应用"><span class="nav-number">2.</span> <span class="nav-text">lamp结合第三方工具的应用</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#lamp-wordpress搭建个人站点"><span class="nav-number">2.1.</span> <span class="nav-text">lamp+wordpress搭建个人站点</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#php-fpm模式搭建web应用"><span class="nav-number">2.2.</span> <span class="nav-text">php-fpm模式搭建web应用</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#安装php-fpm、mariadb-server、httpd"><span class="nav-number">2.2.1.</span> <span class="nav-text">安装php-fpm、mariadb-server、httpd</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#配置php"><span class="nav-number">2.2.2.</span> <span class="nav-text">配置php</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#配置apache"><span class="nav-number">2.2.3.</span> <span class="nav-text">配置apache</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#phpMyadmin使用"><span class="nav-number">2.2.4.</span> <span class="nav-text">phpMyadmin使用</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#使用编译安装的方式搭建lamp架构"><span class="nav-number">3.</span> <span class="nav-text">使用编译安装的方式搭建lamp架构</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#编译安装httpd"><span class="nav-number">3.1.</span> <span class="nav-text">编译安装httpd</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#编译安装php-php-7-1-7"><span class="nav-number">3.2.</span> <span class="nav-text">编译安装php(php-7.1.7)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#编译安装mariadb"><span class="nav-number">3.3.</span> <span class="nav-text">编译安装mariadb</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#以fpm的方式编译安装php"><span class="nav-number">3.4.</span> <span class="nav-text">以fpm的方式编译安装php</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#对编译安装的php使用xcache加速-php7不可用"><span class="nav-number">3.4.1.</span> <span class="nav-text">对编译安装的php使用xcache加速,php7不可用</span></a></li></ol></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">ShengQin Miao</span>
+
+  
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-area-chart"></i>
+    </span>
+    
+      <span class="post-meta-item-text">Site words total count&#58;</span>
+    
+    <span title="Site words total count">131.6k</span>
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Pisces</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js"></script>
+  <script>AV.initialize("vItlX9Jc2L4BuXKt6BJWW6eJ-gzGzoHsz", "IisqhTArerBOyaxKHN8TcE10");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

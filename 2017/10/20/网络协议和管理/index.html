@@ -1,0 +1,1346 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="网络协议," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="物理拓扑分类： 1234567总线拓扑：所有设备均可接受信号环状拓扑：信号绕环传输，单一故障点双环拓扑：信号沿相反方向传输，比单环的复原能力更强星型拓扑：通过中心点传输，单一故障点扩展的星型拓扑：比星型拓扑的复原能力强***主流的拓扑结构全网状拓扑：容错能力强，实施成本高。部分网状拓扑：在容错能力与成本之间寻求平衡。  osi七层模型：降低复杂性、标准化接口、简化模块化设计、确保技术的互操作性、加">
+<meta property="og:type" content="article">
+<meta property="og:title" content="网络协议和管理">
+<meta property="og:url" content="http://yoursite.com/2017/10/20/%E7%BD%91%E7%BB%9C%E5%8D%8F%E8%AE%AE%E5%92%8C%E7%AE%A1%E7%90%86/index.html">
+<meta property="og:site_name" content="漫步人生路">
+<meta property="og:description" content="物理拓扑分类： 1234567总线拓扑：所有设备均可接受信号环状拓扑：信号绕环传输，单一故障点双环拓扑：信号沿相反方向传输，比单环的复原能力更强星型拓扑：通过中心点传输，单一故障点扩展的星型拓扑：比星型拓扑的复原能力强***主流的拓扑结构全网状拓扑：容错能力强，实施成本高。部分网状拓扑：在容错能力与成本之间寻求平衡。  osi七层模型：降低复杂性、标准化接口、简化模块化设计、确保技术的互操作性、加">
+<meta property="article:published_time" content="2017-10-19T16:00:00.000Z">
+<meta property="article:modified_time" content="2020-04-20T13:33:53.992Z">
+<meta property="article:author" content="ShengQin Miao">
+<meta property="article:tag" content="网络协议">
+<meta name="twitter:card" content="summary">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2017/10/20/网络协议和管理/"/>
+
+
+
+
+
+  <title>网络协议和管理 | 漫步人生路</title>
+  
+
+
+
+
+
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?f076ecd4b66d3a02de923868671591de";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+<meta name="generator" content="Hexo 4.2.0"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">漫步人生路</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off"
+             placeholder="搜索..." spellcheck="false"
+             type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/10/20/%E7%BD%91%E7%BB%9C%E5%8D%8F%E8%AE%AE%E5%92%8C%E7%AE%A1%E7%90%86/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="ShengQin Miao">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/uploads/touxiang.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="漫步人生路">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">网络协议和管理</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-10-20T00:00:00+08:00">
+                2017-10-20
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+             <span id="/2017/10/20/%E7%BD%91%E7%BB%9C%E5%8D%8F%E8%AE%AE%E5%92%8C%E7%AE%A1%E7%90%86/" class="leancloud_visitors" data-flag-title="网络协议和管理">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+            <div class="post-wordcount">
+              
+                
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-file-word-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">字数统计&#58;</span>
+                
+                <span title="字数统计">
+                  5.2k
+                </span>
+              
+
+              
+                <span class="post-meta-divider">|</span>
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-clock-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">阅读时长 &asymp;</span>
+                
+                <span title="阅读时长">
+                  21
+                </span>
+              
+            </div>
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>物理拓扑分类：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">总线拓扑：所有设备均可接受信号</span><br><span class="line">环状拓扑：信号绕环传输，单一故障点</span><br><span class="line">双环拓扑：信号沿相反方向传输，比单环的复原能力更强</span><br><span class="line">星型拓扑：通过中心点传输，单一故障点</span><br><span class="line">扩展的星型拓扑：比星型拓扑的复原能力强***主流的拓扑结构</span><br><span class="line">全网状拓扑：容错能力强，实施成本高。</span><br><span class="line">部分网状拓扑：在容错能力与成本之间寻求平衡。</span><br></pre></td></tr></table></figure>
+
+<p><strong>osi七层模型：降低复杂性、标准化接口、简化模块化设计、确保技术的互操作性、加快发展速度、简化教学</strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">7、应用层application</span><br><span class="line">	网络进程访问应用程序；为应用程序进程（例如，电子邮件、文件传输和终端仿真）提供网络服务；提供用户身份验证。</span><br><span class="line">6、表示层persention</span><br><span class="line">	数据表示；确保接收系统可以读出该数据；格式化数据；构建数据；协商用于应用层的数据传输语法；提供加密。</span><br><span class="line">5、会话层session</span><br><span class="line">	主机间通信；建立、管理和终止在应用程序之间的会话。</span><br><span class="line">4、传输层transport</span><br><span class="line">	传输问题；确保数据传输的可靠性，建立、维护和终止虚拟电路；通过错误检测和恢复；信息流控制来保障可靠性。</span><br><span class="line">3、网络层network</span><br><span class="line">	数据传输；路由数据包，选择传递数据的最佳路径，支持逻辑寻址和路径选择。路由器工作在网络层。</span><br><span class="line">2、数据链路层data link</span><br><span class="line">	访问介质；定义如何格式化数据以便进行传输以及如何控制对网络的访问，支持错误检查。交换机工作在数据链路层。</span><br><span class="line">1、物理层physical</span><br><span class="line">	二进制传输；为启动、维护、以及关闭物理链路定义了电气规范、机械规范、过程规范和功能规范。hub集线器工作在物理层</span><br></pre></td></tr></table></figure>
+<p>osi七层模型中，下层为上层提供服务。</p>
+<p>三种通讯模式：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">单播unicast</span><br><span class="line">多播multicast</span><br><span class="line">广播btoadcast</span><br></pre></td></tr></table></figure>
+
+<p>lan的组成</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">computers</span><br><span class="line">	PCs</span><br><span class="line">	Servers</span><br><span class="line">Interconnections</span><br><span class="line">	NICs</span><br><span class="line">	Media</span><br><span class="line">Network devices</span><br><span class="line">	Hubs</span><br><span class="line">	Switches</span><br><span class="line">	Routers</span><br><span class="line">Protocols</span><br><span class="line">	Ethernet</span><br><span class="line">	IP</span><br><span class="line">	ARP</span><br><span class="line">	DHCP</span><br></pre></td></tr></table></figure>
+
+<p>双绞线针脚定义：<br>     百兆以内：半双工，只发或只收<br>     千兆：全双工，即发又收</p>
+<p> 单工：喇叭，广播，<br> 半双工：对讲机，微信语音<br> 全双工：打电话</p>
+<p>光纤以及光电转换（把网线转换成光纤），光纤的传输距离能达到千米以上。<br>熔纤机，光纤的材质是玻璃纤维。</p>
+<p>网络适配器（网卡）：工作在数据链路层</p>
+<p>以太网：工作在数据链路层，规定数据帧的报文结构，分成有线以太网和无线以太网（WiFi）</p>
+<p>马斯洛理论：<br>    自我实现<br>    尊重<br>    社会<br>    安全<br>    生理</p>
+<p>hub集线器：<br>    多端口中继器<br>    hub并不记忆该信息包是由哪个MAC地址发出，哪个MAC地址在hub的哪个端口。<br>    特点：<br>        共享带宽<br>        半双工<br>        hub会产生flood泛洪现象</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">冲突域：一台主机发送报文，另一台主机也发送报文，产生冲突，则两台设备在同一个冲突域；不产生冲突，则两台设备不在同一个冲突域。</span><br><span class="line">广播域：一个主机发送广播，另一个主机能收到，则两台主机在同一个广播域；否则不再同一个广播域。</span><br></pre></td></tr></table></figure>
+
+<p>为了解决冲突域和广播域的问题，采取如下方法：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">以太网桥：</span><br><span class="line">	优势：</span><br><span class="line">		扩展了网络带宽</span><br><span class="line">		分割了网络冲突域，使网络冲突被限制在最小的范围内</span><br><span class="line">		交换机作为更加智能的交换设备，能够提供更多用户所要求的功能：优先级，虚拟网，远程检测......</span><br><span class="line">	以太网桥的工作原理：</span><br><span class="line">		以太网桥监听数据帧中源MAC地址，学习MAC，建立MAC表</span><br><span class="line">		对于未知MAC地址，网桥将转发到除接收该帧的端口之外的所有端口</span><br><span class="line">		当网桥接到一个数据帧时，如果该帧的目的位于接收端口所在网段上，它就过滤掉该数据帧；如果目的MAC地址位于另外一个端口，网桥就将该帧转发到该端口</span><br><span class="line">		当网桥接到广播帧时，它立即转发到除接收端口之外的所有其他端口。</span><br></pre></td></tr></table></figure>
+
+<p>路由器：<br>为了实现路由，路由器需要做以下事情：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">分割广播域</span><br><span class="line">选择路由表中到达目标最好的路径</span><br><span class="line">维护和检查路由信息</span><br><span class="line">连接广域网</span><br></pre></td></tr></table></figure>
+
+<p>路由：把一个数据包从一个设备发送到不同网络里的里一个设备上去。这些工作依靠路由器来完成。路由器只关心网络的状态和<br>    决定网络中的最佳路径。路由的实现依靠路由器中的路由表来完成。</p>
+<p>VLAN：VLAN=广播域=逻辑网络（Subnet）<br>    分割广播域<br>    安全<br>    灵活管理<br>单臂路由：</p>
+<p>分层的网络架构：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">核心层Core Layer：</span><br><span class="line">	企业级应用快速转发</span><br><span class="line">分布层Distribution：</span><br><span class="line">	广播域，路由，安全，远程接入，访问层汇聚</span><br><span class="line">访问层AccessLayer：</span><br><span class="line">	终端接入</span><br></pre></td></tr></table></figure>
+
+<p>以太网帧的最小长度为46个字节</p>
+<p>TCP/IP协议：协议栈<br>    全称：Transmission Control Protocol/Internet Protocol<br>        传输控制协议/因特网互联协议<br>    共定义了4层<br>        4、应用层（包括osi模型的应用层，表示层，会话层）<br>            协议：http、ftp、tftp、nfs、telnet、smtp、dns<br>        3、传输层（相当于osi的传输层）<br>            协议：tcp（面向连接，）、udp（不面向连接，）<br>            功能：多路会话、分段（将大文件切割成小的段进行传输）、<br>        2、Internet层（相当于osi模型的网络层）<br>        1、网络访问层（相当于数据链路层和物理层的集合）<br>TCP协议的特性：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">工作在传输层</span><br><span class="line">面向连接协议</span><br><span class="line">全双工协议</span><br><span class="line">半关闭</span><br><span class="line">错误检查</span><br><span class="line">将数据打包成段，排序</span><br><span class="line">确认机制</span><br><span class="line">数据恢复重传</span><br><span class="line">流量控制控制，滑动窗口</span><br><span class="line">拥塞控制，慢启动和拥塞避免算法</span><br></pre></td></tr></table></figure>
+
+<p>TCP协议包头：<br>    前20个字节（160位）固定；前32位0-31为源端口和目标端口，之后32位为序号，在之后32位为确认号，</p>
+<p>相关服务的固定端口：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">http：80</span><br><span class="line">ssh：22</span><br><span class="line">ftp：21</span><br><span class="line">qq udp：8000</span><br><span class="line">telnet：23	</span><br><span class="line">dns：53</span><br><span class="line">tftp：69</span><br><span class="line">snmp：161</span><br><span class="line">https：443</span><br><span class="line">mysql：3306</span><br></pre></td></tr></table></figure>
+
+<p>TCP/IP的三次握手：<br>    有限状态机FSM：Finite State Machine<br>    11种状态</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">CLSED 没有任何连接状态</span><br><span class="line">LISTEN 侦听状态，等待来自远方TCP端口的连接请求</span><br><span class="line"></span><br><span class="line">SYN-SENT 在发送连接请求之后，等待对方确认</span><br><span class="line">SYN-RECIVED 在收到和发送一个连接请求之后，等待对方确认</span><br><span class="line"></span><br><span class="line">ESTABLISHED 代表传输连接建立，双方进入数据传送状态</span><br><span class="line"></span><br><span class="line">FIN-WAIT1 主动关闭，主机已经发送关闭连接请求，等待对方确认</span><br><span class="line">FIN-WAIT2 主动关闭，主机已经收到对方关闭传输连接确认</span><br><span class="line"></span><br><span class="line">TIME-WAIT 完成双向传输连接关闭，等待所有分组消失</span><br><span class="line">CLOSE-WAIT 被动关闭，收到对方发来的关闭连接请求，并已确认</span><br><span class="line"></span><br><span class="line">LAST-ACK 被动关闭，等待最后一个关闭传输连接确认，并等待所有分组消失</span><br><span class="line">CLOSING 双方同时尝试关闭传输连接，等待对方确认</span><br></pre></td></tr></table></figure>
+
+<p>UDP特性：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">工作在传输层</span><br><span class="line">提供不可靠的网络访问</span><br><span class="line">非面向连接协议</span><br><span class="line">有限的错误检查</span><br><span class="line">传输性能高</span><br><span class="line">无数据恢复特性</span><br></pre></td></tr></table></figure>
+
+<p>sync半连接和accept全连接队列<br>    未完成连接队列大小，建议调整大小为1024以上<br>    完成连接队列大小，建议调整大小为1024以上</p>
+<p>ICMP协议详解：Internet层协议。<br>     /proc/sys/net/ipv4/icmp_echo_ignore_all<br>         该文件内容为0时，允许回应ICMP包，为1时不允许回应<br>     利用ICMP进行攻击<br>        ping -s 65507 Package_size -f ip 可以使目标主机的网卡利用率暴涨</p>
+<p>ARP协议：Adress Resolution Protocol 地址解析协议<br>    A知道B的IP不但是知道位置，A在寻找B时会发ARP广播，B收到广播后，会将A的IP和A的Mac地址存到本机ARP列表，<br>        之后会向A发送返回包，包中包含自己的mac，A收到B发来的返回包后，会在机子的ARP列表中加入B的IP和Mac对应关系。</p>
+<p>ARP寻址时如果夸路由器，则A和B必须配置网关，网关分别对应连接的路由器的端口，        </p>
+<p><strong>IP报文</strong><br>    IP报头：20个字节（128位），<br>    报文头部格式：Package<br>        4位版本号；4位首部长度；8位分区服务；16位的总长度；16位的标识；<br>        3位的标志；13位的片偏移；8位生存时间；8位协议；16位首部检验和；<br>        32位源地址；32位目的地址；长度可变的可选字段；填充部分；</p>
+<p>主机到主机的包传递过程：<br>    路由-&gt; ARP -&gt; 三次握手 -&gt;  </p>
+<p>ip地址：<br>    标识每个主机所在的网段和在网络中的位置。<br>    组成：<br>        网络ID位：<br>            标识网络<br>            每个网段分配一个网络ID<br>        主机ID：<br>            标识单个主机<br>            有组织分配给各设备<br>网关：下一个路由器距离本机近的那个端口。<br>路由表：只负责往外发，把包发送到哪个位置。不负责接收。</p>
+<p>主机和远程主机通信的过程：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">拿到对方主机的ip</span><br><span class="line">判断本主机和对方主机是否在一个网段：对方ip和本机子网掩码与，再拿本机ip和子网掩码与，看结果是否相同。</span><br><span class="line">查找路由表，找到去往远程主机的路径。</span><br></pre></td></tr></table></figure>
+
+<p>动态主机配置协议DHCP：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">客户端发送发现报文广播；discover</span><br><span class="line">DHCP服务器发送广播提供消息；offer</span><br><span class="line">客户端对请求消息做出响应。request；告诉网络中主机本机占用的ip</span><br><span class="line">DHCP服务器以确认消息结束交换过程。ACK确认报文；</span><br></pre></td></tr></table></figure>
+
+<pre><code>DHCP采用UDP协议，服务器端口号为68；客户端端口号为67.</code></pre><p>基本网络配置：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">将linux主机接入到网络中，需要配置网络相关配置。</span><br><span class="line">一般包括如下内容：</span><br><span class="line">	主机名</span><br><span class="line">	IP&#x2F;netmask</span><br><span class="line">	路由：默认网关</span><br><span class="line">	DNS服务器： 将域名解析成IP地址；hosts文件也可本地解析</span><br><span class="line">		主DNS服务器</span><br><span class="line">		次DNS服务器</span><br><span class="line">		第三DNS服务器</span><br></pre></td></tr></table></figure>
+<pre><code>默认本地hosts文件的解析优先级高于DNS，但是可以通过/etc/nsswitch.conf控制两者优先级。</code></pre><p>###########################################################<br>centos6相关网络配置：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">网络接口识别并命名相关的udev配置文件：</span><br><span class="line">	&#x2F;etc&#x2F;udev&#x2F;rules.d&#x2F;70-persistent-net.rules</span><br><span class="line">主机名存放的文件： 修改完主机名后，建议将新的主机名加入hosts文件做解析</span><br><span class="line">	&#x2F;etc&#x2F;sysconfig&#x2F;network</span><br><span class="line">查看网卡信息：</span><br><span class="line">	dmesg | grep -i eth </span><br><span class="line">	ethtool -i eth0</span><br><span class="line">卸载网卡驱动：</span><br><span class="line">	modprobe -r e1000</span><br><span class="line">	rmmod e1000</span><br><span class="line">装载网卡驱动：</span><br><span class="line">	modprobe e1000</span><br></pre></td></tr></table></figure>
+
+<p>centos7相关网络配置:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">主机名存放文件：</span><br><span class="line">	&#x2F;etc&#x2F;hostname</span><br><span class="line">修改主机名： 修改完主机名后，建议将新的主机名加入hosts文件做解析</span><br><span class="line">	hostnamectl set-hostname new-hostname</span><br></pre></td></tr></table></figure>
+
+<p>##########################################################</p>
+<p>arping -I 网卡名 ip ：通过该网卡发送ARP广播查找该网段中有几个主机的ip相同。</p>
+<p>ip地址配置方式:<br>静态指定：<br>    ifconfig route netstat<br>    ip:object {link,addr,route} , ss , tc<br>    system-config-network-tui,setup<br>    配置文件<br>动态分配：<br>    DHCP:Dynamic Host Configuration Protocol </p>
+<p>网络配置相关命令：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">ifconfig命令：</span><br><span class="line">	ifconfig [interface] </span><br><span class="line">		ifconfig -a  查看所有网卡信息</span><br><span class="line">		ifconfig IFACE [up|down] 启用|禁用网卡（从链路层down掉，拔网线从物理层down掉）；等价于 ifup|ifdown DEVICE</span><br><span class="line">	ifconfig interface [aftype] options | address ...</span><br><span class="line">		ifconfig IFACE IP&#x2F;netmask [up] 使用ifconfig命令配置ip地址，临时配置ip地址，将网卡down掉或重启网络后丢失。</span><br><span class="line">		ifconfig IFACE IP netmask NETMASK </span><br><span class="line">	注意：ifconfig命令修改后立即生效</span><br><span class="line">	启用混杂模式：[-]promisc</span><br><span class="line">	配置网卡别名，实现一个网卡绑定多个ip：</span><br><span class="line">		ifconfig eth1:2 ip </span><br><span class="line">		如果不想要了，使用ifdown eth1:2 即可删掉该ip</span><br></pre></td></tr></table></figure>
+
+<p>route命令：路由管理</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">查看路由表：</span><br><span class="line">		route -n</span><br><span class="line">	添加路由：</span><br><span class="line">		route add </span><br><span class="line">			route add [-net|-host] target [netmask Nm] [gw Gw] [[dev] if]</span><br><span class="line">				网关必须和主机ip在同一网段才可行。</span><br><span class="line">			for example:</span><br><span class="line">				目标： 192.168.1.3 网关：172.16.0.1</span><br><span class="line">					route add -host 192.168.1.3 gw 172.16.0.1 dev eth0</span><br><span class="line">				目标：192.168.0.0 网关：172.16.0.1</span><br><span class="line">					route add -net 192.168.0.0&#x2F;24 gw 172.16.0.1 dev eth0</span><br><span class="line">			添加默认路由，网关：172.16.0.1</span><br><span class="line">				route add default gw 172.16.0.1</span><br><span class="line">	删除路由：</span><br><span class="line">		route del </span><br><span class="line">			route del [-net|-host] target [gw Gw] [netmask Nm] [[dev] if]</span><br><span class="line">				for example:</span><br><span class="line">			 	目标：192.168.1.3 网关：172.16.0.1</span><br><span class="line">				 		route del -host 192.168.1.3</span><br><span class="line">				 	目标：192.168.0.0 网关：172.16.0.1</span><br><span class="line">				 		route del -net 192.168.0.0&#x2F;24		</span><br><span class="line">		配置动态路由：</span><br><span class="line">			通过安装守护进程获取动态路由：</span><br><span class="line">				安装quagga包</span><br><span class="line">				支持多种路由协议：RIP OSPF BGP</span><br><span class="line">				命令vtysh配置</span><br></pre></td></tr></table></figure>
+
+<p>网络连接管理及查看相关命令：<br>显示网络连接：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">netstat [--tcp|-t] [--udp|-u] [--raw|-w] [--listening|-l] [--all|-a] [--numeric|-n] [--extend|-e] [--progam|-p]</span><br><span class="line">	-t:tcp相关协议</span><br><span class="line">	-u:udp相关协议</span><br><span class="line">	-w：raw socket相关</span><br><span class="line">	-l：处于坚挺状态</span><br><span class="line">	-a：所有状态</span><br><span class="line">	-n：以数字显示IP和端口</span><br><span class="line">	-e：扩展格式</span><br><span class="line">	-p：显示相关进程及PID</span><br><span class="line">	常用组合：</span><br><span class="line">		-tan， -uan， -tnl， -unl </span><br><span class="line">	显示路由表：</span><br><span class="line">		netstat -rn </span><br><span class="line">			-r:显示内核路由表</span><br><span class="line">			-n：以数字格式显示IP和端口</span><br><span class="line">	显示接口统计数据：</span><br><span class="line">		netstat &#123;--interface|-i|-I&#125; [iface] [--all|-a] [--extend|-e] [--program|-p] [--numeric|-n]</span><br><span class="line">		netstat -i</span><br><span class="line">		netstat -I&#x3D;IFACE</span><br><span class="line">		ifconfig -s eth0</span><br></pre></td></tr></table></figure>
+
+<p>配置linux网络属性：ip命令</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br></pre></td><td class="code"><pre><span class="line">ip - show &#x2F; manipulate routing,devices,policy routing and tunnels</span><br><span class="line">	ip [options] OBJECT &#123;COMMAND|HELP&#125;</span><br><span class="line">		OBJECT:&#x3D;&#123;link|addr|route&#125;</span><br><span class="line">	ip link - network device configration </span><br><span class="line">		set dev IFACE</span><br><span class="line">			可设置属性：</span><br><span class="line">				up and down:激活或禁用指定接口</span><br><span class="line">					ifup&#x2F;ifdown</span><br><span class="line">		show [dev IFACE] : 指定接口</span><br><span class="line">				[up]:仅显示处于激活状态的接口</span><br><span class="line">	ip addr &#123;add|del&#125; IFADDR dev STRING</span><br><span class="line">		[label LABEL]:添加地址时指明网卡别名</span><br><span class="line">		[scope &#123;global|link|host&#125;]:指明作用域</span><br><span class="line">			global:全局可用</span><br><span class="line">			link:仅链接可用</span><br><span class="line">			host:本机可用</span><br><span class="line">		[broadcast ADDRESS]:指明广播地址</span><br><span class="line">	ip address show - look at protocal addresses</span><br><span class="line">		[dev DEVICE]</span><br><span class="line">		[label PATTERN]</span><br><span class="line">		[primary and secondary]</span><br><span class="line">	ip address flush - 使用格式同show</span><br><span class="line">	例如：</span><br><span class="line">		ip addr add 172.16.100.100&#x2F;16 dev ens33 label ens33:0</span><br><span class="line">		ip addr del 172.16.100.100&#x2F;16 dev ens33 label ens33:0</span><br><span class="line">		ip addr flush dev ens33 label ens33:0</span><br><span class="line">ip route - routing table management</span><br><span class="line">	添加路由：ip route add </span><br><span class="line">	ip route add TARGET via GW dev IFACE src SOURCE_IP</span><br><span class="line">		TARGET:</span><br><span class="line">			主机路由：IP</span><br><span class="line">			网络路由：NETWORK&#x2F;MASK</span><br><span class="line">		例如：</span><br><span class="line">			ip route add 192.168.0.0&#x2F;24 via 172.16.0.1</span><br><span class="line">			ip route add 192.168.1.13 via 172.16.0.1</span><br><span class="line">	添加网关： ip route add default via GW dev IFACE</span><br><span class="line">		例如：</span><br><span class="line">			ip route add default via 172.16.0.1</span><br><span class="line">	删除路由：ip route del TARGET</span><br><span class="line">	显示路由：ip route show|list </span><br><span class="line">	清空路由表：ip route flush [dev IFACE] [via PREFIX]</span><br><span class="line">		例如：</span><br><span class="line">			ip route flush dev eth0</span><br></pre></td></tr></table></figure>
+
+<p>ss命令：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line">格式：ss [option]... [FILTER]</span><br><span class="line">netstat通过遍历proc来获取socket信息，ss使用netlink与内核tcp_diag模块通信获取socket信息。</span><br><span class="line">选项：</span><br><span class="line">	-t:tcp协议相关</span><br><span class="line">	-u：udp协议相关</span><br><span class="line">	-w：裸套接字相关</span><br><span class="line">	-x：unix sock相关</span><br><span class="line">	-l：listen状态的链接</span><br><span class="line">	-a：所有 </span><br><span class="line">	-n：数字格式 </span><br><span class="line">	-p：相关的程序及PID</span><br><span class="line">	-e：扩展的内存信息</span><br><span class="line">	-m：内存用量</span><br><span class="line">	-o：计时器信息</span><br><span class="line">FILTER：[state TCP-STATE] [EXPRESSION]</span><br><span class="line">	TCP常见的状态有：</span><br><span class="line">	tcp finite state machine:</span><br><span class="line">		LISTEN:监听</span><br><span class="line">		ESTABLISHED:已建立的连接</span><br><span class="line">		FIN_WAIT_1</span><br><span class="line">		FIN_WAIT_2</span><br><span class="line">		SYN-SENT</span><br><span class="line">		SYN-RECV</span><br><span class="line">		CLOSED</span><br><span class="line">	EXPRESSION：</span><br><span class="line">		dport&#x3D;</span><br><span class="line">		sport&#x3D;</span><br><span class="line">		示例：&#39;(dport&#x3D;:ssh or sport&#x3D;:ssh)&#39;</span><br><span class="line">	常见组合：</span><br><span class="line">		-tan -tanl -tanlp -uan </span><br><span class="line">常见用法：</span><br><span class="line">	ss -l 显示本地打开的所有端口</span><br><span class="line">	ss -pl 显示内个进程具体打开的socket</span><br><span class="line">	ss -t -a 显示所有tcp socket </span><br><span class="line">	ss -u -a 显示所有的UDP Socket </span><br><span class="line">	ss -o state established &#39;(dport&#x3D;:ssh or sport&#x3D;:ssh)&#39; 显示所有已建立的ssh连接</span><br><span class="line">	ss -o state established &#39;(dport&#x3D;:http or sport&#x3D;:http)&#39; 显示所有已建立的http连接</span><br><span class="line">	ss -s 列出当前socket详细信息</span><br></pre></td></tr></table></figure>
+
+<p>网络配置文件： </p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">IP MASK GW DNS相关配置文件：</span><br><span class="line">	&#x2F;etc&#x2F;sysconfig&#x2F;network-scripts&#x2F;ifcfg-IFACE</span><br><span class="line">		说明参考：&#x2F;usr&#x2F;share&#x2F;doc&#x2F;initscripts-9.49.30&#x2F;sysconfig.txt</span><br><span class="line">			DEVICE:此配置文件应用到的设备</span><br><span class="line">			HWADDR：对应的设备的MAC地址</span><br><span class="line">			BOOTPROTO：激活此设备时使用的地址配置协议，常用的有dhcp static none bootp</span><br><span class="line">			NM_CONTROLLED:NM是NetworkManager的简写，此网卡是否接受NM控制；建议centos6为“no”</span><br><span class="line">			ONBOOT:在系统引导时是否激活此设备</span><br><span class="line">			TYPE：接口类型，常见的有Ethernet,Bridge</span><br><span class="line">			UUID:设备的唯一标识</span><br><span class="line">			IPADDR：指明ip地址</span><br><span class="line">			NETMASK：子网掩码</span><br><span class="line">			GATEWAY：默认网关</span><br><span class="line">			DNS1：第一个DNS服务器指向</span><br><span class="line">			DNS2：第二个DNS服务器的指向</span><br><span class="line">			USERCTL：普通用户是否可控制此设备</span><br><span class="line">			PEERDNS：如果BOOTPROTO的值为dhcp，是否允许dhcp server分配的dns服务器指向信息直接覆盖至&#x2F;etc&#x2F;resolv.conf文件中</span><br></pre></td></tr></table></figure>
+
+<p>网络配置文件模板：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br></pre></td><td class="code"><pre><span class="line">		动态配置： </span><br><span class="line">			DEVICE&#x3D;ethX</span><br><span class="line">			HWADDR&#x3D;</span><br><span class="line">			BOOTPROTO&#x3D;dhcp </span><br><span class="line">			ONBOOT&#x3D;yes</span><br><span class="line">			TYPE&#x3D;Ethernet </span><br><span class="line">		静态配置：</span><br><span class="line">			DEVICE&#x3D;ethX</span><br><span class="line">			HWADDR&#x3D;</span><br><span class="line">			BOOTPROTO&#x3D;static </span><br><span class="line">			ONBOOT&#x3D;yes</span><br><span class="line">			TYPE&#x3D;Ethernet </span><br><span class="line">			IPADDR&#x3D;ip</span><br><span class="line">			NETMASK&#x3D;netmask</span><br><span class="line">			GATEWAY&#x3D;gw</span><br><span class="line">&#96;&#96;&#96;	</span><br><span class="line"></span><br><span class="line">路由相关配置文件：</span><br><span class="line">		&#x2F;etc&#x2F;sysconfig&#x2F;network-scripts&#x2F;route-IFACE</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">主机名和本地解析器：</span><br><span class="line">	配置当前的主机名：</span><br><span class="line">		hstname HOSTNAME </span><br><span class="line">		&#x2F;etc&#x2F;sysconfig&#x2F;network </span><br><span class="line">			HOSTNAME&#x3D;</span><br><span class="line">	解析器执行正向和逆向查询</span><br><span class="line">	&#x2F;etc&#x2F;hosts</span><br><span class="line">		本地主机名数据库和IP地址的映像</span><br><span class="line">		对小型独立网络有用</span><br><span class="line">		通常，在使用DNS前检查</span><br><span class="line">		getent hosts 查看&#x2F;etc&#x2F;hosts内容</span><br><span class="line">DNS名字解析：</span><br><span class="line">	&#x2F;etc&#x2F;resolv.conf </span><br><span class="line">		namaserver DNS_SERVER_IP1</span><br><span class="line">		nameserver DNS_SERVER_IP2</span><br><span class="line">		nameserver DNS_SERVER_IP3</span><br><span class="line">		serch magedu.com </span><br><span class="line">	&#x2F;etc&#x2F;nsswitch.conf </span><br><span class="line">		与&#x2F;etc&#x2F;hosts相比优先于DNS</span><br><span class="line">	正向解析：FQDN--&gt;IP</span><br><span class="line">		dig -t A FQDN </span><br><span class="line">		host -t A FQDN </span><br><span class="line">	反向解析：IP--&gt;FQDN</span><br><span class="line">		dig -x IP</span><br><span class="line">		host -t FTR IP </span><br><span class="line">网络配置文件： </span><br><span class="line">	&#x2F;etc&#x2F;sysconfig&#x2F;network-scripts&#x2F;route-IFACE</span><br><span class="line">		注意：需service network restart生效</span><br><span class="line">		两种配置风格：</span><br><span class="line">			1、TARGET via GW </span><br><span class="line">				如：10.0.0.0&#x2F;8 via 172.16.0.1</span><br><span class="line">			2、每三行定义一条路由</span><br><span class="line">				ADDRESS#&#x3D;TARGET</span><br><span class="line">				NETMASK#&#x3D;mask</span><br><span class="line">				GATEWAY#&#x3D;GW</span><br><span class="line">网卡别名：</span><br><span class="line">	对虚拟主机有用</span><br><span class="line">	将多个IP地址绑定到一个NIC上</span><br><span class="line">		eth0:1 eth0:2 eth0:3</span><br><span class="line">	ifconfig命令：</span><br><span class="line">		ifconfig eth0:0 192.168.1.100&#x2F;24 up </span><br><span class="line">		ifconfig eth0:0 down</span><br><span class="line">	ip命令：</span><br><span class="line">		ip addr add 172.16.1.2&#x2F;16 dev eth0</span><br><span class="line">		ip addr add 172.16.1.1&#x2F;16 dev eth0 label eth0:0</span><br><span class="line">		ip addr add 172.16.1.2&#x2F;16 dev eth0 label eth0:0</span><br><span class="line">		ip addr del 172.16.1.1&#x2F;16 dev eth0 label eth0:0</span><br><span class="line">		ip addr flush dev eth0 label eth0:0</span><br><span class="line">设备别名：</span><br><span class="line">	为每个设备别名生成独立的接口配置文件</span><br><span class="line">		关闭NetworkManager服务</span><br><span class="line">		ifcfg-ethX:xxx</span><br><span class="line">		必须使用静态联网</span><br><span class="line">			DEVICE&#x3D;eth0:0</span><br><span class="line">			IPADDR&#x3D;10.10.10.10</span><br><span class="line">			NETMASK&#x3D;255.0.0.0</span><br><span class="line">			ONPARENT&#x3D;yes</span><br><span class="line">		注意：service network restart生效</span><br><span class="line">		参考：&#x2F;usr&#x2F;share&#x2F;doc&#x2F;initscripts-* &#x2F;sysconfig.txt</span><br><span class="line">网络接口配置-bonding</span><br><span class="line">bonding</span><br></pre></td></tr></table></figure>
+<pre><code>将多块网卡绑定同一IP地址对外提供服务，可以实现高可用或者负载均衡。直接给两块网卡设置同一IP地址是不可以的，
+通过bonding，虚拟一块网卡对外提供链接，物理网卡被修改为相同的MAC地址。</code></pre><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">bonding的工作模式：</span><br></pre></td></tr></table></figure>
+<pre><code>Mode0（balance-rr）
+    轮转（Round-robin）策略：从头到尾顺序的在每个slave接口上面发送数据包。
+    本模式提供负载均衡和容错能力。
+Mode1（active-backup）
+    活动-备份（主备）策略：只有一个slave被激活，当且仅当活动的slave接口失败时才会激活其他slave。
+    为了避免交换机发生混乱此时绑定的MAC地址只有一个外部端口上可见。
+Mode3(broadcast)
+    广播策略：在所有的slave接口上传送所有的报文，提供容错能力
+active-backup、balance-tlb 和 balance-alb 模式不需要交换机的任何特
+殊配置。其他绑定模式需要配置交换机以便整合链接。如：Cisco 交换机需
+要在模式 0、2 和 3 中使用 EtherChannel，但在模式4中需要 LACP和
+EtherChannel</code></pre><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">bonding的配置：</span><br><span class="line">&#x2F;etc&#x2F;sysconfig&#x2F;network-scripts&#x2F;ifcfg-bond0</span><br><span class="line">&#96;&#96;&#96;	</span><br><span class="line">	DEVICE&#x3D;bond0 </span><br><span class="line">	BOOTPROTO&#x3D;none</span><br><span class="line">	BONDING_OPTS&#x3D;&quot;miimon&#x3D;100 mode&#x3D;0&quot;</span><br></pre></td></tr></table></figure>
+
+<p>/etc/sysconfig/network-scripts/ifcfg-eth0</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">DEVICE&#x3D;eth0 </span><br><span class="line">BOOTPROTO&#x3D;none</span><br><span class="line">MASTER&#x3D;bond0 </span><br><span class="line">SLAVE&#x3D;yes</span><br><span class="line">USERCTL&#x3D;no</span><br></pre></td></tr></table></figure>
+<p>miimon 是用来进行链路检测的。如果miimon=100，name系统每100ms监测一次链路连接状态，如果有一条线路不通就转入另一条线路。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">查看bond0状态：</span><br><span class="line">	&#x2F;proc&#x2F;net&#x2F;bonding&#x2F;bond0 </span><br><span class="line">删除bond0：</span><br><span class="line">	ifconfig bond0 down</span><br><span class="line">	rmmod bonding</span><br><span class="line">详细帮助：</span><br><span class="line">	&#x2F;usr&#x2F;share&#x2F;doc&#x2F;kernel-doc- version&#x2F;Documentation&#x2F;networking&#x2F;bonding.txt</span><br><span class="line">	https:&#x2F;&#x2F;www.kernel.org&#x2F;doc&#x2F;Documentation&#x2F;networking&#x2F;bonding.txt</span><br></pre></td></tr></table></figure>
+<p>centos7网络属性配置：<br>    centos6之前，网络接口使用连续号码命名：</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/%E7%BD%91%E7%BB%9C%E5%8D%8F%E8%AE%AE/" rel="tag"># 网络协议</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/10/15/mysql%E5%85%A5%E9%97%A8%E4%B9%8B%E5%A4%9A%E5%AE%9E%E4%BE%8B%E5%AE%9E%E7%8E%B0%E5%92%8C%E5%A2%9E%E5%88%A0%E6%94%B9%E6%9F%A5/" rel="next" title="mysql入门之多实例实现和增删改查">
+                <i class="fa fa-chevron-left"></i> mysql入门之多实例实现和增删改查
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2017/11/21/dropbear/" rel="prev" title="dropbear">
+                dropbear <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+        <!-- JiaThis Button BEGIN -->
+<div class="jiathis_style">
+<span class="jiathis_txt">分享到：</span>
+<a class="jiathis_button_fav">收藏夹</a>
+<a class="jiathis_button_copy">复制网址</a>
+<a class="jiathis_button_email">邮件</a>
+<a class="jiathis_button_weixin">微信</a>
+<a class="jiathis_button_qzone">QQ空间</a>
+<a class="jiathis_button_tqq">腾讯微博</a>
+<a class="jiathis_button_douban">豆瓣</a>
+<a class="jiathis_button_share">一键分享</a>
+
+<a href="http://www.jiathis.com/share?uid=2140465" class="jiathis jiathis_txt jiathis_separator jtico jtico_jiathis" target="_blank">更多</a>
+<a class="jiathis_counter_style"></a>
+</div>
+<script type="text/javascript" >
+var jiathis_config={
+  data_track_clickback:true,
+  summary:"",
+  shortUrl:false,
+  hideMore:false
+}
+</script>
+<script type="text/javascript" src="http://v3.jiathis.com/code/jia.js?uid=" charset="utf-8"></script>
+<!-- JiaThis Button END -->
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+    </div>
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+
+      <section class="site-overview-wrap sidebar-panel sidebar-panel-active">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/uploads/touxiang.jpg"
+                alt="ShengQin Miao" />
+            
+              <p class="site-author-name" itemprop="name">ShengQin Miao</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">53</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                
+                  <span class="site-state-item-count">1</span>
+                  <span class="site-state-item-name">分类</span>
+                
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">61</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">ShengQin Miao</span>
+
+  
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-area-chart"></i>
+    </span>
+    
+      <span class="post-meta-item-text">Site words total count&#58;</span>
+    
+    <span title="Site words total count">131.6k</span>
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Pisces</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js"></script>
+  <script>AV.initialize("vItlX9Jc2L4BuXKt6BJWW6eJ-gzGzoHsz", "IisqhTArerBOyaxKHN8TcE10");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

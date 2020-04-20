@@ -1,0 +1,1474 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="mysql," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="mysql多实例实现此实验是在基于源码编译安装mariadb之后进行的，如果不知道如何安装，请移步mysql入门之安装篇数据库安装目录为&#x2F;app&#x2F;mysql&#x2F; 创建多实例数据库的数据库目录和配置目录等相关目录123456789101112131415161718192021[root@ansible data]#mkdir &#x2F;mysql&#x2F;330&amp;#123;6,7,8&amp;#125;&#x2F;&amp;#123;etc">
+<meta property="og:type" content="article">
+<meta property="og:title" content="mysql入门之多实例实现和增删改查">
+<meta property="og:url" content="http://yoursite.com/2017/10/15/mysql%E5%85%A5%E9%97%A8%E4%B9%8B%E5%A4%9A%E5%AE%9E%E4%BE%8B%E5%AE%9E%E7%8E%B0%E5%92%8C%E5%A2%9E%E5%88%A0%E6%94%B9%E6%9F%A5/index.html">
+<meta property="og:site_name" content="漫步人生路">
+<meta property="og:description" content="mysql多实例实现此实验是在基于源码编译安装mariadb之后进行的，如果不知道如何安装，请移步mysql入门之安装篇数据库安装目录为&#x2F;app&#x2F;mysql&#x2F; 创建多实例数据库的数据库目录和配置目录等相关目录123456789101112131415161718192021[root@ansible data]#mkdir &#x2F;mysql&#x2F;330&amp;#123;6,7,8&amp;#125;&#x2F;&amp;#123;etc">
+<meta property="article:published_time" content="2017-10-14T16:00:00.000Z">
+<meta property="article:modified_time" content="2020-04-20T13:33:51.466Z">
+<meta property="article:author" content="ShengQin Miao">
+<meta property="article:tag" content="mysql">
+<meta name="twitter:card" content="summary">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2017/10/15/mysql入门之多实例实现和增删改查/"/>
+
+
+
+
+
+  <title>mysql入门之多实例实现和增删改查 | 漫步人生路</title>
+  
+
+
+
+
+
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?f076ecd4b66d3a02de923868671591de";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+<meta name="generator" content="Hexo 4.2.0"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">漫步人生路</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off"
+             placeholder="搜索..." spellcheck="false"
+             type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/10/15/mysql%E5%85%A5%E9%97%A8%E4%B9%8B%E5%A4%9A%E5%AE%9E%E4%BE%8B%E5%AE%9E%E7%8E%B0%E5%92%8C%E5%A2%9E%E5%88%A0%E6%94%B9%E6%9F%A5/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="ShengQin Miao">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/uploads/touxiang.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="漫步人生路">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">mysql入门之多实例实现和增删改查</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-10-15T00:00:00+08:00">
+                2017-10-15
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+             <span id="/2017/10/15/mysql%E5%85%A5%E9%97%A8%E4%B9%8B%E5%A4%9A%E5%AE%9E%E4%BE%8B%E5%AE%9E%E7%8E%B0%E5%92%8C%E5%A2%9E%E5%88%A0%E6%94%B9%E6%9F%A5/" class="leancloud_visitors" data-flag-title="mysql入门之多实例实现和增删改查">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+            <div class="post-wordcount">
+              
+                
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-file-word-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">字数统计&#58;</span>
+                
+                <span title="字数统计">
+                  5.9k
+                </span>
+              
+
+              
+                <span class="post-meta-divider">|</span>
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-clock-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">阅读时长 &asymp;</span>
+                
+                <span title="阅读时长">
+                  30
+                </span>
+              
+            </div>
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="mysql多实例实现"><a href="#mysql多实例实现" class="headerlink" title="mysql多实例实现"></a>mysql多实例实现</h2><p>此实验是在基于源码编译安装mariadb之后进行的，如果不知道如何安装，请移步<em>mysql入门之安装</em>篇<br><strong>数据库安装目录为/app/mysql/</strong></p>
+<h4 id="创建多实例数据库的数据库目录和配置目录等相关目录"><a href="#创建多实例数据库的数据库目录和配置目录等相关目录" class="headerlink" title="创建多实例数据库的数据库目录和配置目录等相关目录"></a>创建多实例数据库的数据库目录和配置目录等相关目录</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">[root@ansible data]<span class="comment">#mkdir /mysql/330&#123;6,7,8&#125;/&#123;etc,data,log,socket,pid&#125; -p</span></span><br><span class="line">[root@ansible data]<span class="comment">#tree /mysql/</span></span><br><span class="line">/mysql/</span><br><span class="line">├── 3306</span><br><span class="line">│   ├── data</span><br><span class="line">│   ├── etc</span><br><span class="line">│   ├── <span class="built_in">log</span></span><br><span class="line">│   ├── pid</span><br><span class="line">│   └── socket</span><br><span class="line">├── 3307</span><br><span class="line">│   ├── data</span><br><span class="line">│   ├── etc</span><br><span class="line">│   ├── <span class="built_in">log</span></span><br><span class="line">│   ├── pid</span><br><span class="line">│   └── socket</span><br><span class="line">└── 3308</span><br><span class="line">    ├── data</span><br><span class="line">    ├── etc</span><br><span class="line">    ├── <span class="built_in">log</span></span><br><span class="line">    ├── pid</span><br><span class="line">    └── socket</span><br></pre></td></tr></table></figure>
+
+<h4 id="准备数据库文件"><a href="#准备数据库文件" class="headerlink" title="准备数据库文件"></a>准备数据库文件</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">[root@ansible ~]<span class="comment">#cd /app/mysql/</span></span><br><span class="line">[root@ansible mysql]<span class="comment">#./scripts/mysql_install_db --datadir=/mysql/3306/data/ --user=mysql</span></span><br><span class="line">[root@ansible mysql]<span class="comment">#./scripts/mysql_install_db --datadir=/mysql/3307/data/ --user=mysql</span></span><br><span class="line">[root@ansible mysql]<span class="comment">#./scripts/mysql_install_db --datadir=/mysql/3308/data/ --user=mysql</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="准备配置文件"><a href="#准备配置文件" class="headerlink" title="准备配置文件"></a>准备配置文件</h4><p><strong>将配置文件放到上述规划的etc目录下，并将端口分别改为相应的端口，将socket文件地址指向相应的socket</strong><br>以使用3307端口的实例配置为例</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">[root@ansible mysql]<span class="comment">#sed -n '/^[^#]/p' 3307/etc/my.cnf </span></span><br><span class="line">[mysqld]</span><br><span class="line">port=3307</span><br><span class="line">datadir=/mysql/3307/data/</span><br><span class="line">socket=/mysql/3307/socket/mysql.sock</span><br><span class="line">innodb_file_per_table</span><br><span class="line">symbolic-links=0</span><br><span class="line">[mysqld_safe]</span><br><span class="line"><span class="built_in">log</span>-error=/mysql/3307/<span class="built_in">log</span>/mariadb.log</span><br><span class="line">pid-file=/mysql/3307/pid/mariadb.pid</span><br><span class="line">!includedir /etc/my.cnf.d</span><br></pre></td></tr></table></figure>
+
+<h4 id="将-mysql目录的所有者和所属组改为mysql"><a href="#将-mysql目录的所有者和所属组改为mysql" class="headerlink" title="将/mysql目录的所有者和所属组改为mysql"></a>将/mysql目录的所有者和所属组改为mysql</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@ansible ~]<span class="comment">#chown -R mysql.mysql /mysql</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="准备启动脚本"><a href="#准备启动脚本" class="headerlink" title="准备启动脚本"></a>准备启动脚本</h4><p>以使用3307端口的实例配置为例</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br></pre></td><td class="code"><pre><span class="line">[root@ansible ~]<span class="comment">#cat /mysql/3306/mysqld </span></span><br><span class="line"><span class="meta">#!/bin/bash</span></span><br><span class="line"><span class="comment">#chkconfig: 345 80 2</span></span><br><span class="line">port=3307</span><br><span class="line">mysql_user=<span class="string">"root"</span></span><br><span class="line">mysql_pwd=<span class="string">"137226"</span></span><br><span class="line">cmd_path=<span class="string">"/app/mysql/bin"</span></span><br><span class="line">mysql_basedir=<span class="string">"/mysql"</span></span><br><span class="line">mysql_sock=<span class="string">"<span class="variable">$&#123;mysql_basedir&#125;</span>/<span class="variable">$&#123;port&#125;</span>/socket/mysql.sock"</span></span><br><span class="line"></span><br><span class="line">function_start_mysql()</span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">if</span> [ ! -e <span class="string">"<span class="variable">$mysql_sock</span>"</span> ];<span class="keyword">then</span></span><br><span class="line">      <span class="built_in">printf</span> <span class="string">"Starting MySQL...\n"</span></span><br><span class="line">      <span class="variable">$&#123;cmd_path&#125;</span>/mysqld_safe --defaults-file=<span class="variable">$&#123;mysql_basedir&#125;</span>/<span class="variable">$&#123;port&#125;</span>/etc/my.cnf  &amp;&gt; /dev/null  &amp;</span><br><span class="line">    <span class="keyword">else</span></span><br><span class="line">      <span class="built_in">printf</span> <span class="string">"MySQL is running...\n"</span></span><br><span class="line">      <span class="built_in">exit</span></span><br><span class="line">    <span class="keyword">fi</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">function_stop_mysql()</span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">if</span> [ ! -e <span class="string">"<span class="variable">$mysql_sock</span>"</span> ];<span class="keyword">then</span></span><br><span class="line">       <span class="built_in">printf</span> <span class="string">"MySQL is stopped...\n"</span></span><br><span class="line">       <span class="built_in">exit</span></span><br><span class="line">    <span class="keyword">else</span></span><br><span class="line">       <span class="built_in">printf</span> <span class="string">"Stoping MySQL...\n"</span></span><br><span class="line">       <span class="variable">$&#123;cmd_path&#125;</span>/mysqladmin -u <span class="variable">$&#123;mysql_user&#125;</span> -p<span class="variable">$&#123;mysql_pwd&#125;</span> -S <span class="variable">$&#123;mysql_sock&#125;</span> shutdown</span><br><span class="line">   <span class="keyword">fi</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">function_restart_mysql()</span><br><span class="line">&#123;</span><br><span class="line">    <span class="built_in">printf</span> <span class="string">"Restarting MySQL...\n"</span></span><br><span class="line">    function_stop_mysql</span><br><span class="line">    sleep 2</span><br><span class="line">    function_start_mysql</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">case</span> <span class="variable">$1</span> <span class="keyword">in</span></span><br><span class="line">start)</span><br><span class="line">    function_start_mysql</span><br><span class="line">;;</span><br><span class="line">stop)</span><br><span class="line">    function_stop_mysql</span><br><span class="line">;;</span><br><span class="line">restart)</span><br><span class="line">    function_restart_mysql</span><br><span class="line">;;</span><br><span class="line">*)</span><br><span class="line">    <span class="built_in">printf</span> <span class="string">"Usage: <span class="variable">$&#123;mysql_basedir&#125;</span>/<span class="variable">$&#123;port&#125;</span>/bin/mysqld &#123;start|stop|restart&#125;\n"</span></span><br><span class="line"><span class="keyword">esac</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="将服务脚本加入系统管理服务"><a href="#将服务脚本加入系统管理服务" class="headerlink" title="将服务脚本加入系统管理服务"></a>将服务脚本加入系统管理服务</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">[root@ansible ~]<span class="comment">#cp /mysql/3306/mysqld /etc/init.d/mysqld3306</span></span><br><span class="line">[root@ansible ~]<span class="comment">#cp /mysql/3307/mysqld /etc/init.d/mysqld3307</span></span><br><span class="line">[root@ansible ~]<span class="comment">#cp /mysql/3308/mysqld /etc/init.d/mysqld3308</span></span><br><span class="line">[root@ansible ~]<span class="comment">#chkconfig --add mysqld3306</span></span><br><span class="line">[root@ansible ~]<span class="comment">#chkconfig --add mysqld3307</span></span><br><span class="line">[root@ansible ~]<span class="comment">#chkconfig --add mysqld3308</span></span><br><span class="line">[root@ansible ~]<span class="comment">#chkconfig --list</span></span><br><span class="line"></span><br><span class="line">Note: This output shows SysV services only and does not include native</span><br><span class="line">      systemd services. SysV configuration data might be overridden by native</span><br><span class="line">      systemd configuration.</span><br><span class="line"></span><br><span class="line">      If you want to list systemd services use <span class="string">'systemctl list-unit-files'</span>.</span><br><span class="line">      To see services enabled on particular target use</span><br><span class="line">      <span class="string">'systemctl list-dependencies [target]'</span>.</span><br><span class="line"></span><br><span class="line">mysqld         	0:off	1:off	2:on	3:on	4:on	5:on	6:off</span><br><span class="line">mysqld3306     	0:off	1:off	2:off	3:on	4:on	5:on	6:off</span><br><span class="line">mysqld3307     	0:off	1:off	2:off	3:on	4:on	5:on	6:off</span><br><span class="line">mysqld3308     	0:off	1:off	2:off	3:on	4:on	5:on	6:off</span><br><span class="line">netconsole     	0:off	1:off	2:off	3:off	4:off	5:off	6:off</span><br><span class="line">network        	0:off	1:off	2:on	3:on	4:on	5:on	6:off</span><br></pre></td></tr></table></figure>
+
+<h4 id="开启服务并连接"><a href="#开启服务并连接" class="headerlink" title="开启服务并连接"></a>开启服务并连接</h4><p>以3307端口实例演示</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">[root@ansible ~]<span class="comment">#service mysqld3307 start</span></span><br><span class="line">Starting MySQL...</span><br><span class="line">[root@ansible ~]<span class="comment">#mysql -S /mysql/3307/socket/mysql.sock </span></span><br><span class="line">Welcome to the MariaDB monitor.  Commands end with ; or \g.</span><br><span class="line">Your MariaDB connection id is 8</span><br><span class="line">Server version: 10.2.19-MariaDB Source distribution</span><br><span class="line"></span><br><span class="line">Copyright (c) 2000, 2018, Oracle, MariaDB Corporation Ab and others.</span><br><span class="line"></span><br><span class="line">Type <span class="string">'help;'</span> or <span class="string">'\h'</span> <span class="keyword">for</span> <span class="built_in">help</span>. Type <span class="string">'\c'</span> to clear the current input statement.</span><br><span class="line"></span><br><span class="line">MariaDB [(none)]&gt;</span><br></pre></td></tr></table></figure>
+
+<h4 id="mysql安全加固"><a href="#mysql安全加固" class="headerlink" title="mysql安全加固"></a>mysql安全加固</h4><p>以3307端口实例为例</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@ansible mysql]<span class="comment">#mysql_secure_installation -S /mysql/3307/socket/mysql.sock</span></span><br></pre></td></tr></table></figure>
+<p>此时，mysql数据库的多实例已经完成。</p>
+<h2 id="mysql数据库之增删改查"><a href="#mysql数据库之增删改查" class="headerlink" title="mysql数据库之增删改查"></a>mysql数据库之增删改查</h2><p><strong>以下内容只展示命令，不展示执行结果，不然显得太过臃肿，结果可以在测试机自行测试</strong></p>
+<h3 id="数据库和表管理"><a href="#数据库和表管理" class="headerlink" title="数据库和表管理"></a>数据库和表管理</h3><p><strong>关于字符集，强烈推荐使用utf8mb4字符集</strong><br>修改数据库实例的字符集方法为：在配置文件mysqld语句块中添加character-set-server=utf8mb4<br>修改客户端字符集的方法为：在配置文件mysql语句块添加default-character-set=utf8mb4<br>建议在配置文件中mysqld语句块中写入innodb_file_per_table语句，将每个表的数据单独存放，降低风险。</p>
+<h4 id="创建数据库create-database"><a href="#创建数据库create-database" class="headerlink" title="创建数据库create database"></a>创建数据库create database</h4><p>语法：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">CREATE &#123;DATABASE | SCHEMA&#125; [IF NOT EXISTS] db_name</span><br><span class="line">    [create_specification] ...</span><br><span class="line"></span><br><span class="line">create_specification:</span><br><span class="line">    [DEFAULT] CHARACTER SET [&#x3D;] charset_name</span><br><span class="line">  | [DEFAULT] COLLATE [&#x3D;] collation_name</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">MariaDB [(none)]&gt; create database db_utf8mb4 character <span class="built_in">set</span> utf8mb4;</span><br></pre></td></tr></table></figure>
+
+<p><strong>查看mariadb支持的字符集</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">MariaDB [(none)]&gt; show character <span class="built_in">set</span>;</span><br></pre></td></tr></table></figure>
+
+<p><strong>删除数据库</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">MariaDB [(none)]&gt; drop database testdb;</span><br></pre></td></tr></table></figure>
+
+<h4 id="创建表-CREATE-TABLE"><a href="#创建表-CREATE-TABLE" class="headerlink" title="创建表 CREATE TABLE"></a>创建表 CREATE TABLE</h4><p>(1) 直接创建<br>(2) 通过查询现存表创建；新表会被直接插入查询而来的数据<br>  CREATE [TEMPORARY] TABLE [IF NOT EXISTS] tbl_name [(create_definition,…)] [table_options] [partition_options] select_statement<br>(3) 通过复制现存的表的表结构创建，但不复制数据<br>  CREATE [TEMPORARY] TABLE [IF NOT EXISTS] tbl_name { LIKE old_tbl_name | (LIKE old_tbl_name) }<br>注意：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Storage Engine是指表类型，也即在表创建时指明其使用的存储引擎，同一库中不同表可以使用不同的存储引擎</span><br><span class="line">同一个库中表建议要使用同一种存储引擎类型</span><br></pre></td></tr></table></figure>
+
+<p><strong>字段的数据类型</strong><br>1、整型</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">tinyint(m) 1个字节 范围(-128~127)</span><br><span class="line">smallint(m) 2个字节 范围(-32768~32767)</span><br><span class="line">mediumint(m) 3个字节 范围(-8388608~8388607)</span><br><span class="line">int(m) 4个字节 范围(-2147483648~2147483647)</span><br><span class="line">bigint(m) 8个字节 范围(+-9.22x10的18次方)</span><br></pre></td></tr></table></figure>
+
+<p>2、浮点型(float和double)，近似值</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">float(m,d) 单精度浮点型 8位精度(4字节) m总个数，d小数位</span><br><span class="line">double(m,d) 双精度浮点型16位精度(8字节) m总个数，d小数位</span><br><span class="line">设一个字段定义为float(6,3)，如果插入一个数123.45678,实际数据库里存的是123.457，但总个数还以实际为准，即6位</span><br></pre></td></tr></table></figure>
+
+<p>3、定点数</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">在数据库中存放的是精确值,存为十进制</span><br><span class="line">decimal(m,d) 参数m&lt;65 是总个数，d&lt;30且 d&lt;m 是小数位</span><br><span class="line">MySQL5.0和更高版本将数字打包保存到一个二进制字符串中（每4个字节存9个数字）。例如，decimal(18,9)小数点两边将各存储9个数字，一共使用9个字节：小数点前的数字用4个字节，小数点后的数字用4个字节，小数点本身占1个字节</span><br><span class="line">浮点类型在存储同样范围的值时，通常比decimal使用更少的空间。float使用4个字节存储。double占用8个字节</span><br><span class="line">因为需要额外的空间和计算开销，所以应该尽量只在对小数进行精确计算时才使用decimal——例如存储财务数据。但在数据量比较大的时候，可以考虑使用bigint代替decimal</span><br></pre></td></tr></table></figure>
+
+<p><em>4、字符串(char,varchar,_text)</em></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">char(n) 固定长度，最多255个字符</span><br><span class="line">varchar(n) 可变长度，最多65535个字符</span><br><span class="line">tinytext 可变长度，最多255个字符</span><br><span class="line">text 可变长度，最多65535个字符</span><br><span class="line">mediumtext 可变长度，最多2的24次方-1个字符</span><br><span class="line">longtext 可变长度，最多2的32次方-1个字符</span><br><span class="line">BINARY(M) 固定长度，可存二进制或字符，长度为0-M字节</span><br><span class="line">VARBINARY(M) 可变长度，可存二进制或字符，允许长度为0-M字节</span><br><span class="line">内建类型：ENUM枚举, SET集合</span><br></pre></td></tr></table></figure>
+
+<p><strong>char和varchar：</strong><br>• 1.char(n) 若存入字符数小于n，则以空格补于其后，查询之时再将空格去掉，<br>所以char类型存储的字符串末尾不能有空格，varchar不限于此<br>• 2.char(n) 固定长度，char(4)不管是存入几个字符，都将占用4个字节，varchar<br>是存入的实际字符数+1个字节（n&lt; n&gt;255)，所以varchar(4),存入3个字符将<br>占用4个字节<br>• 3.char类型的字符串检索速度要比varchar类型的快<br>varchar和text：<br>• 1.varchar可指定n，text不能指定，内部存储varchar是存入的实际字符数+1个<br>字节（n&lt; n&gt;255)，text是实际字符数+2个字节。<br>• 2.text类型不能有默认值<br>• 3.varchar可直接创建索引，text创建索引要指定前多少个字符。varchar查询速<br>度快于text</p>
+<p>5.二进制数据：BLOB<br>• BLOB和text存储方式不同，TEXT以文本方式存储，英文存储区分大小写，<br>而Blob是以二进制方式存储，不分大小写<br>• BLOB存储的数据只能整体读出<br>• TEXT可以指定字符集，BLOB不用指定字符集<br>6.日期时间类型<br>• date 日期 ‘2008-12-2’<br>• time 时间 ‘12:25:36’<br>• datetime 日期时间 ‘2008-12-2 22:06:44’<br>• timestamp 自动存储记录修改时间<br>• YEAR(2), YEAR(4)：年份<br> timestamp字段里的时间数据会随其他字段修改的时候自动刷新，这个数<br>据类型的字段可以存放这条记录最后被修改的时间</p>
+<p><strong>修饰符</strong><br>所有类型：<br>• NULL 数据列可包含NULL值<br>• NOT NULL 数据列不允许包含NULL值<br>• DEFAULT 默认值<br>• PRIMARY KEY 主键<br>• UNIQUE KEY 唯一键<br>• CHARACTER SET name 指定一个字符集<br>数值型<br>• AUTO_INCREMENT 自动递增，适用于整数类型<br>• UNSIGNED 无符号</p>
+<p><strong>创建表</strong><br>直接创建</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">create table student (id int unsigned auto_increment primary key ,name varchar(10),sex enum(<span class="string">'f'</span>,<span class="string">'m'</span>) default <span class="string">'m'</span>,age tinyint unsigned,mobile char(11),address varchar(50));</span><br></pre></td></tr></table></figure>
+
+<p>克隆另一张表，并且会将模板表的数据一起克隆</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">MariaDB [studentdb]&gt; create table employee select * from student;</span><br></pre></td></tr></table></figure>
+
+<p>克隆另一张表的表结构，但不克隆表中数据</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">MariaDB [studentdb]&gt; create table custom like student;</span><br></pre></td></tr></table></figure>
+
+<p><strong>查看表结构</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">MariaDB [studentdb]&gt; desc student;</span><br><span class="line">MariaDB [studentdb]&gt; show columns from student;</span><br></pre></td></tr></table></figure>
+
+<p><strong>查看表定义</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">MariaDB [studentdb]&gt; show create table student;</span><br></pre></td></tr></table></figure>
+
+<p><strong>查看表的信息</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">MariaDB [studentdb]&gt; show table status like <span class="string">'student'</span>\G;</span><br></pre></td></tr></table></figure>
+
+<p><strong>查看某个数据库中的所有表的信息</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">MariaDB [studentdb]&gt; show table status from database_name\G;</span><br></pre></td></tr></table></figure>
+
+<p><strong>删除表</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">MariaDB [studentdb]&gt; drop table student;</span><br></pre></td></tr></table></figure>
+
+<h4 id="表操作"><a href="#表操作" class="headerlink" title="表操作"></a>表操作</h4><h5 id="修改表结构alter"><a href="#修改表结构alter" class="headerlink" title="修改表结构alter"></a>修改表结构alter</h5><p>ALTER TABLE ‘tbl_name’<br>字段：<br>    添加字段：add<br>      ADD col1 data_type [FIRST|AFTER col_name]<br>    删除字段：drop<br>    修改字段：<br>      alter（默认值）, change（字段名）, modify（字段属性）<br>索引:<br>    添加索引：add index<br>    删除索引：drop index<br>表选项<br>    修改:<br>查看表上的索引：SHOW INDEXES FROM [db_name.]tbl_name;<br>查看帮助：Help ALTER TABLE</p>
+<p><strong>更改字符集</strong><br>更改库/表字符集</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">MariaDB [db_utf8mb4]&gt; alter database/table name character <span class="built_in">set</span> = utf8mb4;</span><br></pre></td></tr></table></figure>
+
+<p>更改字段的字符集</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">MariaDB [db_utf8mb4]&gt; alter table table_name change column_name column_name_new character <span class="built_in">set</span> utf8mb4</span><br></pre></td></tr></table></figure>
+
+<p><strong>查看表状态</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">MariaDB [db_utf8mb4]&gt; show table status like <span class="string">'student'</span>\G;</span><br></pre></td></tr></table></figure>
+<h5 id="为表增加记录insert"><a href="#为表增加记录insert" class="headerlink" title="为表增加记录insert"></a>为表增加记录insert</h5><p><strong>语法</strong><br>第一种</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">INSERT [LOW_PRIORITY | DELAYED | HIGH_PRIORITY] [IGNORE]</span><br><span class="line">    [INTO] tbl_name [(col_name,...)]</span><br><span class="line">    &#123;VALUES | VALUE&#125; (&#123;expr | DEFAULT&#125;,...),(...),...</span><br><span class="line">    [ ON DUPLICATE KEY UPDATE</span><br><span class="line">      col_name&#x3D;expr</span><br><span class="line">        [, col_name&#x3D;expr] ... ]</span><br></pre></td></tr></table></figure>
+<p>第二种</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">INSERT [LOW_PRIORITY | DELAYED | HIGH_PRIORITY] [IGNORE]</span><br><span class="line">    [INTO] tbl_name</span><br><span class="line">    SET col_name&#x3D;&#123;expr | DEFAULT&#125;, ...</span><br><span class="line">    [ ON DUPLICATE KEY UPDATE</span><br><span class="line">      col_name&#x3D;expr</span><br><span class="line">        [, col_name&#x3D;expr] ... ]</span><br></pre></td></tr></table></figure>
+<p>第三种</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">INSERT [LOW_PRIORITY | HIGH_PRIORITY] [IGNORE]</span><br><span class="line">    [INTO] tbl_name [(col_name,...)]</span><br><span class="line">    SELECT ...fffffffffffffffffffffffffffffffffffffffffffffffffffffff</span><br><span class="line">    [ ON DUPLICATE KEY UPDATE</span><br><span class="line">      col_name&#x3D;expr</span><br><span class="line">        [, col_name&#x3D;expr] ... ]</span><br></pre></td></tr></table></figure>
+<p><strong>查看表中的记录数</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">MariaDB [studentdb]&gt; select count(*) from student;</span><br></pre></td></tr></table></figure>
+
+<p><strong>向表中添加记录</strong><br>使用第一种方法添加</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">MariaDB [studentdb]&gt; insert into student (name,age,mobile,adress)values(<span class="string">'msq'</span>,26,15244059931,<span class="string">'shandong'</span>),(<span class="string">'yfq'</span>,27,15065002205,<span class="string">'shandong'</span>);</span><br></pre></td></tr></table></figure>
+
+<p>使用第二种方法添加（不常用）</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">MariaDB [studentdb]&gt; insert into student <span class="built_in">set</span> name=<span class="string">'mjc'</span>,age=1,address=<span class="string">'shandong'</span>;</span><br></pre></td></tr></table></figure>
+
+<p>使用第三种方法添加，批量查询并将查询的结果插入另一个表</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">MariaDB [studentdb]&gt; insert into custom select * from student;</span><br></pre></td></tr></table></figure>
+<h5 id="删除表中的记录-delete"><a href="#删除表中的记录-delete" class="headerlink" title="删除表中的记录 delete"></a>删除表中的记录 delete</h5><p><strong>删除表中的记录时，一定要加限定条件，否则会清空整个表</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">MariaDB [studentdb]&gt; delete from student <span class="built_in">where</span> id=4;</span><br></pre></td></tr></table></figure>
+
+<p><strong>清空表中的数据，但保留表的结构</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">MariaDB [studentdb]&gt; truncate table student;</span><br></pre></td></tr></table></figure>
+
+<h5 id="更改表中的记录-update"><a href="#更改表中的记录-update" class="headerlink" title="更改表中的记录 update"></a>更改表中的记录 update</h5><p>语法</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">UPDATE [LOW_PRIORITY] [IGNORE] table_reference</span><br><span class="line"> SET col_name1&#x3D;&#123;expr1|DEFAULT&#125; [, col_name2&#x3D;&#123;expr2|DEFAULT&#125;] ...</span><br><span class="line"> [WHERE where_condition]</span><br><span class="line"> [ORDER BY ...]</span><br><span class="line"> [LIMIT row_count]</span><br></pre></td></tr></table></figure>
+
+<p>例如</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">MariaDB [studentdb]&gt; update student(table_name) <span class="built_in">set</span> name=<span class="string">'zsf'</span> <span class="built_in">where</span> id=2;</span><br></pre></td></tr></table></figure>
+<p><strong>由于更改表中的记录时，容易出错，建议在客户端连接时加上-U|–safe-updates|–i-am-a-dummy选项，或者直接在配置文件mysql语句块中机上safe-updates</strong></p>
+<h2 id="查找数据库的内容"><a href="#查找数据库的内容" class="headerlink" title="查找数据库的内容"></a>查找数据库的内容</h2><p>语法</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">SELECT</span><br><span class="line">[ALL | DISTINCT | DISTINCTROW ]</span><br><span class="line">[SQL_CACHE | SQL_NO_CACHE]</span><br><span class="line">select_expr [, select_expr ...]</span><br><span class="line"> [FROM table_references</span><br><span class="line"> [WHERE where_condition]</span><br><span class="line"> [GROUP BY &#123;col_name | expr | position&#125;</span><br><span class="line"> [ASC | DESC], ... [WITH ROLLUP]]</span><br><span class="line"> [HAVING where_condition]</span><br><span class="line"> [ORDER BY &#123;col_name | expr | position&#125;</span><br><span class="line"> [ASC | DESC], ...]</span><br><span class="line"> [LIMIT &#123;[offset,] row_count | row_count OFFSET offset&#125;]</span><br><span class="line"> [FOR UPDATE | LOCK IN SHARE MODE]</span><br></pre></td></tr></table></figure>
+
+<p><strong>字段显示可以使用别名：</strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">col1 AS alias1, col2 AS alias2, ...</span><br></pre></td></tr></table></figure>
+
+<p><strong>WHERE子句：指明过滤条件以实现“选择”的功能：</strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">过滤条件：布尔型表达式</span><br><span class="line">算术操作符：+, -, **, &#x2F;, % </span><br><span class="line">比较操作符：&#x3D;,&lt;&#x3D;&gt;（相等或都为空）, &lt;&gt;, !&#x3D;(非标准SQL), &gt;, &gt;&#x3D;, &lt;, &lt;&#x3D;</span><br><span class="line">BETWEEN min_num AND max_num ：在min_num与max_num之间的范围</span><br><span class="line">IN (element1, element2, ...)：单个散列值</span><br><span class="line">IS NULL：找出空值</span><br><span class="line">IS NOT NULL：找出非空值</span><br></pre></td></tr></table></figure>
+
+<p><strong>模糊匹配：</strong><br>搜索名字列以m开头的记录，但是尽可能不要使用模糊匹配，会降低服务器性能。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">MariaDB [studentdb]&gt; select * from student <span class="built_in">where</span> name like <span class="string">'m%'</span>;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">GROUP：根据指定的条件把查询结果进行“分组”以用于做“聚合”运算</span><br><span class="line">  avg(), max(), min(), count(), sum()</span><br><span class="line">HAVING: 对分组聚合运算后的结果指定过滤条件</span><br><span class="line">ORDER BY: 根据指定的字段对查询结果进行排序</span><br><span class="line">  升序：ASC</span><br><span class="line">  降序：DESC</span><br><span class="line">LIMIT [[offset,]row_count]：对查询的结果进行输出行数数量限制</span><br><span class="line">对查询结果中的数据请求施加“锁”</span><br><span class="line">  FOR UPDATE: 写锁，独占或排它锁，只有一个读和写</span><br><span class="line">  LOCK IN SHARE MODE: 读锁，共享锁，同时多个读</span><br></pre></td></tr></table></figure>
+
+<h3 id="select单表查询"><a href="#select单表查询" class="headerlink" title="select单表查询"></a>select单表查询</h3><p><strong>使用distinct可以对查找到的结果进行去重，之后再显示。</strong></p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">MariaDB [studentdb]&gt; select distinct sex  from student;</span><br><span class="line">+<span class="comment">------+</span></span><br><span class="line">| sex  |</span><br><span class="line">+<span class="comment">------+</span></span><br><span class="line">| m    |</span><br><span class="line">| f    |</span><br><span class="line">+<span class="comment">------+</span></span><br><span class="line">2 rows in <span class="keyword">set</span> (<span class="number">0.00</span> sec)</span><br><span class="line"></span><br><span class="line">MariaDB [studentdb]&gt; <span class="keyword">select</span>  sex  <span class="keyword">from</span> student;</span><br><span class="line">+<span class="comment">------+</span></span><br><span class="line">| sex  |</span><br><span class="line">+<span class="comment">------+</span></span><br><span class="line">| m    |</span><br><span class="line">| m    |</span><br><span class="line">| m    |</span><br><span class="line">| f    |</span><br><span class="line">+<span class="comment">------+</span></span><br><span class="line">4 rows in <span class="keyword">set</span> (<span class="number">0.00</span> sec)</span><br></pre></td></tr></table></figure>
+
+<p>导入测试数据库用于练习</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@ansible ~]<span class="comment">#mysql -p -S /mysql/3307/socket/mysql.sock &lt; hellodb_innodb.sql</span></span><br></pre></td></tr></table></figure>
+
+<p>用于测试的表格如下</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line">ariaDB [hellodb]&gt; select * from students;</span><br><span class="line">+<span class="comment">-------+---------------+-----+--------+---------+-----------+</span></span><br><span class="line">| StuID | Name          | Age | Gender | ClassID | TeacherID |</span><br><span class="line">+<span class="comment">-------+---------------+-----+--------+---------+-----------+</span></span><br><span class="line">|     1 | Shi Zhongyu   |  22 | M      |       2 |         3 |</span><br><span class="line">|     2 | Shi Potian    |  22 | M      |       1 |         7 |</span><br><span class="line">|     3 | Xie Yanke     |  53 | M      |       2 |        16 |</span><br><span class="line">|     4 | Ding Dian     |  32 | M      |       4 |         4 |</span><br><span class="line">|     5 | Yu Yutong     |  26 | M      |       3 |         1 |</span><br><span class="line">|     6 | Shi Qing      |  46 | M      |       5 |      NULL |</span><br><span class="line">|     7 | Xi Ren        |  19 | F      |       3 |      NULL |</span><br><span class="line">|     8 | Lin Daiyu     |  17 | F      |       7 |      NULL |</span><br><span class="line">|     9 | Ren Yingying  |  20 | F      |       6 |      NULL |</span><br><span class="line">|    10 | Yue Lingshan  |  19 | F      |       3 |      NULL |</span><br><span class="line">|    11 | Yuan Chengzhi |  23 | M      |       6 |      NULL |</span><br><span class="line">|    12 | Wen Qingqing  |  19 | F      |       1 |      NULL |</span><br><span class="line">|    13 | Tian Boguang  |  33 | M      |       2 |      NULL |</span><br><span class="line">|    14 | Lu Wushuang   |  17 | F      |       3 |      NULL |</span><br><span class="line">|    15 | Duan Yu       |  19 | M      |       4 |      NULL |</span><br><span class="line">|    16 | Xu Zhu        |  21 | M      |       1 |      NULL |</span><br><span class="line">|    17 | Lin Chong     |  25 | M      |       4 |      NULL |</span><br><span class="line">|    18 | Hua Rong      |  23 | M      |       7 |      NULL |</span><br><span class="line">|    19 | Xue Baochai   |  18 | F      |       6 |      NULL |</span><br><span class="line">|    20 | Diao Chan     |  19 | F      |       7 |      NULL |</span><br><span class="line">|    21 | Huang Yueying |  22 | F      |       6 |      NULL |</span><br><span class="line">|    22 | Xiao Qiao     |  20 | F      |       1 |      NULL |</span><br><span class="line">|    23 | Ma Chao       |  23 | M      |       4 |      NULL |</span><br><span class="line">|    24 | Xu Xian       |  27 | M      |    NULL |      NULL |</span><br><span class="line">|    25 | Sun Dasheng   | 100 | M      |    NULL |      NULL |</span><br><span class="line">+<span class="comment">-------+---------------+-----+--------+---------+-----------+</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>从中选出性别为女的人</strong></p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">MariaDB [hellodb]&gt; select * from students where gender &lt;&gt; 'm'; #或者where gender = f;</span><br><span class="line">+<span class="comment">-------+---------------+-----+--------+---------+-----------+</span></span><br><span class="line">| StuID | Name          | Age | Gender | ClassID | TeacherID |</span><br><span class="line">+<span class="comment">-------+---------------+-----+--------+---------+-----------+</span></span><br><span class="line">|     7 | Xi Ren        |  19 | F      |       3 |      NULL |</span><br><span class="line">|     8 | Lin Daiyu     |  17 | F      |       7 |      NULL |</span><br><span class="line">|     9 | Ren Yingying  |  20 | F      |       6 |      NULL |</span><br><span class="line">|    10 | Yue Lingshan  |  19 | F      |       3 |      NULL |</span><br><span class="line">|    12 | Wen Qingqing  |  19 | F      |       1 |      NULL |</span><br><span class="line">|    14 | Lu Wushuang   |  17 | F      |       3 |      NULL |</span><br><span class="line">|    19 | Xue Baochai   |  18 | F      |       6 |      NULL |</span><br><span class="line">|    20 | Diao Chan     |  19 | F      |       7 |      NULL |</span><br><span class="line">|    21 | Huang Yueying |  22 | F      |       6 |      NULL |</span><br><span class="line">|    22 | Xiao Qiao     |  20 | F      |       1 |      NULL |</span><br><span class="line">+<span class="comment">-------+---------------+-----+--------+---------+-----------+</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>统计表中记录的总数</strong></p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">MariaDB [hellodb]&gt; select gender,count(gender) from students;</span><br><span class="line">+<span class="comment">--------+---------------+</span></span><br><span class="line">| gender | count(gender) |</span><br><span class="line">+<span class="comment">--------+---------------+</span></span><br><span class="line">| M      |            25 |</span><br><span class="line">+<span class="comment">--------+---------------+</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>分组：group by</strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">GROUP：根据指定的条件把查询结果进行“分组”以用于做“聚合”运算</span><br><span class="line">avg(), max(), min(), count(), sum()</span><br><span class="line">HAVING: 对分组聚合运算后的结果指定过滤条件</span><br></pre></td></tr></table></figure>
+
+<p><strong>统计表中男性和女性人数</strong></p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">MMariaDB [hellodb]&gt; select gender 性别,count(*) 人数 from students group by gender;</span><br><span class="line">+<span class="comment">--------+--------+</span></span><br><span class="line">| 性别   | 人数   |</span><br><span class="line">+<span class="comment">--------+--------+</span></span><br><span class="line">| F      |     10 |</span><br><span class="line">| M      |     15 |</span><br><span class="line">+<span class="comment">--------+--------+</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>分组：统计每个班的人数</strong></p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">MariaDB [hellodb]&gt; select classid,count(*) from students group by classid;</span><br><span class="line">+<span class="comment">---------+----------+</span></span><br><span class="line">| classid | count(*) |</span><br><span class="line">+<span class="comment">---------+----------+</span></span><br><span class="line">|    NULL |        2 |</span><br><span class="line">|       1 |        4 |</span><br><span class="line">|       2 |        3 |</span><br><span class="line">|       3 |        4 |</span><br><span class="line">|       4 |        4 |</span><br><span class="line">|       5 |        1 |</span><br><span class="line">|       6 |        4 |</span><br><span class="line">|       7 |        3 |</span><br><span class="line">+<span class="comment">---------+----------+</span></span><br><span class="line">8 rows in <span class="keyword">set</span> (<span class="number">0.00</span> sec)</span><br></pre></td></tr></table></figure>
+
+<p><strong>多次分组：统计每个班的男生和女生人数</strong></p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">MariaDB [hellodb]&gt; select classid,gender,max(age) from students group by classid,gender;</span><br><span class="line">+<span class="comment">---------+--------+----------+</span></span><br><span class="line">| classid | gender | max(age) |</span><br><span class="line">+<span class="comment">---------+--------+----------+</span></span><br><span class="line">|    NULL | M      |      100 |</span><br><span class="line">|       1 | F      |       20 |</span><br><span class="line">|       1 | M      |       22 |</span><br><span class="line">|       2 | M      |       53 |</span><br><span class="line">|       3 | F      |       19 |</span><br><span class="line">|       3 | M      |       26 |</span><br><span class="line">|       4 | M      |       32 |</span><br><span class="line">|       5 | M      |       46 |</span><br><span class="line">|       6 | F      |       22 |</span><br><span class="line">|       6 | M      |       23 |</span><br><span class="line">|       7 | F      |       19 |</span><br><span class="line">|       7 | M      |       23 |</span><br><span class="line">+<span class="comment">---------+--------+----------+</span></span><br></pre></td></tr></table></figure>
+
+
+
+
+<p><strong>分别统计男女平均年龄</strong></p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">MariaDB [hellodb]&gt; select gender 性别,avg(age) 平均年龄 from students group by gender;</span><br><span class="line">+<span class="comment">--------+--------------+</span></span><br><span class="line">| 性别   | 平均年龄     |</span><br><span class="line">+<span class="comment">--------+--------------+</span></span><br><span class="line">| F      |      19.0000 |</span><br><span class="line">| M      |      33.0000 |</span><br><span class="line">+<span class="comment">--------+--------------+</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>只统计女生的平均年龄</strong></p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">MariaDB [hellodb]&gt; select gender,avg(gender) from students group by gender having gender = 'M';</span><br><span class="line">+<span class="comment">--------+-------------+</span></span><br><span class="line">| gender | avg(gender) |</span><br><span class="line">+<span class="comment">--------+-------------+</span></span><br><span class="line">| M      |      2.0000 |</span><br><span class="line">+<span class="comment">--------+-------------+</span></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">MariaDB [hellodb]&gt; select gender,avg(gender) from students where gender = 'm' group by gender;</span><br><span class="line">+<span class="comment">--------+-------------+</span></span><br><span class="line">| gender | avg(gender) |</span><br><span class="line">+<span class="comment">--------+-------------+</span></span><br><span class="line">| M      |      2.0000 |</span><br><span class="line">+<span class="comment">--------+-------------+</span></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">MariaDB [hellodb]&gt; select gender,avg(age) from students where gender='M';</span><br><span class="line">+<span class="comment">--------+----------+</span></span><br><span class="line">| gender | avg(age) |</span><br><span class="line">+<span class="comment">--------+----------+</span></span><br><span class="line">| M      |  33.0000 |</span><br><span class="line">+<span class="comment">--------+----------+</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>统计班级号大于3的班级每个班年龄大于30岁的学生的人数</strong></p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">MariaDB [hellodb]&gt; select classid,count(*) from students where age &gt; 30 group by classid having classid &gt; 3;</span><br><span class="line">+<span class="comment">---------+----------+</span></span><br><span class="line">| classid | count(*) |</span><br><span class="line">+<span class="comment">---------+----------+</span></span><br><span class="line">|       4 |        1 |</span><br><span class="line">|       5 |        1 |</span><br><span class="line">+<span class="comment">---------+----------+</span></span><br><span class="line">2 rows in <span class="keyword">set</span> (<span class="number">0.00</span> sec)</span><br></pre></td></tr></table></figure>
+
+<p><strong>ORDER BY: 根据指定的字段对查询结果进行排序</strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">升序：ASC</span><br><span class="line">降序：DESC</span><br></pre></td></tr></table></figure>
+
+<p><strong>对学生表中的学生排序,并显示年龄最小的前三个学生</strong></p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">MariaDB [hellodb]&gt; select * from students order by age limit 3;</span><br><span class="line">+<span class="comment">-------+-------------+-----+--------+---------+-----------+</span></span><br><span class="line">| StuID | Name        | Age | Gender | ClassID | TeacherID |</span><br><span class="line">+<span class="comment">-------+-------------+-----+--------+---------+-----------+</span></span><br><span class="line">|    14 | Lu Wushuang |  17 | F      |       3 |      NULL |</span><br><span class="line">|     8 | Lin Daiyu   |  17 | F      |       7 |      NULL |</span><br><span class="line">|    19 | Xue Baochai |  18 | F      |       6 |      NULL |</span><br><span class="line">+<span class="comment">-------+-------------+-----+--------+---------+-----------+</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>对学生表中的学生排序,跳过年龄最小的前三个学生，并显示之后的四个学生</strong></p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">MariaDB [hellodb]&gt; select * from students order by age limit 3,4;+-------+--------------+-----+--------+---------+-----------+</span><br><span class="line">| StuID | Name         | Age | Gender | ClassID | TeacherID |</span><br><span class="line">+<span class="comment">-------+--------------+-----+--------+---------+-----------+</span></span><br><span class="line">|    15 | Duan Yu      |  19 | M      |       4 |      NULL |</span><br><span class="line">|    12 | Wen Qingqing |  19 | F      |       1 |      NULL |</span><br><span class="line">|    10 | Yue Lingshan |  19 | F      |       3 |      NULL |</span><br><span class="line">|     7 | Xi Ren       |  19 | F      |       3 |      NULL |</span><br><span class="line">+<span class="comment">-------+--------------+-----+--------+---------+-----------+</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>对表中班级排序后对年龄倒序</strong></p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">MariaDB [hellodb]&gt; select * from students order by -classid desc,age desc;</span><br></pre></td></tr></table></figure>
+
+<h3 id="select多表查询"><a href="#select多表查询" class="headerlink" title="select多表查询"></a>select多表查询</h3><h4 id="两个表交叉查询"><a href="#两个表交叉查询" class="headerlink" title="两个表交叉查询"></a>两个表交叉查询</h4><p><strong>新增一张表</strong></p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">MariaDB [hellodb]&gt; select * from teachers;</span><br><span class="line">+<span class="comment">-----+---------------+-----+--------+</span></span><br><span class="line">| TID | Name          | Age | Gender |</span><br><span class="line">+<span class="comment">-----+---------------+-----+--------+</span></span><br><span class="line">|   1 | Song Jiang    |  45 | M      |</span><br><span class="line">|   2 | Zhang Sanfeng |  94 | M      |</span><br><span class="line">|   3 | Miejue Shitai |  77 | F      |</span><br><span class="line">|   4 | Lin Chaoying  |  93 | F      |</span><br><span class="line">+<span class="comment">-----+---------------+-----+--------+</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>使用union将students表和teachers表纵向合并</strong><br>union具有自动去重的效果，类似distinct取唯一值。</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">MariaDB [hellodb]&gt; select stuid,name,age,gender from students union select * from teachers;</span><br></pre></td></tr></table></figure>
+
+<p><strong>将s、t两张表交叉连接，cross join</strong></p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">MariaDB [hellodb]&gt; select * from students cross join teachers;</span><br></pre></td></tr></table></figure>
+
+<h5 id="取两个表的交集-内连接"><a href="#取两个表的交集-内连接" class="headerlink" title="取两个表的交集:内连接"></a><strong>取两个表的交集:内连接</strong></h5><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">MariaDB [hellodb]&gt; select * from students s,teachers t where  s.teacherid=t.tid;</span><br><span class="line">+<span class="comment">-------+-------------+-----+--------+---------+-----------+-----+---------------+-----+--------+</span></span><br><span class="line">| StuID | Name        | Age | Gender | ClassID | TeacherID | TID | Name          | Age | Gender |</span><br><span class="line">+<span class="comment">-------+-------------+-----+--------+---------+-----------+-----+---------------+-----+--------+</span></span><br><span class="line">|     5 | Yu Yutong   |  26 | M      |       3 |         1 |   1 | Song Jiang    |  45 | M      |</span><br><span class="line">|     1 | Shi Zhongyu |  22 | M      |       2 |         3 |   3 | Miejue Shitai |  77 | F      |</span><br><span class="line">|     4 | Ding Dian   |  32 | M      |       4 |         4 |   4 | Lin Chaoying  |  93 | F      |</span><br><span class="line">+<span class="comment">-------+-------------+-----+--------+---------+-----------+-----+---------------+-----+--------+</span></span><br></pre></td></tr></table></figure>
+
+<p>较新的语法：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">MariaDB [hellodb]&gt; select * from students s inner join teachers t on s.teacherid=t.tid;</span><br><span class="line">+<span class="comment">-------+-------------+-----+--------+---------+-----------+-----+---------------+-----+--------+</span></span><br><span class="line">| StuID | Name        | Age | Gender | ClassID | TeacherID | TID | Name          | Age | Gender |</span><br><span class="line">+<span class="comment">-------+-------------+-----+--------+---------+-----------+-----+---------------+-----+--------+</span></span><br><span class="line">|     5 | Yu Yutong   |  26 | M      |       3 |         1 |   1 | Song Jiang    |  45 | M      |</span><br><span class="line">|    25 | Sun Dasheng | 100 | M      |    NULL |         1 |   1 | Song Jiang    |  45 | M      |</span><br><span class="line">|     1 | Shi Zhongyu |  22 | M      |       2 |         3 |   3 | Miejue Shitai |  77 | F      |</span><br><span class="line">|     4 | Ding Dian   |  32 | M      |       4 |         4 |   4 | Lin Chaoying  |  93 | F      |</span><br><span class="line">+<span class="comment">-------+-------------+-----+--------+---------+-----------+-----+---------------+-----+--------+</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>取两个表的内连接的特定字段</strong></p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">MariaDB [hellodb]&gt; select classid,s.name,stuid,t.name,tid from students s inner join teachers t on t.tid=s.teacherid;</span><br><span class="line">+<span class="comment">---------+-------------+-------+---------------+-----+</span></span><br><span class="line">| classid | name        | stuid | name          | tid |</span><br><span class="line">+<span class="comment">---------+-------------+-------+---------------+-----+</span></span><br><span class="line">|       3 | Yu Yutong   |     5 | Song Jiang    |   1 |</span><br><span class="line">|    NULL | Sun Dasheng |    25 | Song Jiang    |   1 |</span><br><span class="line">|       2 | Shi Zhongyu |     1 | Miejue Shitai |   3 |</span><br><span class="line">|       4 | Ding Dian   |     4 | Lin Chaoying  |   4 |</span><br><span class="line">+<span class="comment">---------+-------------+-------+---------------+-----+</span></span><br></pre></td></tr></table></figure>
+
+<h5 id="左外连接：取出A表的全部记录以及B表中符合条件的记录。"><a href="#左外连接：取出A表的全部记录以及B表中符合条件的记录。" class="headerlink" title="左外连接：取出A表的全部记录以及B表中符合条件的记录。"></a>左外连接：取出A表的全部记录以及B表中符合条件的记录。</h5><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line">MariaDB [hellodb]&gt; select * from students s left outer join teachers t on s.teacherid=t.tid;</span><br><span class="line">+<span class="comment">-------+---------------+-----+--------+---------+-----------+------+---------------+------+--------+</span></span><br><span class="line">| StuID | Name          | Age | Gender | ClassID | TeacherID | TID  | Name          | Age  | Gender |</span><br><span class="line">+<span class="comment">-------+---------------+-----+--------+---------+-----------+------+---------------+------+--------+</span></span><br><span class="line">|     1 | Shi Zhongyu   |  22 | M      |       2 |         3 |    3 | Miejue Shitai |   77 | F      |</span><br><span class="line">|     2 | Shi Potian    |  22 | M      |       1 |         7 | NULL | NULL          | NULL | NULL   |</span><br><span class="line">|     3 | Xie Yanke     |  53 | M      |       2 |        16 | NULL | NULL          | NULL | NULL   |</span><br><span class="line">|     4 | Ding Dian     |  32 | M      |       4 |         4 |    4 | Lin Chaoying  |   93 | F      |</span><br><span class="line">|     5 | Yu Yutong     |  26 | M      |       3 |         1 |    1 | Song Jiang    |   45 | M      |</span><br><span class="line">|     6 | Shi Qing      |  46 | M      |       5 |      NULL | NULL | NULL          | NULL | NULL   |</span><br><span class="line">|     7 | Xi Ren        |  19 | F      |       3 |      NULL | NULL | NULL          | NULL | NULL   |</span><br><span class="line">|     8 | Lin Daiyu     |  17 | F      |       7 |      NULL | NULL | NULL          | NULL | NULL   |</span><br><span class="line">|     9 | Ren Yingying  |  20 | F      |       6 |      NULL | NULL | NULL          | NULL | NULL   |</span><br><span class="line">|    10 | Yue Lingshan  |  19 | F      |       3 |      NULL | NULL | NULL          | NULL | NULL   |</span><br><span class="line">|    11 | Yuan Chengzhi |  23 | M      |       6 |      NULL | NULL | NULL          | NULL | NULL   |</span><br><span class="line">|    12 | Wen Qingqing  |  19 | F      |       1 |      NULL | NULL | NULL          | NULL | NULL   |</span><br><span class="line">|    13 | Tian Boguang  |  33 | M      |       2 |      NULL | NULL | NULL          | NULL | NULL   |</span><br><span class="line">|    14 | Lu Wushuang   |  17 | F      |       3 |      NULL | NULL | NULL          | NULL | NULL   |</span><br><span class="line">|    15 | Duan Yu       |  19 | M      |       4 |      NULL | NULL | NULL          | NULL | NULL   |</span><br><span class="line">|    16 | Xu Zhu        |  21 | M      |       1 |      NULL | NULL | NULL          | NULL | NULL   |</span><br><span class="line">|    17 | Lin Chong     |  25 | M      |       4 |      NULL | NULL | NULL          | NULL | NULL   |</span><br><span class="line">|    18 | Hua Rong      |  23 | M      |       7 |      NULL | NULL | NULL          | NULL | NULL   |</span><br><span class="line">|    19 | Xue Baochai   |  18 | F      |       6 |      NULL | NULL | NULL          | NULL | NULL   |</span><br><span class="line">|    20 | Diao Chan     |  19 | F      |       7 |      NULL | NULL | NULL          | NULL | NULL   |</span><br><span class="line">|    21 | Huang Yueying |  22 | F      |       6 |      NULL | NULL | NULL          | NULL | NULL   |</span><br><span class="line">|    22 | Xiao Qiao     |  20 | F      |       1 |      NULL | NULL | NULL          | NULL | NULL   |</span><br><span class="line">|    23 | Ma Chao       |  23 | M      |       4 |      NULL | NULL | NULL          | NULL | NULL   |</span><br><span class="line">|    24 | Xu Xian       |  27 | M      |    NULL |      NULL | NULL | NULL          | NULL | NULL   |</span><br><span class="line">|    25 | Sun Dasheng   | 100 | M      |    NULL |         1 |    1 | Song Jiang    |   45 | M      |</span><br><span class="line">+<span class="comment">-------+---------------+-----+--------+---------+-----------+------+---------------+------+--------+</span></span><br></pre></td></tr></table></figure>
+
+<h5 id="右外连接：取出B表的全部记录以及A表中符合条件的记录。"><a href="#右外连接：取出B表的全部记录以及A表中符合条件的记录。" class="headerlink" title="右外连接：取出B表的全部记录以及A表中符合条件的记录。"></a>右外连接：取出B表的全部记录以及A表中符合条件的记录。</h5><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">MariaDB [hellodb]&gt; select * from students s right outer join teachers t on s.teacherid=t.tid;</span><br><span class="line">+<span class="comment">-------+-------------+------+--------+---------+-----------+-----+---------------+-----+--------+</span></span><br><span class="line">| StuID | Name        | Age  | Gender | ClassID | TeacherID | TID | Name          | Age | Gender |</span><br><span class="line">+<span class="comment">-------+-------------+------+--------+---------+-----------+-----+---------------+-----+--------+</span></span><br><span class="line">|     1 | Shi Zhongyu |   22 | M      |       2 |         3 |   3 | Miejue Shitai |  77 | F      |</span><br><span class="line">|     4 | Ding Dian   |   32 | M      |       4 |         4 |   4 | Lin Chaoying  |  93 | F      |</span><br><span class="line">|     5 | Yu Yutong   |   26 | M      |       3 |         1 |   1 | Song Jiang    |  45 | M      |</span><br><span class="line">|    25 | Sun Dasheng |  100 | M      |    NULL |         1 |   1 | Song Jiang    |  45 | M      |</span><br><span class="line">|  NULL | NULL        | NULL | NULL   |    NULL |      NULL |   2 | Zhang Sanfeng |  94 | M      |</span><br><span class="line">+<span class="comment">-------+-------------+------+--------+---------+-----------+-----+---------------+-----+--------+</span></span><br></pre></td></tr></table></figure>
+
+<h5 id="取出只在A表不在B表中的记录"><a href="#取出只在A表不在B表中的记录" class="headerlink" title="取出只在A表不在B表中的记录"></a>取出只在A表不在B表中的记录</h5><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">MariaDB [hellodb]&gt; select * from students s left join teachers t on s.teacherid=t.tid where tid is null;</span><br><span class="line">+<span class="comment">-------+---------------+-----+--------+---------+-----------+------+------+------+--------+</span></span><br><span class="line">| StuID | Name          | Age | Gender | ClassID | TeacherID | TID  | Name | Age  | Gender |</span><br><span class="line">+<span class="comment">-------+---------------+-----+--------+---------+-----------+------+------+------+--------+</span></span><br><span class="line">|     2 | Shi Potian    |  22 | M      |       1 |         7 | NULL | NULL | NULL | NULL   |</span><br><span class="line">|     3 | Xie Yanke     |  53 | M      |       2 |        16 | NULL | NULL | NULL | NULL   |</span><br><span class="line">|     6 | Shi Qing      |  46 | M      |       5 |      NULL | NULL | NULL | NULL | NULL   |</span><br><span class="line">|     7 | Xi Ren        |  19 | F      |       3 |      NULL | NULL | NULL | NULL | NULL   |</span><br><span class="line">|     8 | Lin Daiyu     |  17 | F      |       7 |      NULL | NULL | NULL | NULL | NULL   |</span><br><span class="line">|     9 | Ren Yingying  |  20 | F      |       6 |      NULL | NULL | NULL | NULL | NULL   |</span><br><span class="line">|    10 | Yue Lingshan  |  19 | F      |       3 |      NULL | NULL | NULL | NULL | NULL   |</span><br><span class="line">|    11 | Yuan Chengzhi |  23 | M      |       6 |      NULL | NULL | NULL | NULL | NULL   |</span><br><span class="line">|    12 | Wen Qingqing  |  19 | F      |       1 |      NULL | NULL | NULL | NULL | NULL   |</span><br><span class="line">|    13 | Tian Boguang  |  33 | M      |       2 |      NULL | NULL | NULL | NULL | NULL   |</span><br><span class="line">|    14 | Lu Wushuang   |  17 | F      |       3 |      NULL | NULL | NULL | NULL | NULL   |</span><br><span class="line">|    15 | Duan Yu       |  19 | M      |       4 |      NULL | NULL | NULL | NULL | NULL   |</span><br><span class="line">|    16 | Xu Zhu        |  21 | M      |       1 |      NULL | NULL | NULL | NULL | NULL   |</span><br><span class="line">|    17 | Lin Chong     |  25 | M      |       4 |      NULL | NULL | NULL | NULL | NULL   |</span><br><span class="line">|    18 | Hua Rong      |  23 | M      |       7 |      NULL | NULL | NULL | NULL | NULL   |</span><br><span class="line">|    19 | Xue Baochai   |  18 | F      |       6 |      NULL | NULL | NULL | NULL | NULL   |</span><br><span class="line">|    20 | Diao Chan     |  19 | F      |       7 |      NULL | NULL | NULL | NULL | NULL   |</span><br><span class="line">|    21 | Huang Yueying |  22 | F      |       6 |      NULL | NULL | NULL | NULL | NULL   |</span><br><span class="line">|    22 | Xiao Qiao     |  20 | F      |       1 |      NULL | NULL | NULL | NULL | NULL   |</span><br><span class="line">|    23 | Ma Chao       |  23 | M      |       4 |      NULL | NULL | NULL | NULL | NULL   |</span><br><span class="line">|    24 | Xu Xian       |  27 | M      |    NULL |      NULL | NULL | NULL | NULL | NULL   |</span><br><span class="line">+<span class="comment">-------+---------------+-----+--------+---------+-----------+------+------+------+--------+</span></span><br></pre></td></tr></table></figure>
+
+<h5 id="取出只在B中不在A中的记录"><a href="#取出只在B中不在A中的记录" class="headerlink" title="取出只在B中不在A中的记录"></a>取出只在B中不在A中的记录</h5><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">MariaDB [hellodb]&gt; select t.* from students s right join teachers t on s.teacherid=t.tid where s.teacherid is null;</span><br><span class="line">+<span class="comment">-----+---------------+-----+--------+</span></span><br><span class="line">| TID | Name          | Age | Gender |</span><br><span class="line">+<span class="comment">-----+---------------+-----+--------+</span></span><br><span class="line">|   2 | Zhang Sanfeng |  94 | M      |</span><br><span class="line">+<span class="comment">-----+---------------+-----+--------+</span></span><br></pre></td></tr></table></figure>
+
+<h5 id="子查询"><a href="#子查询" class="headerlink" title="子查询"></a>子查询</h5><p><strong>选出年龄大于学生平均年龄的老师的记录</strong></p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">MariaDB [hellodb]&gt; select * from teachers where age &gt; (select avg(age) from students);</span><br><span class="line">+<span class="comment">-----+---------------+-----+--------+</span></span><br><span class="line">| TID | Name          | Age | Gender |</span><br><span class="line">+<span class="comment">-----+---------------+-----+--------+</span></span><br><span class="line">|   1 | Song Jiang    |  45 | M      |</span><br><span class="line">|   2 | Zhang Sanfeng |  94 | M      |</span><br><span class="line">|   3 | Miejue Shitai |  77 | F      |</span><br><span class="line">|   4 | Lin Chaoying  |  93 | F      |</span><br><span class="line">+<span class="comment">-----+---------------+-----+--------+</span></span><br></pre></td></tr></table></figure>
+
+<h5 id="完全外连接-左外连接union右外连接"><a href="#完全外连接-左外连接union右外连接" class="headerlink" title="完全外连接:左外连接union右外连接"></a>完全外连接:左外连接union右外连接</h5><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line">MariaDB [hellodb]&gt; select * from students s left outer join teachers t  on s.teacherid=t.tid union select * from students s right outer join teachers t on s.teacherid=t.tid;</span><br><span class="line">+<span class="comment">-------+---------------+------+--------+---------+-----------+------+---------------+------+--------+</span></span><br><span class="line">| StuID | Name          | Age  | Gender | ClassID | TeacherID | TID  | Name          | Age  | Gender |</span><br><span class="line">+<span class="comment">-------+---------------+------+--------+---------+-----------+------+---------------+------+--------+</span></span><br><span class="line">|     1 | Shi Zhongyu   |   22 | M      |       2 |         3 |    3 | Miejue Shitai |   77 | F      |</span><br><span class="line">|     2 | Shi Potian    |   22 | M      |       1 |         7 | NULL | NULL          | NULL | NULL   |</span><br><span class="line">|     3 | Xie Yanke     |   53 | M      |       2 |        16 | NULL | NULL          | NULL | NULL   |</span><br><span class="line">|     4 | Ding Dian     |   32 | M      |       4 |         4 |    4 | Lin Chaoying  |   93 | F      |</span><br><span class="line">|     5 | Yu Yutong     |   26 | M      |       3 |         1 |    1 | Song Jiang    |   45 | M      |</span><br><span class="line">|     6 | Shi Qing      |   46 | M      |       5 |      NULL | NULL | NULL          | NULL | NULL   |</span><br><span class="line">|     7 | Xi Ren        |   19 | F      |       3 |      NULL | NULL | NULL          | NULL | NULL   |</span><br><span class="line">|     8 | Lin Daiyu     |   17 | F      |       7 |      NULL | NULL | NULL          | NULL | NULL   |</span><br><span class="line">|     9 | Ren Yingying  |   20 | F      |       6 |      NULL | NULL | NULL          | NULL | NULL   |</span><br><span class="line">|    10 | Yue Lingshan  |   19 | F      |       3 |      NULL | NULL | NULL          | NULL | NULL   |</span><br><span class="line">|    11 | Yuan Chengzhi |   23 | M      |       6 |      NULL | NULL | NULL          | NULL | NULL   |</span><br><span class="line">|    12 | Wen Qingqing  |   19 | F      |       1 |      NULL | NULL | NULL          | NULL | NULL   |</span><br><span class="line">|    13 | Tian Boguang  |   33 | M      |       2 |      NULL | NULL | NULL          | NULL | NULL   |</span><br><span class="line">|    14 | Lu Wushuang   |   17 | F      |       3 |      NULL | NULL | NULL          | NULL | NULL   |</span><br><span class="line">|    15 | Duan Yu       |   19 | M      |       4 |      NULL | NULL | NULL          | NULL | NULL   |</span><br><span class="line">|    16 | Xu Zhu        |   21 | M      |       1 |      NULL | NULL | NULL          | NULL | NULL   |</span><br><span class="line">|    17 | Lin Chong     |   25 | M      |       4 |      NULL | NULL | NULL          | NULL | NULL   |</span><br><span class="line">|    18 | Hua Rong      |   23 | M      |       7 |      NULL | NULL | NULL          | NULL | NULL   |</span><br><span class="line">|    19 | Xue Baochai   |   18 | F      |       6 |      NULL | NULL | NULL          | NULL | NULL   |</span><br><span class="line">|    20 | Diao Chan     |   19 | F      |       7 |      NULL | NULL | NULL          | NULL | NULL   |</span><br><span class="line">|    21 | Huang Yueying |   22 | F      |       6 |      NULL | NULL | NULL          | NULL | NULL   |</span><br><span class="line">|    22 | Xiao Qiao     |   20 | F      |       1 |      NULL | NULL | NULL          | NULL | NULL   |</span><br><span class="line">|    23 | Ma Chao       |   23 | M      |       4 |      NULL | NULL | NULL          | NULL | NULL   |</span><br><span class="line">|    24 | Xu Xian       |   27 | M      |    NULL |      NULL | NULL | NULL          | NULL | NULL   |</span><br><span class="line">|    25 | Sun Dasheng   |  100 | M      |    NULL |         1 |    1 | Song Jiang    |   45 | M      |</span><br><span class="line">|  NULL | NULL          | NULL | NULL   |    NULL |      NULL |    2 | Zhang Sanfeng |   94 | M      |</span><br><span class="line">+<span class="comment">-------+---------------+------+--------+---------+-----------+------+---------------+------+--------+</span></span><br></pre></td></tr></table></figure>
+
+<h5 id="取A、B并集去除交集的部分"><a href="#取A、B并集去除交集的部分" class="headerlink" title="取A、B并集去除交集的部分"></a>取A、B并集去除交集的部分</h5><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line">MariaDB [hellodb]&gt; select * from (select stuid,s.name student_name,s.age student_age,s.gender student_gender,classid,teacherid,tid,t.name,t.age,t.gender from students s left outer join teachers t on s.teacherid=t.tid union select * from students s right outer join teachers t on s.teacherid=t.tid) f where f.teacherid is null or f.tid is null;</span><br><span class="line">+<span class="comment">-------+---------------+-------------+----------------+---------+-----------+------+---------------+------+--------+</span></span><br><span class="line">| stuid | student_name  | student_age | student_gender | classid | teacherid | tid  | name          | age  | gender |</span><br><span class="line">+<span class="comment">-------+---------------+-------------+----------------+---------+-----------+------+---------------+------+--------+</span></span><br><span class="line">|     2 | Shi Potian    |          22 | M              |       1 |         7 | NULL | NULL          | NULL | NULL   |</span><br><span class="line">|     3 | Xie Yanke     |          53 | M              |       2 |        16 | NULL | NULL          | NULL | NULL   |</span><br><span class="line">|     6 | Shi Qing      |          46 | M              |       5 |      NULL | NULL | NULL          | NULL | NULL   |</span><br><span class="line">|     7 | Xi Ren        |          19 | F              |       3 |      NULL | NULL | NULL          | NULL | NULL   |</span><br><span class="line">|     8 | Lin Daiyu     |          17 | F              |       7 |      NULL | NULL | NULL          | NULL | NULL   |</span><br><span class="line">|     9 | Ren Yingying  |          20 | F              |       6 |      NULL | NULL | NULL          | NULL | NULL   |</span><br><span class="line">|    10 | Yue Lingshan  |          19 | F              |       3 |      NULL | NULL | NULL          | NULL | NULL   |</span><br><span class="line">|    11 | Yuan Chengzhi |          23 | M              |       6 |      NULL | NULL | NULL          | NULL | NULL   |</span><br><span class="line">|    12 | Wen Qingqing  |          19 | F              |       1 |      NULL | NULL | NULL          | NULL | NULL   |</span><br><span class="line">|    13 | Tian Boguang  |          33 | M              |       2 |      NULL | NULL | NULL          | NULL | NULL   |</span><br><span class="line">|    14 | Lu Wushuang   |          17 | F              |       3 |      NULL | NULL | NULL          | NULL | NULL   |</span><br><span class="line">|    15 | Duan Yu       |          19 | M              |       4 |      NULL | NULL | NULL          | NULL | NULL   |</span><br><span class="line">|    16 | Xu Zhu        |          21 | M              |       1 |      NULL | NULL | NULL          | NULL | NULL   |</span><br><span class="line">|    17 | Lin Chong     |          25 | M              |       4 |      NULL | NULL | NULL          | NULL | NULL   |</span><br><span class="line">|    18 | Hua Rong      |          23 | M              |       7 |      NULL | NULL | NULL          | NULL | NULL   |</span><br><span class="line">|    19 | Xue Baochai   |          18 | F              |       6 |      NULL | NULL | NULL          | NULL | NULL   |</span><br><span class="line">|    20 | Diao Chan     |          19 | F              |       7 |      NULL | NULL | NULL          | NULL | NULL   |</span><br><span class="line">|    21 | Huang Yueying |          22 | F              |       6 |      NULL | NULL | NULL          | NULL | NULL   |</span><br><span class="line">|    22 | Xiao Qiao     |          20 | F              |       1 |      NULL | NULL | NULL          | NULL | NULL   |</span><br><span class="line">|    23 | Ma Chao       |          23 | M              |       4 |      NULL | NULL | NULL          | NULL | NULL   |</span><br><span class="line">|    24 | Xu Xian       |          27 | M              |    NULL |      NULL | NULL | NULL          | NULL | NULL   |</span><br><span class="line">|  NULL | NULL          |        NULL | NULL           |    NULL |      NULL |    2 | Zhang Sanfeng |   94 | M      |</span><br><span class="line">+<span class="comment">-------+---------------+-------------+----------------+---------+-----------+------+---------------+------+--------+</span></span><br></pre></td></tr></table></figure>
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/mysql/" rel="tag"># mysql</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/10/07/mysql%E8%AF%BB%E5%86%99%E5%88%86%E7%A6%BB/" rel="next" title="基于proxysql实现mysql读写分离">
+                <i class="fa fa-chevron-left"></i> 基于proxysql实现mysql读写分离
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2017/10/20/%E7%BD%91%E7%BB%9C%E5%8D%8F%E8%AE%AE%E5%92%8C%E7%AE%A1%E7%90%86/" rel="prev" title="网络协议和管理">
+                网络协议和管理 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+        <!-- JiaThis Button BEGIN -->
+<div class="jiathis_style">
+<span class="jiathis_txt">分享到：</span>
+<a class="jiathis_button_fav">收藏夹</a>
+<a class="jiathis_button_copy">复制网址</a>
+<a class="jiathis_button_email">邮件</a>
+<a class="jiathis_button_weixin">微信</a>
+<a class="jiathis_button_qzone">QQ空间</a>
+<a class="jiathis_button_tqq">腾讯微博</a>
+<a class="jiathis_button_douban">豆瓣</a>
+<a class="jiathis_button_share">一键分享</a>
+
+<a href="http://www.jiathis.com/share?uid=2140465" class="jiathis jiathis_txt jiathis_separator jtico jtico_jiathis" target="_blank">更多</a>
+<a class="jiathis_counter_style"></a>
+</div>
+<script type="text/javascript" >
+var jiathis_config={
+  data_track_clickback:true,
+  summary:"",
+  shortUrl:false,
+  hideMore:false
+}
+</script>
+<script type="text/javascript" src="http://v3.jiathis.com/code/jia.js?uid=" charset="utf-8"></script>
+<!-- JiaThis Button END -->
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+    </div>
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/uploads/touxiang.jpg"
+                alt="ShengQin Miao" />
+            
+              <p class="site-author-name" itemprop="name">ShengQin Miao</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">53</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                
+                  <span class="site-state-item-count">1</span>
+                  <span class="site-state-item-name">分类</span>
+                
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">61</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#mysql多实例实现"><span class="nav-number">1.</span> <span class="nav-text">mysql多实例实现</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#创建多实例数据库的数据库目录和配置目录等相关目录"><span class="nav-number">1.0.1.</span> <span class="nav-text">创建多实例数据库的数据库目录和配置目录等相关目录</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#准备数据库文件"><span class="nav-number">1.0.2.</span> <span class="nav-text">准备数据库文件</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#准备配置文件"><span class="nav-number">1.0.3.</span> <span class="nav-text">准备配置文件</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#将-mysql目录的所有者和所属组改为mysql"><span class="nav-number">1.0.4.</span> <span class="nav-text">将&#x2F;mysql目录的所有者和所属组改为mysql</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#准备启动脚本"><span class="nav-number">1.0.5.</span> <span class="nav-text">准备启动脚本</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#将服务脚本加入系统管理服务"><span class="nav-number">1.0.6.</span> <span class="nav-text">将服务脚本加入系统管理服务</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#开启服务并连接"><span class="nav-number">1.0.7.</span> <span class="nav-text">开启服务并连接</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#mysql安全加固"><span class="nav-number">1.0.8.</span> <span class="nav-text">mysql安全加固</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#mysql数据库之增删改查"><span class="nav-number">2.</span> <span class="nav-text">mysql数据库之增删改查</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#数据库和表管理"><span class="nav-number">2.1.</span> <span class="nav-text">数据库和表管理</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#创建数据库create-database"><span class="nav-number">2.1.1.</span> <span class="nav-text">创建数据库create database</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#创建表-CREATE-TABLE"><span class="nav-number">2.1.2.</span> <span class="nav-text">创建表 CREATE TABLE</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#表操作"><span class="nav-number">2.1.3.</span> <span class="nav-text">表操作</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#修改表结构alter"><span class="nav-number">2.1.3.1.</span> <span class="nav-text">修改表结构alter</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#为表增加记录insert"><span class="nav-number">2.1.3.2.</span> <span class="nav-text">为表增加记录insert</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#删除表中的记录-delete"><span class="nav-number">2.1.3.3.</span> <span class="nav-text">删除表中的记录 delete</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#更改表中的记录-update"><span class="nav-number">2.1.3.4.</span> <span class="nav-text">更改表中的记录 update</span></a></li></ol></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#查找数据库的内容"><span class="nav-number">3.</span> <span class="nav-text">查找数据库的内容</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#select单表查询"><span class="nav-number">3.1.</span> <span class="nav-text">select单表查询</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#select多表查询"><span class="nav-number">3.2.</span> <span class="nav-text">select多表查询</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#两个表交叉查询"><span class="nav-number">3.2.1.</span> <span class="nav-text">两个表交叉查询</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#取两个表的交集-内连接"><span class="nav-number">3.2.1.1.</span> <span class="nav-text">取两个表的交集:内连接</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#左外连接：取出A表的全部记录以及B表中符合条件的记录。"><span class="nav-number">3.2.1.2.</span> <span class="nav-text">左外连接：取出A表的全部记录以及B表中符合条件的记录。</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#右外连接：取出B表的全部记录以及A表中符合条件的记录。"><span class="nav-number">3.2.1.3.</span> <span class="nav-text">右外连接：取出B表的全部记录以及A表中符合条件的记录。</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#取出只在A表不在B表中的记录"><span class="nav-number">3.2.1.4.</span> <span class="nav-text">取出只在A表不在B表中的记录</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#取出只在B中不在A中的记录"><span class="nav-number">3.2.1.5.</span> <span class="nav-text">取出只在B中不在A中的记录</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#子查询"><span class="nav-number">3.2.1.6.</span> <span class="nav-text">子查询</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#完全外连接-左外连接union右外连接"><span class="nav-number">3.2.1.7.</span> <span class="nav-text">完全外连接:左外连接union右外连接</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#取A、B并集去除交集的部分"><span class="nav-number">3.2.1.8.</span> <span class="nav-text">取A、B并集去除交集的部分</span></a></li></ol></li></ol></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">ShengQin Miao</span>
+
+  
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-area-chart"></i>
+    </span>
+    
+      <span class="post-meta-item-text">Site words total count&#58;</span>
+    
+    <span title="Site words total count">131.6k</span>
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Pisces</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js"></script>
+  <script>AV.initialize("vItlX9Jc2L4BuXKt6BJWW6eJ-gzGzoHsz", "IisqhTArerBOyaxKHN8TcE10");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

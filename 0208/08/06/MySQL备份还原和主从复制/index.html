@@ -1,0 +1,1613 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="mysql,主从复制," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="备份和恢复为什么要备份？实现容灾恢复 12345硬件故障软件故障自然灾害黑客攻击误操作删除等数据丢失场景  备份注意要点 123能容忍最多丢失多少数据恢复数据需要在多长时间内完成需要恢复哪些数据  还原要点 12做还原测试，用于测试备份的可用性还原演练  备份类型1234完全备份：整个数据集部分备份：只备份数据子集，如部分库或表增量备份：仅备份最近一次完全备份或增量备份（如果存在增量）以来变化的数">
+<meta property="og:type" content="article">
+<meta property="og:title" content="MySQL备份还原和主从复制">
+<meta property="og:url" content="http://yoursite.com/0208/08/06/MySQL%E5%A4%87%E4%BB%BD%E8%BF%98%E5%8E%9F%E5%92%8C%E4%B8%BB%E4%BB%8E%E5%A4%8D%E5%88%B6/index.html">
+<meta property="og:site_name" content="漫步人生路">
+<meta property="og:description" content="备份和恢复为什么要备份？实现容灾恢复 12345硬件故障软件故障自然灾害黑客攻击误操作删除等数据丢失场景  备份注意要点 123能容忍最多丢失多少数据恢复数据需要在多长时间内完成需要恢复哪些数据  还原要点 12做还原测试，用于测试备份的可用性还原演练  备份类型1234完全备份：整个数据集部分备份：只备份数据子集，如部分库或表增量备份：仅备份最近一次完全备份或增量备份（如果存在增量）以来变化的数">
+<meta property="article:published_time" content="0208-08-05T15:54:17.000Z">
+<meta property="article:modified_time" content="2020-04-20T13:33:51.708Z">
+<meta property="article:author" content="ShengQin Miao">
+<meta property="article:tag" content="mysql">
+<meta property="article:tag" content="主从复制">
+<meta name="twitter:card" content="summary">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/0208/08/06/MySQL备份还原和主从复制/"/>
+
+
+
+
+
+  <title>MySQL备份还原和主从复制 | 漫步人生路</title>
+  
+
+
+
+
+
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?f076ecd4b66d3a02de923868671591de";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+<meta name="generator" content="Hexo 4.2.0"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">漫步人生路</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off"
+             placeholder="搜索..." spellcheck="false"
+             type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/0208/08/06/MySQL%E5%A4%87%E4%BB%BD%E8%BF%98%E5%8E%9F%E5%92%8C%E4%B8%BB%E4%BB%8E%E5%A4%8D%E5%88%B6/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="ShengQin Miao">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/uploads/touxiang.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="漫步人生路">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">MySQL备份还原和主从复制</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="0208-08-06T00:00:00+08:00">
+                0208-08-06
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+             <span id="/0208/08/06/MySQL%E5%A4%87%E4%BB%BD%E8%BF%98%E5%8E%9F%E5%92%8C%E4%B8%BB%E4%BB%8E%E5%A4%8D%E5%88%B6/" class="leancloud_visitors" data-flag-title="MySQL备份还原和主从复制">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+            <div class="post-wordcount">
+              
+                
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-file-word-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">字数统计&#58;</span>
+                
+                <span title="字数统计">
+                  6.8k
+                </span>
+              
+
+              
+                <span class="post-meta-divider">|</span>
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-clock-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">阅读时长 &asymp;</span>
+                
+                <span title="阅读时长">
+                  27
+                </span>
+              
+            </div>
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="备份和恢复"><a href="#备份和恢复" class="headerlink" title="备份和恢复"></a>备份和恢复</h2><p>为什么要备份？<br><strong>实现容灾恢复</strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">硬件故障</span><br><span class="line">软件故障</span><br><span class="line">自然灾害</span><br><span class="line">黑客攻击</span><br><span class="line">误操作删除等数据丢失场景</span><br></pre></td></tr></table></figure>
+
+<p><strong>备份注意要点</strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">能容忍最多丢失多少数据</span><br><span class="line">恢复数据需要在多长时间内完成</span><br><span class="line">需要恢复哪些数据</span><br></pre></td></tr></table></figure>
+
+<p><strong>还原要点</strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">做还原测试，用于测试备份的可用性</span><br><span class="line">还原演练</span><br></pre></td></tr></table></figure>
+
+<h4 id="备份类型"><a href="#备份类型" class="headerlink" title="备份类型"></a>备份类型</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">完全备份：整个数据集</span><br><span class="line">部分备份：只备份数据子集，如部分库或表</span><br><span class="line">增量备份：仅备份最近一次完全备份或增量备份（如果存在增量）以来变化的数据，备份较快，还原复杂</span><br><span class="line">差异备份：仅备份最近一次完全备份以来变化的数据，备份较慢，还原简单</span><br></pre></td></tr></table></figure>
+
+<p><strong>注意</strong>：二进制文件不应该与数据文件放在同一磁盘</p>
+<p><strong>冷、温、热备份</strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">冷备：读写操作均不可进行</span><br><span class="line">温备：读操作可执行，但写操作不可执行</span><br><span class="line">热备：读写操作均可执行</span><br><span class="line">	MyISAM：温备，不支持热备</span><br><span class="line">	InnoDB：都支持，建议使用热备</span><br></pre></td></tr></table></figure>
+
+<p><strong>物理和逻辑备份</strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">物理备份：直接复制数据文件进行备份，与存储引擎有关，占用较多的空间，速度快。</span><br><span class="line">逻辑备份：从数据库中“导出”数据另存而进行的备份，与存储引擎无关，占用空间少，速度慢，可能丢失精度</span><br></pre></td></tr></table></figure>
+
+<h4 id="备份时需要考虑的因素"><a href="#备份时需要考虑的因素" class="headerlink" title="备份时需要考虑的因素"></a>备份时需要考虑的因素</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">温备的持锁多久</span><br><span class="line">备份产生的负载</span><br><span class="line">备份过程的时长</span><br><span class="line">恢复过程的时长</span><br></pre></td></tr></table></figure>
+
+<h4 id="备份什么"><a href="#备份什么" class="headerlink" title="备份什么"></a>备份什么</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">数据</span><br><span class="line">二进制日志、InnoDB的事务日志</span><br><span class="line">程序代码（存储过程、函数、触发器、时间调度器）</span><br><span class="line">服务器的配置文件</span><br></pre></td></tr></table></figure>
+
+<h3 id="备份工具"><a href="#备份工具" class="headerlink" title="备份工具"></a>备份工具</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">cp,tar等复制归档工具：物理备份工具，适用所有存储引擎；只支持冷备；完全和部分备份</span><br><span class="line">LVM的快照：先加锁，做快照后解锁，几乎热备；借助文件系统工具进行备份</span><br><span class="line">mysqldump：逻辑备份工具，适用所有存储引擎，温备；支持完全或部分备份；对InnoDB存储引擎支持热备，结合binlog的增量备份</span><br><span class="line">xtrabackup：由Percona提供支持对InnoDB做热备(物理备份)的工具，支持完全备份、增量备份</span><br><span class="line">MariaDB Backup： 从MariaDB 10.1.26开始集成，基于Percona XtraBackup 2.3.8实现</span><br><span class="line">mysqlbackup：热备份， MySQL Enterprise Edition组件</span><br><span class="line">mysqlhotcopy：PERL 语言实现，几乎冷备，仅适用于MyISAM存储引擎，</span><br><span class="line">使用LOCK TABLES、FLUSH TABLES和cp或scp来快速备份数据库</span><br></pre></td></tr></table></figure>
+
+<h4 id="mysqldump工具介绍"><a href="#mysqldump工具介绍" class="headerlink" title="mysqldump工具介绍"></a>mysqldump工具介绍</h4><p>mysqldump：客户端命令，通过mysql协议连接至mysql服务器进行备份<br>用法：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">mysqldump [OPTIONS] database [tables]  (不推荐使用)</span><br><span class="line">mysqldump [OPTIONS] –B DB1 [DB2 DB3...]</span><br><span class="line">mysqldump [OPTIONS] –A [OPTIONS]</span><br></pre></td></tr></table></figure>
+
+<p>mysqldump常见选项：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">-A， --all-databases 备份所有数据库，含create database</span><br><span class="line">-B , --databases db_name… 指定备份的数据库，包括create database语句</span><br><span class="line">-E, --events：备份相关的所有event scheduler,即备份计划任务</span><br><span class="line">-R, --routines：备份所有存储过程和自定义函数</span><br><span class="line">--triggers：备份表相关触发器，默认启用,用--skip-triggers，不备份触发器</span><br><span class="line">--default-character-set&#x3D;utf8 指定字符集</span><br><span class="line">--master-data[&#x3D;#]： 此选项须启用二进制日志</span><br><span class="line">	1：所备份的数据之前加一条记录为CHANGE MASTER TO语句，非注释，不指定#，默认为1</span><br><span class="line">	2：记录为注释的CHANGE MASTER TO语句此选项会自动关闭--lock-tables功能，自动打开-x | --lock-all-tables功能（除非开启--single-transaction）</span><br><span class="line">-F, --flush-logs ：备份前滚动日志，锁定表完成后，执行flush logs命令,生成新的二进制日志文件，配合-A 或 -B 选项时，会导致刷新多次数据库。建议在同一时刻执行转储和日志刷新，可通过和--single-transaction或-x，--master-data 一起使用实现，此时只刷新一次日志</span><br><span class="line">--compact 去掉注释，适合调试，生产不使用</span><br><span class="line">-d, --no-data 只备份表结构</span><br><span class="line">-t, --no-create-info 只备份数据,不备份create table</span><br><span class="line">-n,--no-create-db 不备份create database，可被-A或-B覆盖</span><br><span class="line">--flush-privileges 备份mysql或相关库时需要使用</span><br><span class="line">-f, --force 忽略SQL错误，继续执行</span><br><span class="line">--hex-blob 使用十六进制符号转储二进制列，当有包括BINARY，VARBINARY，BLOB，BIT的数据类型的列时使用，避免乱码</span><br><span class="line">-q, --quick 不缓存查询，直接输出，加快备份速度</span><br></pre></td></tr></table></figure>
+
+<h4 id="实现数据库分库备份"><a href="#实现数据库分库备份" class="headerlink" title="实现数据库分库备份"></a>实现数据库分库备份</h4><p>方法一：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@mariadb ~]<span class="comment">#mysql -e 'show databases'|grep -Eiv 'database|information_schema|performance_schema'|sed -r 's#.*#mysqldump -B -F --master-data=2 &amp; |gzip &gt; &amp;_`data +%F`.sql.gzip#'|bash</span></span><br></pre></td></tr></table></figure>
+
+<p>方法二：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@mariadb ~]<span class="comment">#for i in `mysql -e 'show databases'|grep -Eiv "database|information_schema|performance_schema"`;do mysqldump -B $i -F --master-data=2 |gzip &gt; $&#123;i&#125;_`date +%F`.sql.gzip;done</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>MyISAM备份选项</strong>：<br> 支持温备；不支持热备，所以必须先锁定要备份的库，而后启动备份操作锁定方法如下：<br>    -x,–lock-all-tables：加全局读锁，锁定所有库的所有表，同时加–singletransaction或–lock-tables选项会关闭此选项功能<br> 注意：数据量大时，可能会导致长时间无法并发访问数据库<br>     -l,–lock-tables：对于需要备份的每个数据库，在启动备份之前分别锁定其所有表，默认为on,–skip-lock-tables选项可禁用,对备份MyISAM的多个库,可能会造成数据不一致<br> 注：以上选项对InnoDB表一样生效，实现温备，但不推荐使用</p>
+<p> <strong>InnoDB备份选项</strong>： 支持热备，可用温备但不建议用<br> –single-transaction：此选项Innodb中推荐使用，不适用MyISAM，此选项会开始备份前，先执行START TRANSACTION指令开启事务，即以事务的方式开启备份<br>此选项通过在单个事务中转储所有表来创建一致的快照。 仅适用于存储在支持多版本控制的存储引擎中的表（目前只有InnoDB可以）; 转储不保证与其他存储引擎保持一致。 在进行单事务转储时，要确保有效的转储文件（正确的表内容和二进制日志位置），没有其他连接应该使用以下语句：ALTER TABLE，DROP TABLE，RENAME TABLE，TRUNCATE TABLE<br>此选项和–lock-tables（此选项隐含提交挂起的事务）选项是相互排斥<br>备份大型表时，建议将–single-transaction选项和–quick结合一起使用</p>
+<h3 id="生产环境备份策略"><a href="#生产环境备份策略" class="headerlink" title="生产环境备份策略"></a>生产环境备份策略</h3><p><strong>InnoDB建议备份策略</strong>：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@mariadb ~]<span class="comment">#mysqldump –uroot –A –F –E –R --single-transaction --master-data=1 --flush-privileges --triggers --default-character-set=utf8 --hex-blob &gt; $BACKUP/fullbak_$BACKUP_TIME.sql</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>MyISAM建议备份策略</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@mariadb ~]<span class="comment">#mysqldump –uroot –A –F –E –R –x --master-data=1 --flush-privileges --triggers --default-character-set=utf8 --hex-blob &gt; $BACKUP/fullbak_$BACKUP_TIME.sql</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="场景：每天凌晨两点计划任务自动备份数据库，第二天早上十点数据库被误删除，设法将数据库恢复到十点的状态"><a href="#场景：每天凌晨两点计划任务自动备份数据库，第二天早上十点数据库被误删除，设法将数据库恢复到十点的状态" class="headerlink" title="场景：每天凌晨两点计划任务自动备份数据库，第二天早上十点数据库被误删除，设法将数据库恢复到十点的状态"></a>场景：每天凌晨两点计划任务自动备份数据库，第二天早上十点数据库被误删除，设法将数据库恢复到十点的状态</h3><ol>
+<li><p>如果是yum安装的数据库，直接启动数据库；如果是多实例，初始化数据库后，然后启动数据库。（本实验以多实例安装为例），前提条件为二进制日志和数据库必须分离存放，即二进制日志必须保存完整，此外还要确认字符集和存储引擎。备份策略为innodb建议的备份策略。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">[root@ansible <span class="built_in">test</span>]<span class="comment">#sed -n '/^[^#]/p' /mysql/3306/etc/my.cnf </span></span><br><span class="line">[mysqld]</span><br><span class="line">port=3306</span><br><span class="line">datadir=/mysql/3306/data/</span><br><span class="line"><span class="built_in">log</span>-bin=/mysql/3306/logbin/mysql-bin</span><br><span class="line">socket=/mysql/3306/socket/mysql.sock</span><br><span class="line">innodb_file_per_table</span><br><span class="line">symbolic-links=0</span><br><span class="line">[mysqld_safe]</span><br><span class="line"><span class="built_in">log</span>-error=/mysql/3306/<span class="built_in">log</span>/mariadb.log</span><br><span class="line">pid-file=/mysql/3306/pid/mariadb.pid</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>导入备份。<br>首先关闭二进制日志：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">MariaDB [(none)]&gt; set sql_log_bin=0;</span><br><span class="line">MariaDB [(none)]&gt;source test/all_bak.sql</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>将二进制日志导入数据库。<br>新开终端查看当前被分的二进制节点：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@ansible ~]<span class="comment">#sed -n '/^-- CHANGE MASTER TO/p' test/all_bak.sql </span></span><br><span class="line">-- CHANGE MASTER TO MASTER_LOG_FILE=<span class="string">'mysql-bin.000003'</span>, MASTER_LOG_POS=385;</span><br></pre></td></tr></table></figure>
+
+</li>
+</ol>
+<p>将此节点之后的二进制日志导出：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">[root@ansible ~]<span class="comment">#ls /mysql/3306/logbin/</span></span><br><span class="line">mysql-bin.000001  mysql-bin.000003  mysql-bin.000005  mysql-bin.000007  mysql-bin.000009  mysql-bin.state</span><br><span class="line">mysql-bin.000002  mysql-bin.000004  mysql-bin.000006  mysql-bin.000008  mysql-bin.index</span><br><span class="line">[root@ansible ~]<span class="comment">#mysqlbinlog /mysql/3306/logbin/mysql-bin.00000&#123;3,4,5,6,7,8,9&#125; &gt; /root/test/binlog_bak.sql</span></span><br></pre></td></tr></table></figure>
+
+<p>导入（在旧终端）：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">MariaDB [(none)]&gt;<span class="built_in">source</span> /root/<span class="built_in">test</span>/binlog_bak.sql</span><br></pre></td></tr></table></figure>
+
+<p>开启二进制日志：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">MariaDB [(none)]&gt; <span class="built_in">set</span> sql_log_bin=1;</span><br></pre></td></tr></table></figure>
+
+<p>此时，已经将数据库恢复到十点的状态，恢复期间，应通过设置防火墙策略等手段禁止用户访问该实例，数据库恢复完成后，恢复用户的访问。</p>
+<h3 id="场景：每天凌晨两点计划任务自动备份数据库，第二天早上十点数据库中的某个表被误删除，之后对数据库的其他表做了一些写操作，直到十点十分发现问题，设法将数据库恢复到十点十分的状态，即恢复被删除的表，并将其余操作一并恢复。"><a href="#场景：每天凌晨两点计划任务自动备份数据库，第二天早上十点数据库中的某个表被误删除，之后对数据库的其他表做了一些写操作，直到十点十分发现问题，设法将数据库恢复到十点十分的状态，即恢复被删除的表，并将其余操作一并恢复。" class="headerlink" title="场景：每天凌晨两点计划任务自动备份数据库，第二天早上十点数据库中的某个表被误删除，之后对数据库的其他表做了一些写操作，直到十点十分发现问题，设法将数据库恢复到十点十分的状态，即恢复被删除的表，并将其余操作一并恢复。"></a>场景：每天凌晨两点计划任务自动备份数据库，第二天早上十点数据库中的某个表被误删除，之后对数据库的其他表做了一些写操作，直到十点十分发现问题，设法将数据库恢复到十点十分的状态，即恢复被删除的表，并将其余操作一并恢复。</h3><ol>
+<li>准备工作：依然是用hellodb数据库做演示，删除teachers表，并在students表中插入记录，而后恢复。<br>hellodb库的表结构如下：<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">MariaDB [hellodb]&gt; show tables;</span><br><span class="line">+<span class="comment">-------------------+</span></span><br><span class="line">| Tables_in_hellodb |</span><br><span class="line">+<span class="comment">-------------------+</span></span><br><span class="line">| classes           |</span><br><span class="line">| coc               |</span><br><span class="line">| courses           |</span><br><span class="line">| scores            |</span><br><span class="line">| students          |</span><br><span class="line">| teachers          |</span><br><span class="line">| toc               |</span><br><span class="line">+<span class="comment">-------------------+</span></span><br></pre></td></tr></table></figure>
+
+</li>
+</ol>
+<p>备份数据库</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@mariadb ~]<span class="comment">#mysqldump -A -F --single-transaction --master-data=2 &gt; all_bak.sql</span></span><br></pre></td></tr></table></figure>
+
+<ol start="2">
+<li><p>禁止用户访问此数据库实例。（利用防火墙策略等手段）</p>
+</li>
+<li><p>关闭二进制日志</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">MariaDB [hellodb]&gt; set sql_log_bin=0;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>导入备份的数据库</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">MariaDB [hellodb]&gt; source /root/all_bak.sql</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>将备份节点之后的二进制日志导出</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@mariadb ~]<span class="comment">#mysqlbinlog /var/lib/mysql/mariadb-bin.000002 &gt; binlog.sql</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>将导出的二进制日志中的删除teachers表的语句删除</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@mariadb ~]<span class="comment">#sed -i '/^DROP/s/.*/#&amp;/' binlog.sql</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>将二进制日志导入数据库</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">MariaDB [hellodb]&gt; source /root/binlog.sql</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>打开二进制日志</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">MariaDB [hellodb]&gt; set sql_log_bin=1;</span><br></pre></td></tr></table></figure>
+
+</li>
+</ol>
+<p>至此，误删除的表已经恢复，注意：所有的导入过程必须关闭二进制日志，直到恢复完成后再打开。</p>
+<h2 id="percona-xtrabackup实战入门"><a href="#percona-xtrabackup实战入门" class="headerlink" title="percona-xtrabackup实战入门"></a>percona-xtrabackup实战入门</h2><p>Percona</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">官网：www.percona.com</span><br><span class="line">percona-server</span><br><span class="line">InnoDB --&gt; XtraDB</span><br></pre></td></tr></table></figure>
+
+<p><strong>Xtrabackup</strong><br>percona提供的mysql数据库备份工具，惟一开源的能够对innodb和xtradb数据库进行热备的工具<br>手册：<a href="https://www.percona.com/doc/percona-xtrabackup/LATEST/index.html" target="_blank" rel="noopener">https://www.percona.com/doc/percona-xtrabackup/LATEST/index.html</a><br>特点：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">备份还原过程快速、可靠</span><br><span class="line">备份过程不会打断正在执行的事务</span><br><span class="line">能够基于压缩等功能节约磁盘空间和流量</span><br><span class="line">自动实现备份检验</span><br><span class="line">开源，免费</span><br></pre></td></tr></table></figure>
+
+<p><strong>xtrabaclip工作原理</strong>：<br><a href="https://www.percona.com/doc/percona-xtrabackup/LATEST/how_xtrabackup_works.html" target="_blank" rel="noopener">https://www.percona.com/doc/percona-xtrabackup/LATEST/how_xtrabackup_works.html</a></p>
+<p>下载xtrabackup</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@mariadb tools]<span class="comment">#wget https://www.percona.com/downloads/XtraBackup/Percona-XtraBackup-2.4.12/binary/redhat/7/x86_64/percona-xtrabackup-24-2.4.12-1.el7.x86_64.rpm</span></span><br></pre></td></tr></table></figure>
+
+<p>安装xtrabackup</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@mariadb tools]<span class="comment">#yum install percona*.rpm</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="xtrabackup用法简介"><a href="#xtrabackup用法简介" class="headerlink" title="xtrabackup用法简介"></a>xtrabackup用法简介</h4><p><strong>备份</strong>：innobackupex [option] BACKUP-ROOT-DIR<br>选项说明：<a href="https://www.percona.com/doc/percona-xtrabackup/LATEST/genindex.html" target="_blank" rel="noopener">https://www.percona.com/doc/percona-xtrabackup/LATEST/genindex.html</a><br>选项说明：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">--user：该选项表示备份账号</span><br><span class="line">--password：该选项表示备份的密码</span><br><span class="line">--host：该选项表示备份数据库的地址</span><br><span class="line">--databases：该选项接受的参数为数据库名，如果要指定多个数据库，彼此间需要以空格隔开；如：&quot;xtra_test dba_test&quot;，同时，在指定某数据库时，也可以只指定其中的某张表。如：&quot;mydatabase.mytable&quot;。该选项对innodb引擎表无效，还是会备份所有innodb表</span><br><span class="line">--defaults-file：该选项指定从哪个文件读取MySQL配置，必须放在命令行第一个选项位置</span><br><span class="line">--incremental：该选项表示创建一个增量备份，需要指定--incremental-basedir</span><br><span class="line">--incremental-basedir：该选项指定为前一次全备份或增量备份的目录，与--incremental同时使用</span><br><span class="line">--incremental-dir：该选项表示还原时增量备份的目录</span><br><span class="line">--include&#x3D;name：指定表名，格式：databasename.tablename</span><br></pre></td></tr></table></figure>
+
+<p><strong>prepare</strong>：innobackupex –apply-log [option] BACKUP-DIR<br>选项说明</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">--apply-log：最后一次恢复时使用该选项，一般情况下,在备份完成后，数据尚且不能用于恢复操作，因为备份的数据中可能会包含尚未提交的事务或已经提交但</span><br><span class="line">	尚未同步至数据文件中的事务。因此，此时数据文件仍处于不一致状态。此选项作用是通过回滚未提交的事务及同步已经提交的事</span><br><span class="line">	务至数据文件使数据文件处于一致性状态</span><br><span class="line">--use-memory：和--apply-log选项一起使用，当prepare 备份时，做crashrecovery分配的内存大小，单位字节，也可1MB,1M,1G,1GB等，推荐1G</span><br><span class="line">--export：表示开启可导出单独的表之后再导入其他Mysql中</span><br><span class="line">--redo-only：不是最后一次恢复时使用，此选项在prepare base full backup，往其中合并增量备份时候使用，但不包括对最后一个增量备份的合并</span><br></pre></td></tr></table></figure>
+
+<p><strong>还原</strong>：innobackupex –copy-back [选项] BACKUP-DIR<br>          innobackupex –move-back [选项] [–defaults-group=GROUP-NAME] BACKUP-DIR<br>选项说明</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">--defaults-file&#x3D;[MY.CNF]:此选项接受一个字符串参数，该参数指定要从中读取默</span><br><span class="line">	认MySQL选项的文件。必须作为命令行中的第一个选项。</span><br><span class="line">--copy-back：做数据恢复时将备份数据文件拷贝到MySQL服务器的datadir</span><br><span class="line">--move-back：这个选项与--copy-back相似，唯一的区别是它不拷贝文件，</span><br><span class="line">	而是移动文件到目的地。这个选项移除backup文件，用时候必须小心。使用场</span><br><span class="line">	景：没有足够的磁盘空间同事保留数据文件和Backup副本</span><br></pre></td></tr></table></figure>
+
+<p>还原注意事项：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">1.datadir 目录必须为空。除非指定innobackupex --force-non-emptydirectorires选项指定，否则--copy-backup选项不会复制目标目录已经存在的文件。</span><br><span class="line">2.在restore之前,必须shutdown MySQL实例，不能将一个运行中的实例restore到datadir目录中</span><br><span class="line">3.由于文件属性会被保留，大部分情况下需要在启动实例之前将文件的属主改为mysql，这些文件将属于创建备份的用户</span><br><span class="line">chown -R mysql:mysql &#x2F;data&#x2F;mysql</span><br></pre></td></tr></table></figure>
+<p>以上需要在用户调用innobackupex之前完成</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">--force-non-empty-directories：指定该参数时候，使得innobackupex --</span><br><span class="line">copy-back或--move-back选项转移文件到非空目录，已存在的文件不会被覆</span><br><span class="line">盖。如果--copy-back和--move-back文件需要从备份目录拷贝一个在</span><br><span class="line">datadir已经存在的文件，会报错失败</span><br></pre></td></tr></table></figure>
+
+<p><strong>使用xtrabackup备份生成的相关文件</strong><br>使用innobakupex备份时，其会调用xtrabackup备份所有的InnoDB表，复制所有关于表结构定义的相关文件(.frm)、以及MyISAM、MERGE、CSV和ARCHIVE表的相关文件，同时还会备份触发器和数据库配置信息相关的文件。这些文件会被保存至一个以时间命名的目录中,在备份时，innobackupex还会在备份目录中创建如下文件：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">xtrabackup_info：innobackupex工具执行时的相关信息，包括版本，备份选项，备</span><br><span class="line">	份时长，备份LSN(log sequence number日志序列号)，BINLOG的位置</span><br><span class="line">xtrabackup_checkpoints：备份类型（如完全或增量）、备份状态（如是否已经为</span><br><span class="line">	prepared状态）和LSN范围信息,每个InnoDB页(通常为16k大小)都会包含一个日</span><br><span class="line">	志序列号LSN。LSN是整个数据库系统的系统版本号，每个页面相关的LSN能够表明</span><br><span class="line">	此页面最近是如何发生改变的</span><br><span class="line">xtrabackup_binlog_info：MySQL服务器当前正在使用的二进制日志文件及至备份</span><br><span class="line">	这一刻为止二进制日志事件的位置，可利用实现基于binlog的恢复</span><br><span class="line">backup-my.cnf：备份命令用到的配置选项信息</span><br><span class="line">xtrabackup_logfile：备份生成的日志文件</span><br></pre></td></tr></table></figure>
+
+<h3 id="实验：xtrabackup完全备份及还原"><a href="#实验：xtrabackup完全备份及还原" class="headerlink" title="实验：xtrabackup完全备份及还原"></a><strong>实验：xtrabackup完全备份及还原</strong></h3><ol>
+<li><p>在原主机做完全备份到/data/backup</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@mariadb tools]<span class="comment">#xtrabackup --backup --target-dir=/data/backup</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>将备份后生成的目录拷贝到远程主机</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@mariadb tools]<span class="comment">#scp -r /data/backup/ 192.168.34.108:/data/backup/</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>在远程主机做预准备工作</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@node01 ~]<span class="comment">#xtrabackup --prepare --target-dir=/data/backup</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>执行还原操作</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@node01 ~]<span class="comment">#xtrabackup --copy-back --target-dir=/data/backup --datadir=/var/lib/mysql</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>更改还原的数据库的属主和属组</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@node01 ~]<span class="comment">#chown -R mysql.mysql /var/lib/mysql/</span></span><br></pre></td></tr></table></figure>
+
+</li>
+</ol>
+<p>至此，实验结束。</p>
+<h3 id="实验：xtrabackup完全、增量备份及还原"><a href="#实验：xtrabackup完全、增量备份及还原" class="headerlink" title="实验：xtrabackup完全、增量备份及还原"></a><strong>实验：xtrabackup完全、增量备份及还原</strong></h3><p>创建文件夹用于实验</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@mariadb backup]<span class="comment">#mkdir /data/test/&#123;base,inc1,inc2&#125;</span></span><br></pre></td></tr></table></figure>
+
+<ol>
+<li><p>执行完全备份</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@mariadb backup]<span class="comment">#xtrabackup --backup --target-dir=/data/test/base</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>往数据库中插入数据后执行第一次增量备份</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@mariadb backup]<span class="comment">#xtrabackup --backup --target-dir=/data/test/inc1 --incremental-basedir=/data/test/base</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>再次往数据库插入数据后执行第二次增量备份</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@mariadb backup]<span class="comment">#xtrabackup --backup --target-dir=/data/test/inc2 --incremental-basedir=/data/test/inc1</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>删除数据库，准备还原</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">[root@mariadb backup]<span class="comment">#rm -rf /var/lib/mysql/*</span></span><br><span class="line">``` </span><br><span class="line"></span><br><span class="line">5. 预准备完成备份，此选项--apply-log-only 阻止回滚未完成的事务</span><br><span class="line">```bash</span><br><span class="line">[root@mariadb backup]<span class="comment">#xtrabackup --prepare --target-dir=/data/test/base --apply-log-only</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>合并第1次增量备份到完全备份</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@mariadb backup]<span class="comment">#xtrabackup --prepare --apply-log-only --target-dir=/data/test/base --incremental-dir=/data/test/inc1</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>合并第2次增量备份到完全备份：最后一次还原不需要加选项–apply-log-only</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@mariadb backup]<span class="comment">#xtrabackup --prepare  --target-dir=/data/test/base --incremental-dir=/data/test/inc2</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>复制到数据库目录，注意数据库目录必须为空，MySQL服务不能启动</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@mariadb backup]<span class="comment">#xtrabackup --copy-back --target-dir=/data/test/base --datadir=/var/lib/mysql/</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>还原属性</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@mariadb backup]<span class="comment">#chown -R mysql:mysql /var/lib/mysql</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>启动服务</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@mariadb backup]<span class="comment">#systemctl start mariadb</span></span><br></pre></td></tr></table></figure>
+
+</li>
+</ol>
+<p>xtrabackup单表导出和导入</p>
+<ol>
+<li>单表备份<br>innobackupex –include=’hellodb.students’ /backups</li>
+<li>备份表结构<br>mysql -e ‘show create table hellodb.students’ &gt; student.sql</li>
+<li>删除表<br>mysql -e ‘drop table hellodb.students‘<br>4 innobackupex –apply-log –export /backups/2018-02-23_15-03-23/</li>
+<li>创建表<br>mysql&gt;CREATE TABLE <code>students</code> (<br><code>StuID</code> int(10) unsigned NOT NULL AUTO_INCREMENT,<br><code>Name</code> varchar(50) NOT NULL,<br><code>Age</code> tinyint(3) unsigned NOT NULL,<br><code>Gender</code> enum(‘F’,’M’) NOT NULL,<br><code>ClassID</code> tinyint(3) unsigned DEFAULT NULL,<br><code>TeacherID</code> int(10) unsigned DEFAULT NULL,<br>PRIMARY KEY (<code>StuID</code>)<br>) ENGINE=InnoDB AUTO_INCREMENT=26 DEFAULT CHARSET=utf8</li>
+<li>删除表空间<br>alter table students discard tablespace;</li>
+<li>cp /backups/2018-02-23_15-03-23/hellodb/students.{cfg,exp,ibd}<br>/var/lib/mysql/hellodb/</li>
+<li>chown -R mysql.mysql /var/lib/mysql/hellodb/</li>
+<li>mysql&gt;alter table students import tablespace;</li>
+</ol>
+<h2 id="mysql主从复制"><a href="#mysql主从复制" class="headerlink" title="mysql主从复制"></a>mysql主从复制</h2><p>mysql的扩展</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">读写分离</span><br><span class="line">复制：每个节点都有相同的数据集</span><br><span class="line">		向外扩展</span><br><span class="line">		二进制日志</span><br><span class="line">		单向</span><br></pre></td></tr></table></figure>
+
+<p>主从复制的功用</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">数据分布</span><br><span class="line">负载均衡读</span><br><span class="line">备份</span><br><span class="line">高可用和故障切换</span><br><span class="line">mysql升级测试</span><br></pre></td></tr></table></figure>
+
+<p><strong>主从复制原理</strong></p>
+<ol>
+<li>master收到用户的写操作，更新数据，同时写入二进制日志。</li>
+<li>master上的dump thread向slave上的I/O thread发送binary log events</li>
+<li>slave thread将从master接收的binary log events保存在rely log中</li>
+<li>slave上的SQL thread从rely log读取日志事件，并写入本地数据库中。至此，完成主从复制</li>
+</ol>
+<p><strong>复制类型</strong><br><strong>异步复制</strong>：master写入完成后立即反馈结果给用户，有数据丢失风险，例如master在向slave同步之前突然宕机，然而用户以为已经正确完成写入操作。<br><strong>同步复制</strong>：master写入完成后先将二进制日志同步到所有的slave，之后在反馈结果给用户，缺点是用户体验差，可能造成长时间等待。<br><strong>半同步复制</strong>：master写入完成后先将二进制日志同步到slave，但是只要有一个slave同步完成，即反馈结果给用户，比较合理。</p>
+<p>主从配置过程：参看官网<br><a href="https://mariadb.com/kb/en/library/setting-up-replication/" target="_blank" rel="noopener">https://mariadb.com/kb/en/library/setting-up-replication/</a><br><a href="https://dev.mysql.com/doc/refman/5.5/en/replication-configuration.html" target="_blank" rel="noopener">https://dev.mysql.com/doc/refman/5.5/en/replication-configuration.html</a></p>
+<p><strong>主节点配置</strong></p>
+<ol>
+<li>启用二进制日志<br>[mysqld]<br>log_bin</li>
+<li>为当前节点设置一个全局唯一的ID号<br>[mysqld]<br>server_id=#<br>log-basename=master 可选项，设置datadir中日志名称，确保不依赖主机名</li>
+<li>创建有复制权限的账号<br>GRANT REPLICATION SLAVE ON <em>.</em> TO ‘repluser’@’HOST’ IDENTIFIED BY<br>‘replpass’;</li>
+</ol>
+<p><strong>从节点配置</strong></p>
+<ol>
+<li>启动中继日志<br>[mysqld]<br>server_id=# 为当前节点设置一个全局惟的ID号<br>read-only<br>relay_log=relay-log relay log的文件路径，默认值hostname-relay-bin<br>relay_log_index=relay-log.index 默认值hostname-relay-bin.index</li>
+<li>使用有复制权限的用户账号连接至主服务器，并启动复制线程<br>mysql&gt; CHANGE MASTER TO MASTER_HOST=’host’,<br>MASTER_USER=’repluser’, MASTER_PASSWORD=’replpass’,<br>MASTER_LOG_FILE=’mysql-bin.xxxxx’, MASTER_LOG_POS=#;<br>mysql&gt; START SLAVE [IO_THREAD|SQL_THREAD];</li>
+</ol>
+<h4 id="实验：配置主从复制架构"><a href="#实验：配置主从复制架构" class="headerlink" title="实验：配置主从复制架构"></a>实验：配置主从复制架构</h4><ol>
+<li><p>配置主服务器</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">[mysqld]</span><br><span class="line"><span class="built_in">log</span>-bin</span><br><span class="line">server-id=1</span><br><span class="line">binlog-format=row</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>在主服务器创建用于主从复制的用户</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">MariaDB [(none)]&gt; grant replication slave on *.* to 'repluser'@'192.168.34.%' identified by '137226';</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>配置从服务器</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">[mysqld]</span><br><span class="line">port=3306</span><br><span class="line">server-id=2</span><br><span class="line"><span class="built_in">read</span>-only</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>在从服务器指定主服务器位置，复制用户、密码，及开始复制点</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">MariaDB [(none)]&gt; CHANGE MASTER TO</span><br><span class="line">  MASTER_HOST='192.168.34.102',</span><br><span class="line">  MASTER_USER='repluser',</span><br><span class="line">  MASTER_PASSWORD='137226',</span><br><span class="line">  MASTER_PORT=3306,</span><br><span class="line">  MASTER_LOG_FILE='mariadb-bin.000005',</span><br><span class="line">  MASTER_LOG_POS=329;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>开启slave</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">MariaDB [(none)]&gt;start slave;</span><br></pre></td></tr></table></figure>
+
+</li>
+</ol>
+<p>至此，简单的主从复制已经实现，从服务器可以配置多个，只需要server-id不同即可。</p>
+<p><strong>复制架构中应该注意的问题</strong></p>
+<ol>
+<li><p>限制从服务器为只读</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">在从服务器上设置read_only&#x3D;ON</span><br><span class="line">	注意：此限制对拥有SUPER权限的用户均无效</span><br><span class="line">阻止所有用户, 包括主服务器复制的更新</span><br><span class="line">	mysql&gt; FLUSH TABLES WITH READ LOCK;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>RESET SLAVE 在从服务器清除master.info ，relay-log.info, relay log ，开始新的relaylog ,注意：需要先STOP SLAVE</p>
+</li>
+</ol>
+<p>RESET SLAVE ALL 清除所有从服务器上设置的主服务器同步信息如：PORT, HOST, USER和 PASSWORD 等</p>
+<ol start="3">
+<li><p>sql_slave_skip_counter = N 从服务器忽略几个主服务器的复制事件，global变量</p>
+</li>
+<li><p>如何保证主从复制的事务安全<br>参看<a href="https://mariadb.com/kb/en/library/server-system-variables/" target="_blank" rel="noopener">https://mariadb.com/kb/en/library/server-system-variables/</a><br>在master节点启用参数：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sync_binlog&#x3D;1 每次写后立即同步二进制日志到磁盘，性能差</span><br></pre></td></tr></table></figure>
+
+</li>
+</ol>
+<p>如果用到的为InnoDB存储引擎：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">innodb_flush_log_at_trx_commit&#x3D;1 每次事务提交立即同步日志写磁盘</span><br><span class="line">innodb_support_xa&#x3D;ON 默认值，分布式事务MariaDB10.3.0废除</span><br><span class="line">sync_master_info&#x3D;# #次事件后master.info同步到磁盘</span><br></pre></td></tr></table></figure>
+
+<p>在slave节点启用服务器选项：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">skip_slave_start&#x3D;ON 不自动启动slave</span><br></pre></td></tr></table></figure>
+
+<p>在slave节点启用参数：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">sync_relay_log&#x3D;# #次写后同步relay log到磁盘</span><br><span class="line">sync_relay_log_info&#x3D;# #次事务后同步relay-log.info到磁盘</span><br></pre></td></tr></table></figure>
+
+<h3 id="主从级联复制"><a href="#主从级联复制" class="headerlink" title="主从级联复制"></a>主从级联复制</h3><p>以A(192,168,34,108)，B(192.168.34.103)，C(192,。168.34.108)分别为主，从，二级从演示。</p>
+<ol>
+<li><p>主服务器主服务器如上。</p>
+</li>
+<li><p>在从服务器开启二进制日志，并指定更新二进制日志,其余同上：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[mysqld]</span><br><span class="line">log-bin</span><br><span class="line">log-slave-updates</span><br></pre></td></tr></table></figure></li>
+<li><p>将二级从服务器的主指向一级从服务器即可。</p>
+</li>
+</ol>
+<h2 id="mysql主主复制"><a href="#mysql主主复制" class="headerlink" title="mysql主主复制"></a>mysql主主复制</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">主主复制：互为主从</span><br><span class="line">容易产生的问题：数据不一致；因此慎用</span><br><span class="line">考虑要点：自动增长id</span><br><span class="line">配置一个节点使用奇数id</span><br><span class="line">	auto_increment_offset&#x3D;1 开始点</span><br><span class="line">	auto_increment_increment&#x3D;2 增长幅度</span><br><span class="line">另一个节点使用偶数id	</span><br><span class="line">	auto_increment_offset&#x3D;2</span><br><span class="line">	auto_increment_increment&#x3D;2</span><br></pre></td></tr></table></figure>
+
+<p><strong>主主复制的配置步骤：</strong></p>
+<ol>
+<li>各节点使用一个惟一server_id</li>
+<li>都启动binary log和relay log</li>
+<li>创建拥有复制权限的用户账号</li>
+<li>定义自动增长id字段的数值范围各为奇偶</li>
+<li>均把对方指定为主节点，并启动复制线程</li>
+</ol>
+<h2 id="半同步复制"><a href="#半同步复制" class="headerlink" title="半同步复制"></a>半同步复制</h2><p>默认情况下，MySQL的复制功能是异步的，异步复制可以提供最佳的性能，主库把binlog日志发送给从库即结束，并不验证从库是否接收完毕。这意味着当主服务器或从服务器端发生故障时，有可能从服务器没有接收到主服务器发送过来的binlog日志，这就会造成主服务器和从服务器的数据不一致，甚至在恢复时造成数据的丢失</p>
+<h4 id="实验：实现半同步复制实验"><a href="#实验：实现半同步复制实验" class="headerlink" title="实验：实现半同步复制实验"></a>实验：实现半同步复制实验</h4><ol>
+<li><p>先搭建主从复制架构，（最少一主两从三台服务器）</p>
+</li>
+<li><p>配置主服务器</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; INSTALL PLUGIN rpl_semi_sync_master SONAME 'semisync_master.so';</span><br><span class="line">mysql&gt;SET GLOBAL rpl_semi_sync_master_enabled=1; #永久保存可写入配置文件</span><br><span class="line">mysql&gt;SET GLOBAL rpl_semi_sync_master_timeout = 1000;超时长为1s #永久保存可写入配置文件</span><br><span class="line">mysql&gt;SHOW GLOBAL VARIABLES LIKE '%semi%';</span><br><span class="line">mysql&gt;SHOW GLOBAL STATUS LIKE '%semi%‘;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>配置从服务器</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; INSTALL PLUGIN rpl_semi_sync_slave SONAME 'semisync_slave.so';</span><br><span class="line">mysql&gt; SET GLOBAL rpl_semi_sync_slave_enabled=1; #永久保存可写入配置文件</span><br></pre></td></tr></table></figure>
+
+</li>
+</ol>
+<h3 id="mysql复制过滤器"><a href="#mysql复制过滤器" class="headerlink" title="mysql复制过滤器"></a>mysql复制过滤器</h3><p>让从节点仅复制指定的数据库，或指定数据库的指定表<br>两种实现方式：</p>
+<ol>
+<li><p>服务器选项：主服务器仅向二进制日志中记录与特定数据库相关的事件<br>注意：此项和binlog_format相关<br>参看：<a href="https://mariadb.com/kb/en/librarymysqld-options/#-binlogignore-db" target="_blank" rel="noopener">https://mariadb.com/kb/en/librarymysqld-options/#-binlogignore-db</a><br>在主服务器配置：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">binlog_do_db &#x3D; 数据库白名单列表，多个数据库需多行实现 </span><br><span class="line">binlog_ignore_db &#x3D; 数据库黑名单列表</span><br></pre></td></tr></table></figure>
+<p>问题：基于二进制还原将无法实现；不建议使用</p>
+</li>
+<li><p>从服务器SQL_THREAD在replay中继日志中的事件时，仅读取与特定数<br>据库(特定表)相关的事件并应用于本地<br>问题：会造成网络及磁盘IO浪费<br>在从服务器配置：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">replicate_do_db&#x3D; 指定复制库的白名单</span><br><span class="line">replicate_ignore_db&#x3D; 指定复制库黑名单</span><br><span class="line">replicate_do_table&#x3D; 指定复制表的白名单</span><br><span class="line">replicate_ignore_table&#x3D; 指定复制表的黑名单</span><br><span class="line">replicate_wild_do_table&#x3D; foo%.bar% 支持通配符</span><br><span class="line">replicate_wild_ignore_table&#x3D;</span><br></pre></td></tr></table></figure>
+
+</li>
+</ol>
+<h3 id="mysql主从复制加密"><a href="#mysql主从复制加密" class="headerlink" title="mysql主从复制加密"></a>mysql主从复制加密</h3><p><strong>基于SSL复制：</strong><br>在默认的主从复制过程或远程连接到MySQL/MariaDB所有的链接通信中的数据都是明文的，外网里访问数据或者复制，存在安全隐患。通过SSL/TLS加密的方式进行复制的方法，来进一步提高数据的安全性</p>
+<p><strong>获取证书</strong></p>
+<ol>
+<li><p>生成私钥</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@mariadb ssl]<span class="comment">#(umask 066;openssl genrsa 2048 &gt; cakey.pem)</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>生成自签名证书</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@mariadb ssl]<span class="comment">#openssl req -new -x509 -key cakey.pem -out cacert.pem -days 3650</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>生成主服务器私钥及证书申请</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@mariadb ssl]<span class="comment">#openssl req -newkey rsa:2048 -days 365 -nodes -keyout master.key &gt; master.csr</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>生成从服务器私钥和证书申请</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@mariadb ssl]<span class="comment">#openssl req -newkey rsa:2048 -days 365 -nodes -keyout slave.key &gt; slave.csr</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>分别给master.csr和slave.csr办法证书</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@mariadb ssl]<span class="comment">#openssl x509 -req -in master.csr -CA cacert.pem -CAkey cakey.pem -set_serial 01 &gt; master.crt</span></span><br><span class="line">[root@mariadb ssl]<span class="comment">#openssl x509 -req -in slave.csr -CA cacert.pem -CAkey cakey.pem -set_serial 02 &gt; slave.crt</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>验证证书的有效性</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[root@mariadb ssl]<span class="comment">#openssl verify -CAfile cacert.pem master.crt slave.crt</span></span><br><span class="line">master.crt: OK</span><br><span class="line">slave.crt: OK</span><br></pre></td></tr></table></figure>
+
+</li>
+</ol>
+<p>此时的目录结构如下：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">[root@mariadb ssl]<span class="comment">#ls</span></span><br><span class="line">cacert.pem  master.crt  master.key  slave.csr</span><br><span class="line">cakey.pem   master.csr  slave.crt   slave.key</span><br><span class="line">[root@mariadb ssl]<span class="comment">#pwd</span></span><br><span class="line">/etc/my.cnf.d/ssl</span><br></pre></td></tr></table></figure>
+
+<ol start="7">
+<li><p>将相关证书分别拷贝到主服务器和各从服务器</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@mariadb ssl]<span class="comment">#scp cacert.pem slave.crt slave.key 192.168.34.108:/etc/my.cnf.d/ssl/</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>配置主服务器</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">[mysqld]</span><br><span class="line">log-bin</span><br><span class="line">server_id&#x3D;1</span><br><span class="line">ssl</span><br><span class="line">ssl-ca&#x3D;&#x2F;etc&#x2F;my.cnf.d&#x2F;ssl&#x2F;cacert.pem</span><br><span class="line">ssl-cert&#x3D;&#x2F;etc&#x2F;my.cnf.d&#x2F;ssl&#x2F;master.crt</span><br><span class="line">ssl-key&#x3D;&#x2F;etc&#x2F;my.cnf.d&#x2F;ssl&#x2F;master.key</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>配置从服务器</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt;</span><br><span class="line"><span class="keyword">CHANGE</span> <span class="keyword">MASTER</span> <span class="keyword">TO</span></span><br><span class="line">MASTER_HOST=<span class="string">'192.168.34.102'</span>,</span><br><span class="line">MASTER_USER=<span class="string">'rplssl'</span>,</span><br><span class="line">MASTER_PASSWORD=<span class="string">'centos'</span>,</span><br><span class="line">MASTER_LOG_FILE=<span class="string">'mariadb-bin.000005'</span>,</span><br><span class="line">MASTER_LOG_POS=<span class="number">329</span>,</span><br><span class="line">MASTER_SSL=<span class="number">1</span>,</span><br><span class="line">MASTER_SSL_CA = <span class="string">'/etc/my.cnf.d/ssl/cacert.pem'</span>,</span><br><span class="line">MASTER_SSL_CERT = <span class="string">'/etc/my.cnf.d/ssl/slave.crt'</span>,</span><br><span class="line">MASTER_SSL_KEY = <span class="string">'/etc/my.cnf.d/ssl/slave.key'</span>;</span><br></pre></td></tr></table></figure>
+
+</li>
+</ol>
+<h3 id="主从复制的监控和维护"><a href="#主从复制的监控和维护" class="headerlink" title="主从复制的监控和维护"></a>主从复制的监控和维护</h3><p><strong>清理日志</strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">PURGE &#123; BINARY | MASTER &#125; LOGS &#123; TO &#39;log_name&#39; | BEFORE</span><br><span class="line">datetime_expr &#125;</span><br><span class="line">RESET MASTER</span><br><span class="line">RESET SLAVE</span><br></pre></td></tr></table></figure>
+
+<p><strong>复制监控</strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">SHOW MASTER STATUS</span><br><span class="line">SHOW BINLOG EVENTS</span><br><span class="line">SHOW BINARY LOGS</span><br><span class="line">SHOW SLAVE STATUS</span><br><span class="line">SHOW PROCESSLIST</span><br></pre></td></tr></table></figure>
+
+<p><strong>从服务器是否落后于主服务</strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Seconds_Behind_Master: 0</span><br></pre></td></tr></table></figure>
+
+<p><strong>如何确定主从节点数据是否一致</strong><br> percona-tools</p>
+<p><strong>数据不一致如何修复</strong><br> 删除从数据库，重新复制</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/mysql/" rel="tag"># mysql</a>
+          
+            <a href="/tags/%E4%B8%BB%E4%BB%8E%E5%A4%8D%E5%88%B6/" rel="tag"># 主从复制</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2016/06/16/%E7%BC%96%E8%AF%91%E5%AE%89%E8%A3%85git/" rel="prev" title="编译安装git">
+                编译安装git <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+        <!-- JiaThis Button BEGIN -->
+<div class="jiathis_style">
+<span class="jiathis_txt">分享到：</span>
+<a class="jiathis_button_fav">收藏夹</a>
+<a class="jiathis_button_copy">复制网址</a>
+<a class="jiathis_button_email">邮件</a>
+<a class="jiathis_button_weixin">微信</a>
+<a class="jiathis_button_qzone">QQ空间</a>
+<a class="jiathis_button_tqq">腾讯微博</a>
+<a class="jiathis_button_douban">豆瓣</a>
+<a class="jiathis_button_share">一键分享</a>
+
+<a href="http://www.jiathis.com/share?uid=2140465" class="jiathis jiathis_txt jiathis_separator jtico jtico_jiathis" target="_blank">更多</a>
+<a class="jiathis_counter_style"></a>
+</div>
+<script type="text/javascript" >
+var jiathis_config={
+  data_track_clickback:true,
+  summary:"",
+  shortUrl:false,
+  hideMore:false
+}
+</script>
+<script type="text/javascript" src="http://v3.jiathis.com/code/jia.js?uid=" charset="utf-8"></script>
+<!-- JiaThis Button END -->
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+    </div>
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/uploads/touxiang.jpg"
+                alt="ShengQin Miao" />
+            
+              <p class="site-author-name" itemprop="name">ShengQin Miao</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">53</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                
+                  <span class="site-state-item-count">1</span>
+                  <span class="site-state-item-name">分类</span>
+                
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">61</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#备份和恢复"><span class="nav-number">1.</span> <span class="nav-text">备份和恢复</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#备份类型"><span class="nav-number">1.0.1.</span> <span class="nav-text">备份类型</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#备份时需要考虑的因素"><span class="nav-number">1.0.2.</span> <span class="nav-text">备份时需要考虑的因素</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#备份什么"><span class="nav-number">1.0.3.</span> <span class="nav-text">备份什么</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#备份工具"><span class="nav-number">1.1.</span> <span class="nav-text">备份工具</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#mysqldump工具介绍"><span class="nav-number">1.1.1.</span> <span class="nav-text">mysqldump工具介绍</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#实现数据库分库备份"><span class="nav-number">1.1.2.</span> <span class="nav-text">实现数据库分库备份</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#生产环境备份策略"><span class="nav-number">1.2.</span> <span class="nav-text">生产环境备份策略</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#场景：每天凌晨两点计划任务自动备份数据库，第二天早上十点数据库被误删除，设法将数据库恢复到十点的状态"><span class="nav-number">1.3.</span> <span class="nav-text">场景：每天凌晨两点计划任务自动备份数据库，第二天早上十点数据库被误删除，设法将数据库恢复到十点的状态</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#场景：每天凌晨两点计划任务自动备份数据库，第二天早上十点数据库中的某个表被误删除，之后对数据库的其他表做了一些写操作，直到十点十分发现问题，设法将数据库恢复到十点十分的状态，即恢复被删除的表，并将其余操作一并恢复。"><span class="nav-number">1.4.</span> <span class="nav-text">场景：每天凌晨两点计划任务自动备份数据库，第二天早上十点数据库中的某个表被误删除，之后对数据库的其他表做了一些写操作，直到十点十分发现问题，设法将数据库恢复到十点十分的状态，即恢复被删除的表，并将其余操作一并恢复。</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#percona-xtrabackup实战入门"><span class="nav-number">2.</span> <span class="nav-text">percona-xtrabackup实战入门</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#xtrabackup用法简介"><span class="nav-number">2.0.1.</span> <span class="nav-text">xtrabackup用法简介</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#实验：xtrabackup完全备份及还原"><span class="nav-number">2.1.</span> <span class="nav-text">实验：xtrabackup完全备份及还原</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#实验：xtrabackup完全、增量备份及还原"><span class="nav-number">2.2.</span> <span class="nav-text">实验：xtrabackup完全、增量备份及还原</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#mysql主从复制"><span class="nav-number">3.</span> <span class="nav-text">mysql主从复制</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#实验：配置主从复制架构"><span class="nav-number">3.0.1.</span> <span class="nav-text">实验：配置主从复制架构</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#主从级联复制"><span class="nav-number">3.1.</span> <span class="nav-text">主从级联复制</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#mysql主主复制"><span class="nav-number">4.</span> <span class="nav-text">mysql主主复制</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#半同步复制"><span class="nav-number">5.</span> <span class="nav-text">半同步复制</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#实验：实现半同步复制实验"><span class="nav-number">5.0.1.</span> <span class="nav-text">实验：实现半同步复制实验</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#mysql复制过滤器"><span class="nav-number">5.1.</span> <span class="nav-text">mysql复制过滤器</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#mysql主从复制加密"><span class="nav-number">5.2.</span> <span class="nav-text">mysql主从复制加密</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#主从复制的监控和维护"><span class="nav-number">5.3.</span> <span class="nav-text">主从复制的监控和维护</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">ShengQin Miao</span>
+
+  
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-area-chart"></i>
+    </span>
+    
+      <span class="post-meta-item-text">Site words total count&#58;</span>
+    
+    <span title="Site words total count">131.6k</span>
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Pisces</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js"></script>
+  <script>AV.initialize("vItlX9Jc2L4BuXKt6BJWW6eJ-gzGzoHsz", "IisqhTArerBOyaxKHN8TcE10");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

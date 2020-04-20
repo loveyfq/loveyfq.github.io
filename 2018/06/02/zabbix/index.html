@@ -1,0 +1,1384 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="zabbix,监控," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="安装zabbix-server准备数据库12345MariaDB [wpdb]&gt; create database zabbix character set utf8 collate utf8_bin;Query OK, 1 row affected (0.00 sec)MariaDB [wpdb]&gt; grant all privileges on zabbix.* to zabbix@">
+<meta property="og:type" content="article">
+<meta property="og:title" content="zabbix">
+<meta property="og:url" content="http://yoursite.com/2018/06/02/zabbix/index.html">
+<meta property="og:site_name" content="漫步人生路">
+<meta property="og:description" content="安装zabbix-server准备数据库12345MariaDB [wpdb]&gt; create database zabbix character set utf8 collate utf8_bin;Query OK, 1 row affected (0.00 sec)MariaDB [wpdb]&gt; grant all privileges on zabbix.* to zabbix@">
+<meta property="article:published_time" content="2018-06-01T16:00:00.000Z">
+<meta property="article:modified_time" content="2020-04-20T13:33:53.230Z">
+<meta property="article:author" content="ShengQin Miao">
+<meta property="article:tag" content="zabbix">
+<meta property="article:tag" content="监控">
+<meta name="twitter:card" content="summary">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2018/06/02/zabbix/"/>
+
+
+
+
+
+  <title>zabbix | 漫步人生路</title>
+  
+
+
+
+
+
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?f076ecd4b66d3a02de923868671591de";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+<meta name="generator" content="Hexo 4.2.0"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">漫步人生路</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off"
+             placeholder="搜索..." spellcheck="false"
+             type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/06/02/zabbix/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="ShengQin Miao">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/uploads/touxiang.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="漫步人生路">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">zabbix</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-06-02T00:00:00+08:00">
+                2018-06-02
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+             <span id="/2018/06/02/zabbix/" class="leancloud_visitors" data-flag-title="zabbix">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+            <div class="post-wordcount">
+              
+                
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-file-word-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">字数统计&#58;</span>
+                
+                <span title="字数统计">
+                  3.5k
+                </span>
+              
+
+              
+                <span class="post-meta-divider">|</span>
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-clock-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">阅读时长 &asymp;</span>
+                
+                <span title="阅读时长">
+                  16
+                </span>
+              
+            </div>
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h3 id="安装zabbix-server"><a href="#安装zabbix-server" class="headerlink" title="安装zabbix-server"></a>安装zabbix-server</h3><h4 id="准备数据库"><a href="#准备数据库" class="headerlink" title="准备数据库"></a>准备数据库</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">MariaDB [wpdb]&gt; create database zabbix character <span class="built_in">set</span> utf8 collate utf8_bin;</span><br><span class="line">Query OK, 1 row affected (0.00 sec)</span><br><span class="line"></span><br><span class="line">MariaDB [wpdb]&gt; grant all privileges on zabbix.* to zabbix@<span class="string">'10.10.10.%'</span> identified by <span class="string">'centos'</span>;</span><br><span class="line">Query OK, 0 rows affected (0.01 sec)</span><br></pre></td></tr></table></figure>
+
+<h4 id="编译安装zabbix"><a href="#编译安装zabbix" class="headerlink" title="编译安装zabbix"></a>编译安装zabbix</h4><p>到官方网站下载zabbix4.0.3版本的源码包<br><a href="https://sourceforge.net/projects/zabbix/files/ZABBIX%20Latest%20Stable/4.0.3/zabbix-4.0.3.tar.gz/download" target="_blank" rel="noopener">https://sourceforge.net/projects/zabbix/files/ZABBIX%20Latest%20Stable/4.0.3/zabbix-4.0.3.tar.gz/download</a><br>安装依赖包</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@10-10-10-11 zabbix-4.0.3]<span class="comment">#yum install gcc libxml2-devel net-snmp net-snmp-devel curl curl-devel php php-bcmath php-mbstring mariadb mariadb-devel libevent-devel –y</span></span><br></pre></td></tr></table></figure>
+<p>如果是最小化安装的系统，还需安装以下常用包</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@10-10-10-11 zabbix-4.0.3]<span class="comment">#yum install vim iotop bc gcc gcc-c++ glibc glibc-devel pcre pcre-devel openssl openssl-devel zip unzip zlib-devel net-tools lrzsz tree ntpdate telnet lsof tcpdump wget libevent libevent-devel -y</span></span><br></pre></td></tr></table></figure>
+<p>因为要支持java，所以要安装jdk</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@node01 bin]<span class="comment"># yum -y install java-11-openjdk-devel</span></span><br></pre></td></tr></table></figure>
+
+<p>开始编译安装</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">[root@10-10-10-11 zabbix-4.0.3]<span class="comment">#pwd</span></span><br><span class="line">/root/tools/zabbix-4.0.3</span><br><span class="line">[root@10-10-10-11 tools]<span class="comment">#tar xf zabbix-4.0.3.tar.gz </span></span><br><span class="line">[root@10-10-10-11 tools]<span class="comment">#cd zabbix-4.0.3</span></span><br><span class="line">[root@10-10-10-11 zabbix-4.0.3]<span class="comment">#useradd zabbix -s /sbin/nologin </span></span><br><span class="line">[root@10-10-10-11 zabbix-4.0.3]<span class="comment">#./configure --prefix=/usr/local/zabbix --enable-server --enable-agent  --with-mysql --with-net-snmp --with-libcurl --with-libxml2 --enable-java</span></span><br><span class="line">[root@10-10-10-11 zabbix-4.0.3]<span class="comment">#make &amp;&amp; make install</span></span><br></pre></td></tr></table></figure>
+<p>在编译过程中报错</p>
+<pre><code>checking size of void *... 8
+checking for mysql_config... no
+checking for mariadb_config... no
+configure: error: MySQL library not found</code></pre><p>解决方法为安装mysql-devel包</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@10-10-10-11 zabbix-4.0.3]<span class="comment">#yum -y install mysql-devel</span></span><br></pre></td></tr></table></figure>
+
+<p>安装完成后修改zabbix-server.conf配置文件，如下：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">[root@10-10-10-11 zabbix]<span class="comment">#grep "^[a-Z]" /usr/local/zabbix/etc/zabbix_server.conf</span></span><br><span class="line">LogFile=/usr/<span class="built_in">local</span>/zabbix/logs/zabbix_server.log</span><br><span class="line">DebugLevel=3</span><br><span class="line">PidFile=/usr/<span class="built_in">local</span>/zabbix/pid/zabbix_server.pid</span><br><span class="line">SocketDir=/usr/<span class="built_in">local</span>/zabbox/socket</span><br><span class="line">DBHost=10.10.10.6</span><br><span class="line">DBName=zabbix</span><br><span class="line">DBUser=zabbix</span><br><span class="line">DBPassword=centos</span><br><span class="line">DBPort=3306</span><br><span class="line">Timeout=4</span><br><span class="line">LogSlowQueries=3000</span><br></pre></td></tr></table></figure>
+<p>创建相关目录</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@10-10-10-11 mysql]<span class="comment">#mkdir /usr/local/zabbix/&#123;pid,logs,socket&#125; -pv</span></span><br><span class="line">[root@10-10-10-11 mysql]<span class="comment">#chown -R zabbix.zabbix /usr/local/zabbix/</span></span><br></pre></td></tr></table></figure>
+<p>导入数据库</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">[root@10-10-10-11 mysql]<span class="comment">#pwd</span></span><br><span class="line">/root/tools/zabbix-4.0.3/database/mysql</span><br><span class="line">[root@10-10-10-11 mysql]<span class="comment">#mysql -uzabbix -pcentos -h10.10.10.23 zabbix &lt; schema.sql </span></span><br><span class="line">[root@10-10-10-11 mysql]<span class="comment">#mysql -uzabbix -pcentos -h10.10.10.23 zabbix &lt; images.sql </span></span><br><span class="line">[root@10-10-10-11 mysql]<span class="comment">#mysql -uzabbix -pcentos -h10.10.10.23 zabbix &lt; data.sql</span></span><br></pre></td></tr></table></figure>
+<p>复制启动脚本</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">[root@10-10-10-11 zabbix-4.0.3]<span class="comment">#pwd</span></span><br><span class="line">/root/tools/zabbix-4.0.3</span><br><span class="line">[root@10-10-10-11 zabbix-4.0.3]<span class="comment">#cp misc/init.d/fedora/core/zabbix_server /etc/init.d/</span></span><br><span class="line">[root@10-10-10-11 zabbix-4.0.3]<span class="comment">#cp misc/init.d/fedora/core/zabbix_agentd /etc/init.d/</span></span><br></pre></td></tr></table></figure>
+<p>修改启动脚本</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">vim /etc/init.d/zabbix_server</span><br><span class="line">vim /etc/init.d/zabbix_agent</span><br><span class="line">21 <span class="comment"># Zabbix-Directory</span></span><br><span class="line">22 BASEDIR=/usr/<span class="built_in">local</span>/zabbix</span><br></pre></td></tr></table></figure>
+<p>启动zabbix-server</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">~]<span class="comment">#service zabbix_server start</span></span><br></pre></td></tr></table></figure>
+<p>配置web界面</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[root@10-10-10-11 html]<span class="comment">#yum -y install httpd</span></span><br><span class="line">[root@10-10-10-11 html]<span class="comment">#cp -a /root/tools/zabbix-4.0.3/frontends/php/* /var/www/html/</span></span><br><span class="line">[root@10-10-10-11 html]<span class="comment">#systemctl start httpd</span></span><br></pre></td></tr></table></figure>
+<p>此时，在浏览可以通过ip访问该站点了。</p>
+<p>访问zabbix时会出现几个报错，解决办法为：<br>安装缺少的包</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@10-10-10-11 html]<span class="comment">#yum install php-gettext php-session php-ctype php-xmlreader php-xmlwriter php-xml php-net-socket php-gd php-mysql -y</span></span><br></pre></td></tr></table></figure>
+<p>修改php配置文件如下：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">[root@10-10-10-11 html]<span class="comment">#vi /etc/php.ini </span></span><br><span class="line">post_max_size = 8M 改为 post_max_size = 16M</span><br><span class="line">max_execution_time = 30 改为 max_execution_time = 300</span><br><span class="line">max_input_time = 60 改为 max_input_time = 300</span><br><span class="line">;date.timezone = 改为 date.timezone = Asia/Shanghai</span><br></pre></td></tr></table></figure>
+<p>重启httpd后再次访问web</p>
+<p>之后按提示操作配置后就可以正常访问zabbix-server。</p>
+<p>zabbix字体乱码的解决办法：<br>将Windows中的字体(控制面板-&gt;小图标-&gt;字体)拷贝到zabbix中</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">[root@10-10-10-11 fonts]<span class="comment">#pwd</span></span><br><span class="line">/var/www/html/fonts</span><br><span class="line">[root@10-10-10-11 fonts]<span class="comment">#ll</span></span><br><span class="line">total 12252</span><br><span class="line">-rw-r--r-- 1 zabbix zabbix   756072 Dec 20 19:24 DejaVuSans.ttf</span><br><span class="line">-rw-r--r-- 1 zabbix zabbix 11787328 Dec  4  2017 simkai.ttf</span><br><span class="line">[root@10-10-10-11 html]<span class="comment">#pwd</span></span><br><span class="line">/var/www/html</span><br><span class="line">[root@10-10-10-11 html]<span class="comment">#grep "DejaVuSans" ./* -R</span></span><br><span class="line">Binary file ./fonts/DejaVuSans.ttf matches</span><br><span class="line">./include/defines.inc.php:define(<span class="string">'ZBX_GRAPH_FONT_NAME'</span>,		DejaVuSans<span class="string">'); // font file name</span></span><br><span class="line"><span class="string">./include/defines.inc.php:define('</span>ZBX_FONT_NAME<span class="string">', '</span>DejaVuSans<span class="string">');</span></span><br></pre></td></tr></table></figure>
+<p>将搜索到的文件中的字体替换为刚才复制进来的字体即可。</p>
+<h3 id="向zabbix-server中增加agent-被动模式"><a href="#向zabbix-server中增加agent-被动模式" class="headerlink" title="向zabbix server中增加agent(被动模式)"></a>向zabbix server中增加agent(被动模式)</h3><p><strong>先在客户端安装zabbix agent</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@host-10-10-10-13 zabbix-4.0.3]<span class="comment"># ./configure --enable-agent --prefix=/usr/local/zabbix </span></span><br><span class="line">[root@host-10-10-10-13 zabbix-4.0.3]<span class="comment">#make &amp;&amp; make install</span></span><br></pre></td></tr></table></figure>
+<p>修改zabbix agent的配置文件</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">[root@host-10-10-10-13 zabbix]<span class="comment"># grep "^[a-Z]" /usr/local/zabbix/etc/zabbix_agentd.conf</span></span><br><span class="line">PidFile=/usr/<span class="built_in">local</span>/zabbix/pid/zabbix_agentd.pid</span><br><span class="line">LogFile=/usr/<span class="built_in">local</span>/zabbix/logs/zabbix_agentd.log</span><br><span class="line">DebugLevel=3</span><br><span class="line">Server=10.10.10.11 <span class="comment">##被动模式下的服务器地址</span></span><br><span class="line">StartAgents=3</span><br><span class="line">ServerActive=127.0.0.1 <span class="comment">##主动模式下的服务器地址</span></span><br><span class="line">Hostname=10.10.10.13 <span class="comment">##主机名，必须在整个zabbix监控组里面唯一，且与zabbix上的名称保持一致</span></span><br><span class="line">Timeout=30</span><br><span class="line">UnsafeUserParameters=1</span><br></pre></td></tr></table></figure>
+
+<p>创建相关目录和zabbix用户，</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[root@host-10-10-10-13 zabbix]<span class="comment"># mkdir /usr/local/zabbix/&#123;logs,pid&#125;</span></span><br><span class="line">[root@host-10-10-10-13 zabbix]<span class="comment"># useradd zabbix -s /sbin/nologin </span></span><br><span class="line">[root@host-10-10-10-13 zabbix]<span class="comment"># chown -R zabbix.zabbix /usr/local/zabbix/</span></span><br></pre></td></tr></table></figure>
+
+<p>启动zabbix agent之后，即可以在web图形界面添加相应的主机。</p>
+<p>zabbix get工具介绍：使用该工具可以获取zabbix agent数据命令。可以通过yum安装zabbix-get的rpm包获取该工具。<br>编译安装的zabbix在安装目录下的bin目录里面也有该工具，可以通过如下方式使用</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">[root@10-10-10-11 zabbix-4.0.3]<span class="comment">#cd /usr/local/zabbix/</span></span><br><span class="line">[root@10-10-10-11 zabbix]<span class="comment">#ls bin</span></span><br><span class="line">zabbix_get  zabbix_sender</span><br><span class="line">[root@10-10-10-11 zabbix]<span class="comment">#cp bin/zabbix_get /usr/bin/</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="使用zabbix监控tomcat"><a href="#使用zabbix监控tomcat" class="headerlink" title="使用zabbix监控tomcat"></a>使用zabbix监控tomcat</h3><h4 id="在zabbix-server上安装配置java-gateway"><a href="#在zabbix-server上安装配置java-gateway" class="headerlink" title="在zabbix server上安装配置java gateway"></a>在zabbix server上安装配置java gateway</h4><p>java gateway可以配置在一个单独的服务器上，也可以和zabbix server配置在同一服务器上，这里以单独配置一台java gateway服务器为例。编译安装的zabbix开启–enable-java选项会自动安装java gateway功能。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">~]<span class="comment">#yum install gcc libxml2-devel net-snmp net-snmp-devel curl curl-devel php php-bcmath php-mbstring mariadb-devel java-1.8.0-openjdk-devel -y</span></span><br><span class="line">~]<span class="comment">#./configure --prefix=/usr/local/zabbix --enable-java --with-net-snmp --with-mysql --with-ssh2</span></span><br><span class="line">~]<span class="comment">#make &amp;&amp; make install</span></span><br></pre></td></tr></table></figure>
+<p>编辑配置文件</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">~]<span class="comment"># vim /usr/local/zabbix/sbin/zabbix_java/settings.sh</span></span><br><span class="line">LISTEN_IP=<span class="string">"0.0.0.0"</span></span><br><span class="line">LISTEN_PORT=10052</span><br><span class="line">PID_FILE=<span class="string">"/tmp/zabbix_java.pid"</span></span><br><span class="line">START_POLLERS=20 <span class="comment">#启动多少个进程轮询java，要和java 应用保持一定关系</span></span><br><span class="line">TIMEOUT=30</span><br></pre></td></tr></table></figure>
+<p>启动java gateway</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">~]<span class="comment">#/usr/local/zabbix/sbin/zabbix_java/startup.sh</span></span><br></pre></td></tr></table></figure>
+<h4 id="单独配置一台java-gateway服务器"><a href="#单独配置一台java-gateway服务器" class="headerlink" title="单独配置一台java gateway服务器"></a>单独配置一台java gateway服务器</h4><p>下载安装java gateway的rpm包</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@docker tools]<span class="comment">#wget https://mirrors.aliyun.com/zabbix/zabbix/4.0/rhel/7/x86_64/zabbix-java-gateway-4.0.3-1.el7.x86_64.rpm</span></span><br><span class="line">[root@docker tools]<span class="comment">#yum install zabbix-java-gateway-4.0.3-1.el7.x86_64.rpm</span></span><br></pre></td></tr></table></figure>
+<p>编辑配置文件,此配置文件和编译安装的配置文件一样</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">[root@docker tools]<span class="comment">#grep "^[a-Z]" /etc/zabbix/zabbix_java_gateway.conf </span></span><br><span class="line">PID_FILE=<span class="string">"/var/run/zabbix/zabbix_java.pid"</span></span><br><span class="line">START_POLLERS=10</span><br><span class="line">TIMEOUT=30</span><br></pre></td></tr></table></figure>
+<p>启动java gateway</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@docker tools]<span class="comment">#systemctl start zabbix-java-gateway</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="配置zabbix-server调用java-gateway"><a href="#配置zabbix-server调用java-gateway" class="headerlink" title="配置zabbix server调用java gateway"></a>配置zabbix server调用java gateway</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">~]<span class="comment">#vim /usr/local/zabbix/etc/zabbix_server.conf</span></span><br><span class="line">JavaGateway=192.168.15.203 <span class="comment">#指定java gateway的地址</span></span><br><span class="line">JavaGatewayPort=10052 <span class="comment">#指定java gateway的服务器监听端口，如果是默认端口可以不写</span></span><br><span class="line">StartJavaPollers=20 <span class="comment">#启动多少个进程去轮训 java gateway，要和java gateway的配置一致</span></span><br><span class="line">Timeout=30</span><br></pre></td></tr></table></figure>
+
+<h4 id="配置tomcat启用jmx远程监控"><a href="#配置tomcat启用jmx远程监控" class="headerlink" title="配置tomcat启用jmx远程监控"></a>配置tomcat启用jmx远程监控</h4><p>配置tomcat的启动脚本</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">[root@docker tomcat]<span class="comment">#vi /usr/local/tomcat/bin/catalina.sh</span></span><br><span class="line">CATALINA_OPTS=<span class="string">"<span class="variable">$CATALINA_OPTS</span></span></span><br><span class="line"><span class="string">-Dcom.sun.management.jmxremote #启用远程监控JMX</span></span><br><span class="line"><span class="string">-Dcom.sun.management.jmxremote.port=12345 #默认启动的JMX端口号，要和zabbix添加主机时候的端</span></span><br><span class="line"><span class="string">口一致即可</span></span><br><span class="line"><span class="string">-Dcom.sun.management.jmxremote.authenticate=false #不使用用户名密码</span></span><br><span class="line"><span class="string">-Dcom.sun.management.jmxremote.ssl=false #不使用ssl认证</span></span><br><span class="line"><span class="string">-Djava.rmi.server.hostname=192.168.34.102"</span>  <span class="comment">#tomcat主机自己的IP地址，不要写zabbix服务器的地址</span></span><br></pre></td></tr></table></figure>
+<p>之后启动tomcat就可以在zabbix server上增加该主机的jmx监控。</p>
+<h4 id="监控java的排错方法"><a href="#监控java的排错方法" class="headerlink" title="监控java的排错方法"></a>监控java的排错方法</h4><p>测试能否获取到java当前已经分配的线程数</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># java -jar cmdline-jmxclient-0.10.3.jar - 192.168.15.203:12345 'Catalina:name="http-bio8080",type=ThreadPool' currentThreadCount</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="zabbix-proxy-被动模式"><a href="#zabbix-proxy-被动模式" class="headerlink" title="zabbix proxy(被动模式)"></a>zabbix proxy(被动模式)</h3><p>zabbix 是一个分布式的监控系统，支持通过代理服务器zabbix proxy收集zabbix agent的数据，然后把收集保存在本地数据库并发送给zabbix server进行统一存储和展示。</p>
+<h4 id="安装zabbix-proxy"><a href="#安装zabbix-proxy" class="headerlink" title="安装zabbix proxy"></a>安装zabbix proxy</h4><p>安装依赖包</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@zabbix-proxy ~]<span class="comment"># yum install gcc libxml2-devel net-snmp net-snmp-devel curl curl-devel php php-bcmath php-mbstring mariadb mariadb-devel java-1.8.0-openjdk-devel -y</span></span><br></pre></td></tr></table></figure>
+<p>准备mysql数据库</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">MariaDB [(none)]&gt;create database zabbix_proxy character set utf8 collate utf8_bin;</span><br><span class="line">MariaDB [(none)]&gt;grant all privileges on zabbix_proxy.* to proxy@'%' identified by '123456';</span><br></pre></td></tr></table></figure>
+<p>编译安装zabbix</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@host-10-10-10-12 zabbix-4.0.3]<span class="comment"># ./configure --prefix=/usr/local/zabbix --enable-proxy --enable-agent --with-mysql --with-net-snmp --with-libcurl --with-libxml2 --enable-java</span></span><br></pre></td></tr></table></figure>
+<p>导入数据库，由于此zabbix仅作为proxy使用，所以只需导入schema.sql这一个库即可。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@host-10-10-10-12 tools]<span class="comment"># mysql -uproxy -pcentos -h10.10.10.23 zabbix_proxy &lt; /root/tools/zabbix-4.0.3/database/mysql/schema.sql</span></span><br></pre></td></tr></table></figure>
+<p>配置被动模式下的zabbix proxy</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">[root@apache zabbix]<span class="comment">#grep "^[a-Z]" etc/zabbix_proxy.conf</span></span><br><span class="line">ProxyMode=1 <span class="comment">#0为主动，1为被动</span></span><br><span class="line">Server=192.168.15.201 <span class="comment">#zabbix server服务器的地址或主机名</span></span><br><span class="line">Hostname=proxy1-mage-passive <span class="comment">#代理服务器名称，需要与zabbix server添加代理时候的proxy name是一致的！</span></span><br><span class="line">LogFile=/tmp/zabbix_proxy.log</span><br><span class="line">DBHost=192.168.15.203 <span class="comment">#数据库服务器地址</span></span><br><span class="line">DBName=zabbix_proxy <span class="comment">#使用的数据库名称</span></span><br><span class="line">DBUser=proxy <span class="comment">#连接数据库的用户名称</span></span><br><span class="line">DBPassword=123456 <span class="comment">#数据库用户密码</span></span><br><span class="line">DBPort=3306 <span class="comment">#数据库端口</span></span><br><span class="line">ProxyLocalBuffer=3 <span class="comment">#已经提交到zabbix server的数据保留时间</span></span><br><span class="line">ProxyOfflineBuffer=24 <span class="comment">#未提交到zabbix server的时间保留时间</span></span><br><span class="line">HeartbeatFrequency=60 <span class="comment">#心跳间隔检测时间，默认60秒，范围0-3600秒，被动模式不使用</span></span><br><span class="line">ConfigFrequency=5 <span class="comment">#间隔多久从zabbix server 获取监控信息</span></span><br><span class="line">DataSenderFrequency=5 <span class="comment">#数据发送时间间隔，默认为1秒，范围为1-3600秒，被动模式不使用</span></span><br><span class="line">StartPollers=20 <span class="comment">#启动的数据采集器数量</span></span><br><span class="line">JavaGateway=192.168.15.202 <span class="comment">#java gateway服务器地址,当需要监控java的时候必须配置否则监控不到数据</span></span><br><span class="line">JavaGatewayPort=10052 <span class="comment">#Javagatewa服务端口</span></span><br><span class="line">StartJavaPollers=20 <span class="comment">#启动多少个线程采集数据</span></span><br><span class="line">CacheSize=2G <span class="comment">#保存监控项而占用的最大内存</span></span><br><span class="line">HistoryCacheSize=2G <span class="comment">#保存监控历史数据占用的最大内存</span></span><br><span class="line">Timeout=30 <span class="comment">#监控项超时时间，单位为秒</span></span><br><span class="line">LogSlowQueries=3000 <span class="comment">#毫秒，多久的数据库查询会被记录到日志</span></span><br></pre></td></tr></table></figure>
+<p>编译安装zabbix agent</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">[root@web-server zabbix-4.0.1]<span class="comment"># grep "^[a-Z]" /usr/local/zabbix/etc/zabbix_agentd.conf</span></span><br><span class="line">LogFile=/tmp/zabbix_agentd.log</span><br><span class="line">DebugLevel=4</span><br><span class="line">Server=192.168.15.202,192.168.15.201</span><br><span class="line">ListenPort=10050</span><br><span class="line">ListenIP=0.0.0.0</span><br><span class="line">StartAgents=3</span><br><span class="line">ServerActive=192.168.15.202</span><br><span class="line">Hostname=192.168.34.101</span><br><span class="line">Timeout=30</span><br><span class="line">UnsafeUserParameters=1</span><br></pre></td></tr></table></figure>
+<p>注意，如果agent是通过proxy将数据发到server上的，那么agent配置文件的server要同时写上server和proxy的地址，以逗号分隔。</p>
+<h3 id="zabbix主动模式"><a href="#zabbix主动模式" class="headerlink" title="zabbix主动模式"></a>zabbix主动模式</h3><p>zabbix主被动模式是相对agent来说的，主动模式是agent自动采集数据后发送给server或者proxy，不需要zabbix server的干预，因此主动模式在一定程度上可减轻zabbix server的压力。<br>zabbix被动模式是server主动向客户端发送请求，客户端被动收集数据后发送给sever，由于zabbix server需要周期性的项agent索取数据，这种模式的最大问题就是会加大zabbix server的工作量，在数百台服务器的环境下zabbix server不能及时获取到最新的数据，被动模式时zabbix默认的工作模式。</p>
+<p>zabbix是一个分布式的监控系统，支持通过代理服务器zabbix proxy收集zabbix agent的数据，然后收集保存在本地数据库并发送给zabbix server进行统一存储和展示。</p>
+<h4 id="配置主动模式的proxy"><a href="#配置主动模式的proxy" class="headerlink" title="配置主动模式的proxy"></a>配置主动模式的proxy</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">[root@apache zabbix]<span class="comment">#grep "^[a-Z]" etc/zabbix_proxy.conf</span></span><br><span class="line">ProxyMode=0 <span class="comment">#0为主动，1为被动</span></span><br><span class="line">Server=192.168.34.100 <span class="comment">#zabbix server服务器的地址或主机名</span></span><br><span class="line">Hostname=proxy1-mage-passive <span class="comment">#代理服务器名称，需要与zabbix server添加代理时候的proxy name是一致的！</span></span><br><span class="line">LogFile=/tmp/zabbix_proxy.log</span><br><span class="line">DBHost=192.168.15.203 <span class="comment">#数据库服务器地址</span></span><br><span class="line">DBName=zabbix_proxy <span class="comment">#使用的数据库名称</span></span><br><span class="line">DBUser=proxy <span class="comment">#连接数据库的用户名称</span></span><br><span class="line">DBPassword=123456 <span class="comment">#数据库用户密码</span></span><br><span class="line">DBPort=3306 <span class="comment">#数据库端口</span></span><br><span class="line">ProxyLocalBuffer=3 <span class="comment">#已经提交到zabbix server的数据保留时间</span></span><br><span class="line">ProxyOfflineBuffer=24 <span class="comment">#未提交到zabbix server的时间保留时间</span></span><br><span class="line">HeartbeatFrequency=60 <span class="comment">#心跳间隔检测时间，默认60秒，范围0-3600秒，被动模式不使用</span></span><br><span class="line">ConfigFrequency=5 <span class="comment">#间隔多久从zabbix server 获取监控信息</span></span><br><span class="line">DataSenderFrequency=5 <span class="comment">#数据发送时间间隔，默认为1秒，范围为1-3600秒，被动模式不使用</span></span><br><span class="line">StartPollers=20 <span class="comment">#启动的数据采集器数量</span></span><br><span class="line">JavaGateway=192.168.15.202 <span class="comment">#java gateway服务器地址,当需要监控java的时候必须配置否则监控不到数据</span></span><br><span class="line">JavaGatewayPort=10052 <span class="comment">#Javagatewa服务端口</span></span><br><span class="line">StartJavaPollers=20 <span class="comment">#启动多少个线程采集数据</span></span><br><span class="line">CacheSize=2G <span class="comment">#保存监控项而占用的最大内存</span></span><br><span class="line">HistoryCacheSize=2G <span class="comment">#保存监控历史数据占用的最大内存</span></span><br><span class="line">Timeout=30 <span class="comment">#监控项超时时间，单位为秒</span></span><br><span class="line">LogSlowQueries=3000 <span class="comment">#毫秒，多久的数据库查询会被记录到日志</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="配置主动模式的agent"><a href="#配置主动模式的agent" class="headerlink" title="配置主动模式的agent"></a>配置主动模式的agent</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost zabbix]<span class="comment"># grep "^[a-Z]" etc/zabbix_agentd.conf</span></span><br><span class="line">PidFile=/usr/<span class="built_in">local</span>/zabbix/pid/zabbix_agentd.pid</span><br><span class="line">LogFile=/usr/<span class="built_in">local</span>/zabbix/logs/zabbix_agentd.log</span><br><span class="line">Server=192.168.34.100,192.168.34.103</span><br><span class="line">ServerActive=192.168.34.100,192.168.34.103 <span class="comment">#主动模式下的server地址</span></span><br><span class="line">Hostname=192.168.34.103 <span class="comment">#本机的名称，必须与添加主机时的主机名一样</span></span><br><span class="line">Timeout=30</span><br><span class="line">UnsafeUserParameters=1</span><br></pre></td></tr></table></figure>
+
+<p>编译安装的步骤：</p>
+<ul>
+<li>configure，检查编译环境是否符合要求，如果符合要求生成Makefile</li>
+<li>make，根据Makefile生成模块</li>
+<li>make install，将生成的模块拷贝到指定的目录，完成安装。</li>
+</ul>
+<h3 id="监控TCP连接数"><a href="#监控TCP连接数" class="headerlink" title="监控TCP连接数"></a>监控TCP连接数</h3><p>创建获取数据的脚本</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost zabbix]<span class="comment"># cat /usr/local/zabbix/etc/zabbix_agentd.conf.d/tcp_conn_plugin.sh </span></span><br><span class="line"><span class="meta">#!/bin/bash</span></span><br><span class="line"><span class="function"><span class="title">tcp_conn_status</span></span>()&#123;</span><br><span class="line">	TCP_STAT=<span class="variable">$1</span></span><br><span class="line">	ss -ant | awk <span class="string">'NR&gt;1 &#123;++s[$1]&#125; END &#123;for (i in s) print i,s[i]&#125;'</span> &gt; /tmp/tcp_conn.txt</span><br><span class="line">	TCP_STAT_VALUE=$(grep <span class="string">"<span class="variable">$TCP_STAT</span>"</span> /tmp/tcp_conn.txt | cut -d <span class="string">' '</span> -f2)</span><br><span class="line">	<span class="keyword">if</span> [ -z <span class="variable">$&#123;TCP_STAT_VALUE&#125;</span> ];<span class="keyword">then</span></span><br><span class="line">		TCP_STAT_VALUE=0</span><br><span class="line">	<span class="keyword">fi</span></span><br><span class="line">	<span class="built_in">echo</span> <span class="variable">$TCP_STAT_VALUE</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="title">main</span></span>()&#123;</span><br><span class="line">	<span class="keyword">case</span> <span class="variable">$1</span> <span class="keyword">in</span></span><br><span class="line">		tcp_status)</span><br><span class="line">			tcp_conn_status <span class="variable">$2</span></span><br><span class="line">			;;</span><br><span class="line">		*)</span><br><span class="line">			<span class="built_in">echo</span> <span class="string">"<span class="variable">$0</span> + tcp_status + STATUS"</span></span><br><span class="line">	<span class="keyword">esac</span></span><br><span class="line">&#125;</span><br><span class="line">main <span class="variable">$1</span> <span class="variable">$2</span></span><br></pre></td></tr></table></figure>
+
+<p>创建conf文件引用脚本</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost zabbix]<span class="comment"># vim /usr/local/zabbix/etc/zabbix_agentd.conf.d/all.conf</span></span><br><span class="line">UserParameter=linux_status[*],/usr/<span class="built_in">local</span>/zabbix/etc/zabbix_agentd.conf.d/tcp_conn_plugin.sh “<span class="variable">$1</span>” “<span class="variable">$2</span>” <span class="comment">#添加用户自定义参数</span></span><br></pre></td></tr></table></figure>
+<p>此方法需要在agent配置文件导入自定义配置文件</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost zabbix]<span class="comment">#vim /usr/local/zabbix/etc/zabbix_agentd.conf</span></span><br><span class="line">Include=/usr/<span class="built_in">local</span>/zabbix/etc/zabbix_agentd.conf.d/*.conf</span><br></pre></td></tr></table></figure>
+<p>或者直接在agent配置文件中添加自定义监控项</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost zabbix]<span class="comment">#vim /usr/local/zabbix/etc/zabbix_agentd.conf</span></span><br><span class="line">UserParameter=linux_status[*],/usr/<span class="built_in">local</span>/zabbix/etc/zabbix_agentd.conf.d/tcp_conn_plugin.sh “<span class="variable">$1</span>” “<span class="variable">$2</span>” <span class="comment">#添加用户自定义参数</span></span><br></pre></td></tr></table></figure>
+
+<p>重启agent服务</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost zabbix]<span class="comment">#/etc/init.d/zabbix_agentd restart</span></span><br></pre></td></tr></table></figure>
+
+<p>在被监控的服务器为zabbix用户授权</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost zabbix]<span class="comment"># vi /etc/sudoers</span></span><br><span class="line">zabbix  ALL=(ALL)       NOPASSWD:ALL</span><br></pre></td></tr></table></figure>
+
+<p>测试获取数据</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost zabbix]<span class="comment"># zabbix_get -s 192.168.15.204 -p 10050 -k "linux_status["tcp_status","LISTEN"]"</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="监控redis"><a href="#监控redis" class="headerlink" title="监控redis"></a>监控redis</h3>
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/zabbix/" rel="tag"># zabbix</a>
+          
+            <a href="/tags/%E7%9B%91%E6%8E%A7/" rel="tag"># 监控</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/05/24/tomcat/" rel="next" title="tomcat">
+                <i class="fa fa-chevron-left"></i> tomcat
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/06/03/JVM%E5%8F%82%E6%95%B0%E8%B0%83%E4%BC%98/" rel="prev" title="JVM参数调优">
+                JVM参数调优 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+        <!-- JiaThis Button BEGIN -->
+<div class="jiathis_style">
+<span class="jiathis_txt">分享到：</span>
+<a class="jiathis_button_fav">收藏夹</a>
+<a class="jiathis_button_copy">复制网址</a>
+<a class="jiathis_button_email">邮件</a>
+<a class="jiathis_button_weixin">微信</a>
+<a class="jiathis_button_qzone">QQ空间</a>
+<a class="jiathis_button_tqq">腾讯微博</a>
+<a class="jiathis_button_douban">豆瓣</a>
+<a class="jiathis_button_share">一键分享</a>
+
+<a href="http://www.jiathis.com/share?uid=2140465" class="jiathis jiathis_txt jiathis_separator jtico jtico_jiathis" target="_blank">更多</a>
+<a class="jiathis_counter_style"></a>
+</div>
+<script type="text/javascript" >
+var jiathis_config={
+  data_track_clickback:true,
+  summary:"",
+  shortUrl:false,
+  hideMore:false
+}
+</script>
+<script type="text/javascript" src="http://v3.jiathis.com/code/jia.js?uid=" charset="utf-8"></script>
+<!-- JiaThis Button END -->
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+    </div>
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/uploads/touxiang.jpg"
+                alt="ShengQin Miao" />
+            
+              <p class="site-author-name" itemprop="name">ShengQin Miao</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">53</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                
+                  <span class="site-state-item-count">1</span>
+                  <span class="site-state-item-name">分类</span>
+                
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">61</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#安装zabbix-server"><span class="nav-number">1.</span> <span class="nav-text">安装zabbix-server</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#准备数据库"><span class="nav-number">1.1.</span> <span class="nav-text">准备数据库</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#编译安装zabbix"><span class="nav-number">1.2.</span> <span class="nav-text">编译安装zabbix</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#向zabbix-server中增加agent-被动模式"><span class="nav-number">2.</span> <span class="nav-text">向zabbix server中增加agent(被动模式)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#使用zabbix监控tomcat"><span class="nav-number">3.</span> <span class="nav-text">使用zabbix监控tomcat</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#在zabbix-server上安装配置java-gateway"><span class="nav-number">3.1.</span> <span class="nav-text">在zabbix server上安装配置java gateway</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#单独配置一台java-gateway服务器"><span class="nav-number">3.2.</span> <span class="nav-text">单独配置一台java gateway服务器</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#配置zabbix-server调用java-gateway"><span class="nav-number">3.3.</span> <span class="nav-text">配置zabbix server调用java gateway</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#配置tomcat启用jmx远程监控"><span class="nav-number">3.4.</span> <span class="nav-text">配置tomcat启用jmx远程监控</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#监控java的排错方法"><span class="nav-number">3.5.</span> <span class="nav-text">监控java的排错方法</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#zabbix-proxy-被动模式"><span class="nav-number">4.</span> <span class="nav-text">zabbix proxy(被动模式)</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#安装zabbix-proxy"><span class="nav-number">4.1.</span> <span class="nav-text">安装zabbix proxy</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#zabbix主动模式"><span class="nav-number">5.</span> <span class="nav-text">zabbix主动模式</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#配置主动模式的proxy"><span class="nav-number">5.1.</span> <span class="nav-text">配置主动模式的proxy</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#配置主动模式的agent"><span class="nav-number">5.2.</span> <span class="nav-text">配置主动模式的agent</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#监控TCP连接数"><span class="nav-number">6.</span> <span class="nav-text">监控TCP连接数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#监控redis"><span class="nav-number">7.</span> <span class="nav-text">监控redis</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">ShengQin Miao</span>
+
+  
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-area-chart"></i>
+    </span>
+    
+      <span class="post-meta-item-text">Site words total count&#58;</span>
+    
+    <span title="Site words total count">131.6k</span>
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Pisces</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js"></script>
+  <script>AV.initialize("vItlX9Jc2L4BuXKt6BJWW6eJ-gzGzoHsz", "IisqhTArerBOyaxKHN8TcE10");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

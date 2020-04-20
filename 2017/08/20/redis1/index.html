@@ -1,0 +1,1441 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="redis,非关系型数据库,缓存服务器," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="RedisRdies简介Redis(Remote Dictionary Server)在2009年发布，开发者Salvatore Sanfilippo是意大利开发者，他本想为自己的公司开发一个用于替换MySQL的产品Redis，但是没有想到他把Redis开源后大受欢迎，短短几年，Redis就有了很大的用户群体，目前国内外使用的公司有知乎网、新浪微博、GitHub等redis是一个开源的、遵循BSD">
+<meta property="og:type" content="article">
+<meta property="og:title" content="redis">
+<meta property="og:url" content="http://yoursite.com/2017/08/20/redis1/index.html">
+<meta property="og:site_name" content="漫步人生路">
+<meta property="og:description" content="RedisRdies简介Redis(Remote Dictionary Server)在2009年发布，开发者Salvatore Sanfilippo是意大利开发者，他本想为自己的公司开发一个用于替换MySQL的产品Redis，但是没有想到他把Redis开源后大受欢迎，短短几年，Redis就有了很大的用户群体，目前国内外使用的公司有知乎网、新浪微博、GitHub等redis是一个开源的、遵循BSD">
+<meta property="article:published_time" content="2017-08-19T16:00:00.000Z">
+<meta property="article:modified_time" content="2020-04-20T13:33:52.638Z">
+<meta property="article:author" content="ShengQin Miao">
+<meta property="article:tag" content="redis">
+<meta property="article:tag" content="非关系型数据库">
+<meta property="article:tag" content="缓存服务器">
+<meta name="twitter:card" content="summary">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2017/08/20/redis1/"/>
+
+
+
+
+
+  <title>redis | 漫步人生路</title>
+  
+
+
+
+
+
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?f076ecd4b66d3a02de923868671591de";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+<meta name="generator" content="Hexo 4.2.0"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">漫步人生路</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off"
+             placeholder="搜索..." spellcheck="false"
+             type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/08/20/redis1/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="ShengQin Miao">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/uploads/touxiang.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="漫步人生路">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">redis</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-08-20T00:00:00+08:00">
+                2017-08-20
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+             <span id="/2017/08/20/redis1/" class="leancloud_visitors" data-flag-title="redis">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+            <div class="post-wordcount">
+              
+                
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-file-word-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">字数统计&#58;</span>
+                
+                <span title="字数统计">
+                  6.4k
+                </span>
+              
+
+              
+                <span class="post-meta-divider">|</span>
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-clock-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">阅读时长 &asymp;</span>
+                
+                <span title="阅读时长">
+                  26
+                </span>
+              
+            </div>
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="Redis"><a href="#Redis" class="headerlink" title="Redis"></a>Redis</h2><h3 id="Rdies简介"><a href="#Rdies简介" class="headerlink" title="Rdies简介"></a>Rdies简介</h3><p>Redis(Remote Dictionary Server)在2009年发布，开发者Salvatore Sanfilippo是意大利开发者，他本想为自己的公司开发一个用于替换MySQL的产品Redis，但是没有想到他把Redis开源后大受欢迎，短短几年，Redis就有了很大的用户群体，目前国内外使用的公司有知乎网、新浪微博、GitHub等<br>redis是一个开源的、遵循BSD协议的、基于内存的而且目前比较流行的键值数据库(key-value database)，是一个非关系型数据库，redis提供将内存通过网络远程共享的一种服务，提供类似功能的还有memcache，但相比memcache，redis还提供了易扩展、高性能、具备数据持久性等功能。<br>  Redis在高并发、低延迟环境要求比较高的环境使用量非常广泛</p>
+<h4 id="redis和memcached对比"><a href="#redis和memcached对比" class="headerlink" title="redis和memcached对比"></a>redis和memcached对比</h4><p>支持数据的持久化：可以将内存中的数据保持在磁盘中，重启redis服务或者服务器之后可以从备份文件中恢复数据到内存继续使用。<br>支持更多的数据类型：支持string(字符串)、hash(哈希数据)、list(列表)、set(集合)、zet(有序集合)<br>支持数据的备份：可以实现类似于数据的master-slave模式的数据备份，另外也支持使用快照+AOF。<br>支持更大的value数据：memcache单个key value最大只支持1MB，而redis最大支持512MB。<br>Redis 是单线程，而memcache是多线程，所以单机情况下没有memcache并发高，但redis 支持分布式集群以实现更高的并发，单Redis实例可以实现数万并发。<br>支持集群横向扩展：基于redis cluster的横向扩展，可以实现分布式集群，大幅提升性能和数据安全性。<br>都是基于C语言开发。</p>
+<h4 id="redis典型应用场景"><a href="#redis典型应用场景" class="headerlink" title="redis典型应用场景"></a>redis典型应用场景</h4><p>Session 共享：常见于web集群中的Tomcat或者PHP中多web服务器session共享<br>消息队列：ELK的日志缓存、部分业务的订阅发布系统<br>计数器：访问排行榜、商品浏览数等和次数相关的场景<br>缓存：数据查询、电商网站商品信息、新闻内容<br>微博/微信社交场合：共同好友、点赞评论等</p>
+<h4 id="编译安装redis"><a href="#编译安装redis" class="headerlink" title="编译安装redis"></a>编译安装redis</h4><p>到官网下载源码包，解压后进入解压目录</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">redis-5.0.3]<span class="comment">#make PREFIX=/usr/local/redis install</span></span><br><span class="line">redis-5.0.3]<span class="comment">#mkdir /usr/local/redis/etc</span></span><br><span class="line">redis-5.0.3]<span class="comment">#cp redis.conf /usr/local/redis/etc/</span></span><br></pre></td></tr></table></figure>
+<p>前台启动redis</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">~]<span class="comment">#/usr/local/redis/bin/redis-server  /usr/local/redis/etc/redis.conf</span></span><br></pre></td></tr></table></figure>
+<p>在启动redis的时候回有几个报警需要调整一下<br><strong>WARNING</strong>: The TCP backlog setting of 511 cannot be enforced because /proc/sys/net/core/somaxconn is set to the lower value of 128.<br>backlog参数控制的是三次握手的时候server端收到client ack确认号之后的队列值。<br>net.core.somaxconn = 512<br><strong>WARNING</strong> overcommit_memory is set to 0! Background save may fail under low memory condition. To fix this issue add ‘vm.overcommit_memory = 1’ to /etc/sysctl.conf and then reboot or run the command ‘sysctl vm.overcommit_memory=1’ for this to take effect.<br>0、表示内核将检查是否有足够的可用内存供应用进程使用；如果有足够的可用内存，内存申请允许；否则，内存申请失败，并把错误返回给应用进程。<br>1、表示内核允许分配所有的物理内存，而不管当前的内存状态如何。<br>2、表示内核允许分配超过所有物理内存和交换空间总和的内存<br>vm.overcommit_memory = 1<br><strong>WARNING</strong> you have Transparent Huge Pages (THP) support enabled in your kernel. This will create latency and memory usage issues with Redis. To fix this issue run the command ‘echo never &gt; /sys/kernel/mm/transparent_hugepage/enabled’ as root, and add it to your /etc/rc.local in order to retain the setting after a reboot. Redis must be restarted after THP is disabled.<br>开启大页内存动态分配，需要关闭让redis 负责内存管理。<br>echo never &gt; /sys/kernel/mm/transparent_hugepage/enabled</p>
+<p>之后再次启动redis即可消除警报</p>
+<p><strong>编辑redis服务启动脚本</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">~]<span class="comment"># cat  /usr/lib/systemd/system/redis.service</span></span><br><span class="line">[Unit]</span><br><span class="line">Description=Redis persistent key-value database</span><br><span class="line">After=network.target</span><br><span class="line">After=network-online.target</span><br><span class="line">Wants=network-online.target</span><br><span class="line"></span><br><span class="line">[Service]</span><br><span class="line">ExecStart=/usr/<span class="built_in">local</span>/redis/bin/redis-server /usr/<span class="built_in">local</span>/redis/etc/redis.conf  --supervised systemd</span><br><span class="line">ExecReload=/bin/<span class="built_in">kill</span> -s HUP <span class="variable">$MAINPID</span> </span><br><span class="line">ExecStop=/bin/<span class="built_in">kill</span> -s QUIT <span class="variable">$MAINPID</span></span><br><span class="line">Type=notify</span><br><span class="line">User=redis</span><br><span class="line">Group=redis</span><br><span class="line">RuntimeDirectory=redis</span><br><span class="line">RuntimeDirectoryMode=0755</span><br><span class="line"></span><br><span class="line">[Install]</span><br><span class="line">WantedBy=multi-user.target</span><br></pre></td></tr></table></figure>
+<p><strong>将redis加入systemd管理</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@10-10-10-8 system]<span class="comment">#systemctl daemon-reload</span></span><br></pre></td></tr></table></figure>
+<p>之后就可以用systemd管理redis服务，redis默认监听127.0.0.1:6379端口。</p>
+<h4 id="创建redis用户和数据目录"><a href="#创建redis用户和数据目录" class="headerlink" title="创建redis用户和数据目录"></a>创建redis用户和数据目录</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># groupadd  -g 1000 redis &amp;&amp; useradd   -u 1000 -g 1000 redis -s /sbin/nologin</span></span><br><span class="line"><span class="comment"># mkdir -pv /usr/local/redis/&#123;etc,logs,data,run&#125;</span></span><br><span class="line"><span class="comment"># chown redis.redis -R  /usr/local/redis/</span></span><br></pre></td></tr></table></figure>
+<h4 id="创建命令软连接以方便以后使用"><a href="#创建命令软连接以方便以后使用" class="headerlink" title="创建命令软连接以方便以后使用"></a>创建命令软连接以方便以后使用</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"> ln -sv /usr/<span class="built_in">local</span>/redis/bin/redis-* /usr/bin/</span><br><span class="line">‘/usr/bin/redis-benchmark’ -&gt; ‘/usr/<span class="built_in">local</span>/redis/bin/redis-benchmark’</span><br><span class="line">‘/usr/bin/redis-check-aof’ -&gt; ‘/usr/<span class="built_in">local</span>/redis/bin/redis-check-aof’</span><br><span class="line">‘/usr/bin/redis-check-rdb’ -&gt; ‘/usr/<span class="built_in">local</span>/redis/bin/redis-check-rdb’</span><br><span class="line">‘/usr/bin/redis-cli’ -&gt; ‘/usr/<span class="built_in">local</span>/redis/bin/redis-cli’</span><br><span class="line">‘/usr/bin/redis-sentinel’ -&gt; ‘/usr/<span class="built_in">local</span>/redis/bin/redis-sentinel’</span><br><span class="line">‘/usr/bin/redis-server’ -&gt; ‘/usr/<span class="built_in">local</span>/redis/bin/redis-server’</span><br></pre></td></tr></table></figure>
+<h4 id="编译安装后的命令"><a href="#编译安装后的命令" class="headerlink" title="编译安装后的命令"></a>编译安装后的命令</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line">[root@10-10-10-8 system]<span class="comment">#ll /usr/local/redis/bin/</span></span><br><span class="line">total 32672</span><br><span class="line">-rwxr-xr-x 1 redis redis 4366608 Jan 12 16:34 redis-benchmark <span class="comment">#性能检测工具</span></span><br><span class="line">-rwxr-xr-x 1 redis redis 8090040 Jan 12 16:34 redis-check-aof <span class="comment">#文件检查工具</span></span><br><span class="line">-rwxr-xr-x 1 redis redis 8090040 Jan 12 16:34 redis-check-rdb <span class="comment">#文件检查工具</span></span><br><span class="line">-rwxr-xr-x 1 redis redis 4801864 Jan 12 16:34 redis-cli <span class="comment">#客户端工具</span></span><br><span class="line">lrwxrwxrwx 1 redis redis      12 Jan 12 16:34 redis-sentinel -&gt; redis-server <span class="comment">#哨兵，软连接到server</span></span><br><span class="line">-rwxr-xr-x 1 redis redis 8090040 Jan 12 16:34 redis-server <span class="comment">#redis服务端</span></span><br><span class="line">``` </span><br><span class="line"><span class="comment">#### redis的连接</span></span><br><span class="line">本机非密码连接</span><br><span class="line"></span><br><span class="line">	redis-cli</span><br><span class="line"></span><br><span class="line">夸主机非密码连接</span><br><span class="line"></span><br><span class="line">	redis-cli -h HOSTNAME/IP -p PORT</span><br><span class="line"></span><br><span class="line">夸主机密码连接</span><br><span class="line">	</span><br><span class="line">	redis-cli -h HOSTNAME/IP -p PORT -a PASSWORD</span><br><span class="line"></span><br><span class="line">python连接</span><br><span class="line">```python</span><br><span class="line"><span class="comment">#!/bin/env  python</span></span><br><span class="line"><span class="comment">#Author: Msq</span></span><br><span class="line">import redis</span><br><span class="line">import  time</span><br><span class="line">pool = redis.ConnectionPool(host=<span class="string">"192.168.7.101"</span>, port=6379,password=<span class="string">""</span>)</span><br><span class="line">r = redis.Redis(connection_pool=pool)</span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> range(100):</span><br><span class="line">    r.set(<span class="string">"k%d"</span> % i,<span class="string">"v%d"</span> % i)</span><br><span class="line">    time.sleep(1)</span><br><span class="line">    data=r.get(<span class="string">"k%d"</span> % i)</span><br><span class="line">    <span class="built_in">print</span>(data)</span><br></pre></td></tr></table></figure>
+
+<h4 id="redis帮助命令"><a href="#redis帮助命令" class="headerlink" title="redis帮助命令"></a>redis帮助命令</h4><p>查看通用命令帮助</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; <span class="built_in">help</span> @generic</span><br></pre></td></tr></table></figure>
+
+<h4 id="redis配置文件详解"><a href="#redis配置文件详解" class="headerlink" title="redis配置文件详解"></a>redis配置文件详解</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br></pre></td><td class="code"><pre><span class="line">~]<span class="comment">#cat /usr/local/redis/etc/redis.conf</span></span><br><span class="line"><span class="built_in">bind</span> 0.0.0.0 <span class="comment">#监听地址，可以用空格隔开后多个监听IP</span></span><br><span class="line">protected-mode yes  <span class="comment">#redis3.2 之后加入的新特性，在没有设置bind IP和密码的时候只允许访问127.0.0.1:6379</span></span><br><span class="line">port 6379 <span class="comment">#监听端口</span></span><br><span class="line">tcp-backlog 511 <span class="comment">#三次握手的时候server端收到client ack确认号之后的队列值。</span></span><br><span class="line">timeout 0 <span class="comment">#客户端和Redis服务端的连接超时时间，默认是0，表示永不超时。 </span></span><br><span class="line">tcp-keepalive 300 <span class="comment">#tcp 会话保持时间</span></span><br><span class="line">daemonize no <span class="comment">#认情况下 redis 不是作为守护进程运行的，如果你想让它在后台运行，你就把它改成 yes,当redis作为守护进程运行的时候，它会写一个 pid 到 /var/run/redis.pid 文件里面</span></span><br><span class="line">supervised no <span class="comment">#和操作系统相关参数，可以设置通过upstart和systemd管理Redis守护进程，centos 7以后都使用systemd</span></span><br><span class="line">pidfile /var/run/redis_6379.pid <span class="comment">#pid文件路径</span></span><br><span class="line">loglevel notice <span class="comment">#日志级别</span></span><br><span class="line">logfile <span class="string">""</span> <span class="comment">#日志路径</span></span><br><span class="line">databases 16  <span class="comment">#设置db 库数量，默认16个库</span></span><br><span class="line">always-show-logo yes <span class="comment">#在启动redis 时是否显示log</span></span><br><span class="line"></span><br><span class="line">save 900 1 <span class="comment">#在900秒内有一个键内容发生更改就出就快照机制</span></span><br><span class="line">save 300 10</span><br><span class="line">save 60 10000</span><br><span class="line">stop-writes-on-bgsave-error yes  <span class="comment">#快照出错时是否禁止redis 写入操作</span></span><br><span class="line">rdbcompression yes <span class="comment">#持久化到RDB文件时，是否压缩，"yes"为压缩，"no"则反之</span></span><br><span class="line">rdbchecksum yes  <span class="comment">#是否开启RC64校验，默认是开启</span></span><br><span class="line">dbfilename dump.rdb <span class="comment">#快照文件名</span></span><br><span class="line">dir ./ <span class="comment">#快照文件保存路径</span></span><br><span class="line">replica-serve-stale-data yes <span class="comment">#当从库同主库失去连接或者复制正在进行，从机库有两种运行方式：1) 如果replica-serve-stale-data设置为yes(默认设置)，从库会继续响应客户端的请求。2) 如果replica-serve-stale-data设置为no，除去指定的命令之外的任何请求都会返回一个错误"SYNC with master in progress"。</span></span><br><span class="line">replica-read-only yes <span class="comment">#是否设置从库只读</span></span><br><span class="line">repl-diskless-sync no <span class="comment">#是否使用socket方式复制数据，目前redis复制提供两种方式，disk和socket，如果新的slave连上来或者重连的slave无法部分同步，就会执行全量同步，master会生成rdb文件，有2种方式：disk方式是master创建一个新的进程把rdb文件保存到磁盘，再把磁盘上的rdb文件传递给slave，socket是master创建一个新的进程，直接把rdb文件以socket的方式发给slave，disk方式的时候，当一个rdb保存的过程中，多个slave都能共享这个rdb文件，socket的方式就是一个个slave顺序复制，只有在磁盘速度缓慢但是网络相对较快的情况下才使用socket方式，否则使用默认的disk方式</span></span><br><span class="line">repl-diskless-sync-delay 5  <span class="comment">#diskless复制的延迟时间，设置0为关闭，一旦复制开始还没有结束之前，master节点不会再接收新slave的复制请求，直到下一次开始</span></span><br><span class="line">repl-ping-slave-period 10 <span class="comment">#slave根据master指定的时间进行周期性的PING 监测</span></span><br><span class="line">repl-timeout 60 <span class="comment">#复制链接超时时间，需要大于repl-ping-slave-period，否则会经常报超时</span></span><br><span class="line">repl-disable-tcp-nodelay no <span class="comment">#在socket模式下是否在slave套接字发送SYNC之后禁用 TCP_NODELAY，如果你选择“yes”Redis将使用更少的TCP包和带宽来向slaves发送数据。但是这将使数据传输到slave上有延迟，Linux内核的默认配置会达到40毫秒，如果你选择了 "no" 数据传输到salve的延迟将会减少但要使用更多的带宽</span></span><br><span class="line">repl-backlog-size 1mb <span class="comment">#复制缓冲区大小，只有在slave连接之后才分配内存。 </span></span><br><span class="line">repl-backlog-ttl 3600 <span class="comment">#多次时间master没有slave连接，就清空backlog缓冲区。</span></span><br><span class="line">replica-priority 100 <span class="comment">#当master不可用，Sentinel会根据slave的优先级选举一个master。最低的优先级的slave，当选master。而配置成0，永远不会被选举。</span></span><br><span class="line">requirepass foobared <span class="comment">#设置redis 连接密码</span></span><br><span class="line">rename-command <span class="comment">#重命名一些高危命令</span></span><br><span class="line">maxclients 10000 <span class="comment">#最大连接客户端</span></span><br><span class="line">maxmemory <span class="comment">#最大内存，单位为bytes字节，8G内存的计算方式8(G)*1024(MB)*1024(KB)*1024(Kbyte)，需要注意的是slave的输出缓冲区是不计算在maxmemory内。</span></span><br><span class="line">appendonly no <span class="comment">#是否开启AOF日志记录，默认redis使用的是rdb方式持久化，这种方式在许多应用中已经足够用了。但是redis如果中途宕机，会导致可能有几分钟的数据丢失，根据save来策略进行持久化，Append Only File是另一种持久化方式，可以提供更好的持久化特性。Redis会把每次写入的数据在接收后都写入 appendonly.aof 文件，每次启动时Redis都会先把这个文件的数据读入内存里，先忽略RDB文件。</span></span><br><span class="line">appendfilename <span class="string">"appendonly.aof"</span> <span class="comment">#AOF文件名</span></span><br><span class="line">appendfsync everysec  <span class="comment">#aof持久化策略的配置,no表示不执行fsync,由操作系统保证数据同步到磁盘,always表示每次写入都执行fsync，以保证数据同步到磁盘,everysec表示每秒执行一次fsync，可能会导致丢失这1s数据。</span></span><br><span class="line">no-appendfsync-on-rewrite no <span class="comment">#在aof rewrite期间,是否对aof新记录的append暂缓使用文件同步策略,主要考虑磁盘IO开支和请求阻塞时间。默认为no,表示"不暂缓",新的aof记录仍然会被立即同步，Linux的默认fsync策略是30秒，如果为yes 可能丢失30秒数据，但由于yes性能较好而且会避免出现阻塞因此比较推荐。</span></span><br><span class="line">auto-aof-rewrite-percentage 100 <span class="comment"># 当Aof log增长超过指定比例时，重写log file， 设置为0表示不自动重写Aof 日志，重写是为了使aof体积保持最小，而确保保存最完整的数据。</span></span><br><span class="line">auto-aof-rewrite-min-size 64mb <span class="comment">#触发aof rewrite的最小文件尺寸</span></span><br><span class="line">aof-load-truncated yes <span class="comment">#是否加载由于其他原因导致的末尾异常的AOF文件(主进程被kill/断电等)</span></span><br><span class="line">aof-use-rdb-preamble yes <span class="comment">#redis4.0新增RDB-AOF混合持久化格式，在开启了这个功能之后，AOF重写产生的文件将同时包含RDB格式的内容和AOF格式的内容，其中RDB格式的内容用于记录已有的数据，而AOF格式的内存则用于记录最近发生了变化的数据，这样Redis就可以同时兼有RDB持久化和AOF持久化的优点（既能够快速地生成重写文件，也能够在出现问题时，快速地载入数据）。</span></span><br><span class="line">lua-time-limit 5000 <span class="comment">#lua脚本的最大执行时间，单位为毫秒</span></span><br><span class="line">cluster-enabled yes <span class="comment">#是否开启集群模式，默认是单机模式</span></span><br><span class="line">cluster-config-file nodes-6379.conf <span class="comment">#由node节点自动生成和的集群配置文件</span></span><br><span class="line">cluster-node-timeout 15000 <span class="comment">#集群中node节点连接超时时间</span></span><br><span class="line">cluster-replica-validity-factor 10 <span class="comment">#在执行故障转移的时候可能有些节点和master断开一段时间数据比较旧，这些节点就不适用于选举为master，超过这个时间的就不会被进行故障转移</span></span><br><span class="line">cluster-migration-barrier 1  <span class="comment">#一个主节点拥有的至少正常工作的从节点，即如果主节点的slave节点故障后会将多余的从节点分配到当前主节点成为其新的从节点。</span></span><br><span class="line">cluster-require-full-coverage yes <span class="comment">#集群槽位覆盖，如果一个主库宕机且没有备库就会出现集群槽位不全，那么yes情况下redis集群槽位验证不全就不再对外提供服务，而no则可以继续使用但是会出现查询数据查不到的情况(因为有数据丢失)。</span></span><br><span class="line">cluster-replica-no-failover no</span><br><span class="line"><span class="comment">#Slow log 是 Redis 用来记录查询执行时间的日志系统，slow log 保存在内存里面，读写速度非常快，因此你可以放心地使用它，不必担心因为开启 slow log 而损害 Redis 的速度。</span></span><br><span class="line">slowlog-log-slower-than 10000 <span class="comment">#以微秒为单位的慢日志记录，为负数会禁用慢日志，为0会记录每个命令操作。</span></span><br><span class="line">slowlog-max-len 128 <span class="comment">#记录多少条慢日志保存在队列，超出后会删除最早的，以此滚动删除</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="redis持久化"><a href="#redis持久化" class="headerlink" title="redis持久化"></a>redis持久化</h4><p>redis 虽然是一个内存级别的缓存程序，即redis 是使用内存进行数据的缓存的，但是其可以将内存的数据按照一定的策略保存到硬盘上，从而实现数据持久保存的目的，redis支持两种不同方式的数据持久化保存机制，分别是RDB和AOF</p>
+<h5 id="RDB模式"><a href="#RDB模式" class="headerlink" title="RDB模式"></a>RDB模式</h5><p>RDB：基于时间的快照，只保留当前最新的一次快照，特点是执行速度比较快，缺点是可能会丢失从上次快照到当前快照未完成之间的数据。<br>RDB实现的具体过程Redis从主进程先fork出一个子进程，使用写时复制机制，子进程将内存的数据保存为一个临时文件，比如dump.rdb.temp，当数据保存完成之后再将上一次保存的RDB文件替换掉，然后关闭子进程，这样可以保存每一次做RDB快照的时候保存的数据都是完整的，因为直接替换RDB文件的时候可能会出现突然断电等问题而导致RDB文件还没有保存完整就突然关机停止保存而导致数据丢失的情况，可以手动将每次生成的RDB文件进程备份，这样可以最大化保存历史数据。<br><strong>RDB模式的优缺点</strong><br>优点：</p>
+<ul>
+<li>RDB快照保存了某个时间点的数据，可以通过脚本执行bgsave(非阻塞)或者save(阻塞)命令自定义时间点北备份，可以保留多个备份，当出现问题可以恢复到不同时间点的版本。</li>
+<li>可以最大化io的性能，因为父进程在保存RDB 文件的时候唯一要做的是fork出一个子进程，然后的-操作都会有这个子进程操作，父进程无需任何的IO操作。RDB在大量数据比如几个G的数据，恢复的速度比AOF的快</li>
+</ul>
+<p>缺点：</p>
+<ul>
+<li>不能时时的保存数据，会丢失自上一次执行RDB备份到当前的内存数据</li>
+<li>数据量非常大的时候，从父进程fork的时候需要一点时间，可能是毫秒或者秒</li>
+</ul>
+<h5 id="AOF模式"><a href="#AOF模式" class="headerlink" title="AOF模式"></a>AOF模式</h5><p>AOF:按照操作顺序依次将操作添加到指定的日志文件当中，特点是数据安全性相对较高，缺点是即使有些操作是重复的也会全部记录。<br>AOF和RDB一样使用了写时复制机制，AOF默认为每秒钟fsync一次，即将执行的命令保存到AOF文件当中，这样即使redis服务器发生故障的话顶多也就丢失1秒钟之内的数据，也可以设置不同的fsync策略，或者设置每次执行命令的时候执行fsync，fsync会在后台执行线程，所以主线程可以继续处理用户的正常请求而不受到写入AOF文件的IO影响<br><strong>AOF模式的优缺点</strong><br>AOF的文件大小要大于RDB格式的文件<br>根据所使用的fsync策略(fsync是同步内存中redis所有已经修改的文件到存储设备)，默认是appendfsync everysec即每秒执行一次fsync</p>
+<h3 id="redis的数据类型"><a href="#redis的数据类型" class="headerlink" title="redis的数据类型"></a>redis的数据类型</h3><h4 id="字符串"><a href="#字符串" class="headerlink" title="字符串"></a>字符串</h4><p>字符串是所有编程语言中最常见的和最常用的数据类型，而且也是redis最基本的数据类型之一，而且redis中所有的key的类型都是字符串。<br>添加一个key</p>
+<pre><code>127.0.0.1:6379&gt; set key1 value1
+OK</code></pre><p>获取一个key的内容</p>
+<pre><code>127.0.0.1:6379&gt; get key1
+&quot;value1&quot;</code></pre><p>删除一个key</p>
+<pre><code>127.0.0.1:6379&gt; DEL key1
+(integer) 1</code></pre><p>批量设置多个key</p>
+<pre><code>127.0.0.1:6379&gt; MSET key1 value1 key2 value2
+OK</code></pre><p>批量获取多个key</p>
+<pre><code>127.0.0.1:6379&gt; MSET key1 value1 key2 value2
+OK</code></pre><p>往key中追加数据</p>
+<pre><code>127.0.0.1:6379&gt; APPEND key1 append
+(integer) 12
+127.0.0.1:6379&gt; get key1
+&quot;value1append&quot;</code></pre><p>数值递增</p>
+<pre><code>127.0.0.1:6379&gt; set num 10
+OK
+127.0.0.1:6379&gt; INCR num
+(integer) 11
+127.0.0.1:6379&gt; get num
+&quot;11&quot;</code></pre><p>数值递减：</p>
+<pre><code>127.0.0.1:6379&gt; set num 10
+OK
+127.0.0.1:6379&gt; DECR num
+(integer) 9
+127.0.0.1:6379&gt; get num
+&quot;9&quot;</code></pre><p>返回字符串key长度：</p>
+<pre><code>127.0.0.1:6379&gt; STRLEN key1
+(integer) 12</code></pre><h4 id="列表"><a href="#列表" class="headerlink" title="列表"></a>列表</h4><p>列表是一个双向可读写的管道，其头部是左侧尾部是右侧，一个列表最多可以包含2^32-1个元素即4294967295个元素。<br>列表相关操作</p>
+<pre><code>10.10.10.8:6379&gt; LPUSH list1 jack #生成列表list1并插入第0个值Jack
+(integer) 1
+10.10.10.8:6379&gt; type list1 #查看list1的类型
+list
+10.10.10.8:6379&gt; LPUSH list1 msq 
+(integer) 2
+10.10.10.8:6379&gt; LPUSH list1 merry
+(integer) 3
+10.10.10.8:6379&gt; LLEN list1 #获取列表list1的长度
+(integer) 3
+10.10.10.8:6379&gt; LRANGE list1 0 2 #查看列表list1的第0个值到第2个值
+1) &quot;merry&quot;
+2) &quot;msq&quot;
+3) &quot;jack&quot;</code></pre><h4 id="集合-set"><a href="#集合-set" class="headerlink" title="集合(set)"></a>集合(set)</h4><p>Set 是 String 类型的无序集合。集合成员是唯一的，这就意味着集合中不能出现重复的数据。<br>生成集合key:</p>
+<pre><code>127.0.0.1:6379&gt; SADD set1 v1 
+(integer) 1
+127.0.0.1:6379&gt; SADD set2 v2 v4
+(integer) 2
+127.0.0.1:6379&gt; TYPE set1
+set
+127.0.0.1:6379&gt; TYPE set2
+set</code></pre><p>追加数值：<br>追加的时候不能追加已经存在的数值</p>
+<pre><code>127.0.0.1:6379&gt; SADD set1 v2 v3 v4
+(integer) 3
+127.0.0.1:6379&gt; SADD set1 v2 #没有追加成功
+(integer) 0
+127.0.0.1:6379&gt; TYPE set1
+set
+127.0.0.1:6379&gt; TYPE set2
+set</code></pre><p>查看集合的所有数据：</p>
+<pre><code>127.0.0.1:6379&gt; SMEMBERS set1
+1) &quot;v4&quot;
+2) &quot;v1&quot;
+3) &quot;v3&quot;
+4) &quot;v2&quot;
+127.0.0.1:6379&gt; SMEMBERS set2
+1) &quot;v4&quot;
+2) &quot;v2&quot;</code></pre><p>获取集合的差集：<br>差集：已属于A而不属于B的元素称为A与B的差（集）</p>
+<pre><code>127.0.0.1:6379&gt; SDIFF set1 set2
+1) &quot;v1&quot;
+2) &quot;v3&quot;</code></pre><p>获取集合的交集：<br>交集：已属于A且属于B的元素称为A与B的交（集）</p>
+<pre><code>127.0.0.1:6379&gt; SINTER set1 set2
+1) &quot;v4&quot;
+2) &quot;v2&quot;</code></pre><p>获取集合的并集：<br>并集：已属于A或属于B的元素为称为A与B的并（集）</p>
+<pre><code>127.0.0.1:6379&gt; SUNION  set1 set2
+1) &quot;v2&quot;
+2) &quot;v4&quot;
+3) &quot;v1&quot;
+4) &quot;v3&quot;</code></pre><h4 id="有序集合-sorted-set"><a href="#有序集合-sorted-set" class="headerlink" title="有序集合(sorted set)"></a>有序集合(sorted set)</h4><p>Redis 有序集合和集合一样也是string类型元素的集合,且不允许重复的成员，不同的是每个元素都会关联一个double(双精度浮点型)类型的分数，redis正是通过分数来为集合中的成员进行从小到大的排序，有序集合的成员是唯一的,但分数(score)却可以重复，集合是通过哈希表实现的，所以添加，删除，查找的复杂度都是O(1)， 集合中最大的成员数为 2^32 - 1 (4294967295, 每个集合可存储40多亿个成员)。<br>生成有序集合</p>
+<pre><code>127.0.0.1:6379&gt; ZADD zset1 1 v1 
+(integer) 1
+127.0.0.1:6379&gt; ZADD zset1 2 v2
+(integer) 1
+127.0.0.1:6379&gt; ZADD zset1 2 v3
+(integer) 1
+127.0.0.1:6379&gt; ZADD zset1 3 v4
+(integer) 1
+127.0.0.1:6379&gt; TYPE zset1
+zset
+127.0.0.1:6379&gt; TYPE zset2
+zset</code></pre><p>排行案例：</p>
+<pre><code>192.168.7.104:6379&gt; ZADD paihangbang 10 key1 20 key2 30 key3
+(integer) 3
+192.168.7.104:6379&gt; ZREVRANGE paihangbang 0 -1 withscores
+1) &quot;key3&quot;
+2) &quot;30&quot;
+3) &quot;key2&quot;
+4) &quot;20&quot;
+5) &quot;key1&quot;
+6) &quot;10&quot;</code></pre><p>批量添加多个数值：</p>
+<pre><code>127.0.0.1:6379&gt; ZADD zset2 1 v1 2 v2 4 v3 5 v5
+(integer) 4</code></pre><p>获取集合的长度数：</p>
+<pre><code>127.0.0.1:6379&gt; ZCARD zset1 
+(integer) 4
+127.0.0.1:6379&gt; ZCARD zset2
+(integer) 4</code></pre><p>基于索引返回数值：</p>
+<pre><code>127.0.0.1:6379&gt; ZRANGE zset1 1 3
+1) &quot;v2&quot;
+2) &quot;v3&quot;
+3) &quot;v4&quot;
+127.0.0.1:6379&gt; ZRANGE zset1 0 2
+1) &quot;v1&quot;
+2) &quot;v2&quot;
+3) &quot;v3&quot;</code></pre><p>返回某个数值的索引：</p>
+<pre><code>127.0.0.1:6379&gt; ZRANK zset1 v2
+(integer) 1
+127.0.0.1:6379&gt; ZRANK zset1 v3
+(integer) 2</code></pre><h4 id="哈希-hash"><a href="#哈希-hash" class="headerlink" title="哈希(hash)"></a>哈希(hash)</h4><p>hash 是一个string类型的field和value的映射表，hash特别适合用于存储对象,Redis 中每个 hash 可以存储 2^32 - 1 键值对（40多亿）。</p>
+<p>生成hash key：</p>
+<pre><code>127.0.0.1:6379&gt; HSET hset1 name tom  age 18
+(integer) 1
+127.0.0.1:6379&gt; TYPE hset1
+hash</code></pre><p>获取hash key字段值：</p>
+<pre><code>127.0.0.1:6379&gt; HGET hset1 name
+&quot;tom&quot;
+127.0.0.1:6379&gt; HGET hset1  age
+&quot;18&quot;</code></pre><p>删除一个hash key的字段：</p>
+<pre><code>127.0.0.1:6379&gt; HDEL hset1 age
+(integer) 1</code></pre><p>获取所有hash表中的字段：</p>
+<pre><code>127.0.0.1:6379&gt; HSET hset1 name tom age 19
+(integer) 1
+127.0.0.1:6379&gt; HKEYS hset1
+1) &quot;name&quot;
+2) &quot;age&quot;</code></pre><h3 id="消息队列"><a href="#消息队列" class="headerlink" title="消息队列"></a>消息队列</h3><p>消息队列主要分为两种，分别是生产者消费者模式和发布者订阅者模式，这两种模式Redis都支持。</p>
+<h4 id="生产者消费者模式"><a href="#生产者消费者模式" class="headerlink" title="生产者消费者模式"></a>生产者消费者模式</h4><p>在生产者消费者(Producer/Consumer)模式下，在上层应用接收到的外部请求后开始处理其当前步骤的操作，在执行完成后将已经完成的操作发送至指定的频道(channel)当中，并由其下层的应用监听该频道并继续下一步的操作，如果其处理完成后没有下一步的操作就直接返回数据给外部请求，如果还有下一步的操作就再将任务发布到另外一个频道，由另外一个消费者继续监听和处理。</p>
+<h5 id="模式介绍"><a href="#模式介绍" class="headerlink" title="模式介绍"></a>模式介绍</h5><p>生产者消费者模式下，多个消费者同时监听一个队里，但是一个消息只能被最先抢到消息的消费者消费，即消息任务是一次性读取和处理，此模式在分布式业务架构中非常常用，比较常用的软件还有 RabbitMQ、Kafka、RocketMQ、ActiveMQ等</p>
+<h5 id="队列介绍"><a href="#队列介绍" class="headerlink" title="队列介绍"></a>队列介绍</h5><p>队列当中的 消息由不同的生产者写入也会有不同的消费者取出进行消费处理，但是买一个消息一定是只能被取出一次也就是被消费一次。</p>
+<h2 id="redis高可用和集群"><a href="#redis高可用和集群" class="headerlink" title="redis高可用和集群"></a>redis高可用和集群</h2><p>虽然Redis可以实现单机的数据持久化，但无论是RDB也好或者AOF也好，都解决不了单点宕机问题，即一旦redis服务器本身出现系统故障、硬件故障等问题后，就会直接造成数据的丢失，因此需要使用另外的技术来解决单点问题。</p>
+<h3 id="配置redis主从"><a href="#配置redis主从" class="headerlink" title="配置redis主从"></a>配置redis主从</h3><p>主备模式，可以实现Redis数据的跨主机备份。<br>程序端连接到高可用负载的VIP，然后连接到负载服务器设置的Redis后端real server，此模式不需要在程序里面配置Redis服务器的真实IP地址，当后期Redis服务器IP地址发生变更只需要更改redis 相应的后端real server即可，可避免更改程序中的IP地址设置。</p>
+<h4 id="配置slave"><a href="#配置slave" class="headerlink" title="配置slave"></a>配置slave</h4><p>edis Slave 也要开启持久化并设置和master同样的连接密码，因为后期slave会有提升为master的可能,Slave端切换master同步后会丢失之前的所有数据。<br>一旦某个Slave成为一个master的slave，Redis Slave服务会清空当前redis服务器上的所有数据并将master的数据导入到自己的内存，但是断开同步关系后不会删除当前已经同步过的数据。</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/redis/" rel="tag"># redis</a>
+          
+            <a href="/tags/%E9%9D%9E%E5%85%B3%E7%B3%BB%E5%9E%8B%E6%95%B0%E6%8D%AE%E5%BA%93/" rel="tag"># 非关系型数据库</a>
+          
+            <a href="/tags/%E7%BC%93%E5%AD%98%E6%9C%8D%E5%8A%A1%E5%99%A8/" rel="tag"># 缓存服务器</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/08/19/iptables/" rel="next" title="iptables">
+                <i class="fa fa-chevron-left"></i> iptables
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2017/09/20/tcp_wrappers/" rel="prev" title="TCP_Wrappers">
+                TCP_Wrappers <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+        <!-- JiaThis Button BEGIN -->
+<div class="jiathis_style">
+<span class="jiathis_txt">分享到：</span>
+<a class="jiathis_button_fav">收藏夹</a>
+<a class="jiathis_button_copy">复制网址</a>
+<a class="jiathis_button_email">邮件</a>
+<a class="jiathis_button_weixin">微信</a>
+<a class="jiathis_button_qzone">QQ空间</a>
+<a class="jiathis_button_tqq">腾讯微博</a>
+<a class="jiathis_button_douban">豆瓣</a>
+<a class="jiathis_button_share">一键分享</a>
+
+<a href="http://www.jiathis.com/share?uid=2140465" class="jiathis jiathis_txt jiathis_separator jtico jtico_jiathis" target="_blank">更多</a>
+<a class="jiathis_counter_style"></a>
+</div>
+<script type="text/javascript" >
+var jiathis_config={
+  data_track_clickback:true,
+  summary:"",
+  shortUrl:false,
+  hideMore:false
+}
+</script>
+<script type="text/javascript" src="http://v3.jiathis.com/code/jia.js?uid=" charset="utf-8"></script>
+<!-- JiaThis Button END -->
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+    </div>
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/uploads/touxiang.jpg"
+                alt="ShengQin Miao" />
+            
+              <p class="site-author-name" itemprop="name">ShengQin Miao</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">53</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                
+                  <span class="site-state-item-count">1</span>
+                  <span class="site-state-item-name">分类</span>
+                
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">61</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Redis"><span class="nav-number">1.</span> <span class="nav-text">Redis</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Rdies简介"><span class="nav-number">1.1.</span> <span class="nav-text">Rdies简介</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#redis和memcached对比"><span class="nav-number">1.1.1.</span> <span class="nav-text">redis和memcached对比</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#redis典型应用场景"><span class="nav-number">1.1.2.</span> <span class="nav-text">redis典型应用场景</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#编译安装redis"><span class="nav-number">1.1.3.</span> <span class="nav-text">编译安装redis</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#创建redis用户和数据目录"><span class="nav-number">1.1.4.</span> <span class="nav-text">创建redis用户和数据目录</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#创建命令软连接以方便以后使用"><span class="nav-number">1.1.5.</span> <span class="nav-text">创建命令软连接以方便以后使用</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#编译安装后的命令"><span class="nav-number">1.1.6.</span> <span class="nav-text">编译安装后的命令</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#redis帮助命令"><span class="nav-number">1.1.7.</span> <span class="nav-text">redis帮助命令</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#redis配置文件详解"><span class="nav-number">1.1.8.</span> <span class="nav-text">redis配置文件详解</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#redis持久化"><span class="nav-number">1.1.9.</span> <span class="nav-text">redis持久化</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#RDB模式"><span class="nav-number">1.1.9.1.</span> <span class="nav-text">RDB模式</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#AOF模式"><span class="nav-number">1.1.9.2.</span> <span class="nav-text">AOF模式</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#redis的数据类型"><span class="nav-number">1.2.</span> <span class="nav-text">redis的数据类型</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#字符串"><span class="nav-number">1.2.1.</span> <span class="nav-text">字符串</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#列表"><span class="nav-number">1.2.2.</span> <span class="nav-text">列表</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#集合-set"><span class="nav-number">1.2.3.</span> <span class="nav-text">集合(set)</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#有序集合-sorted-set"><span class="nav-number">1.2.4.</span> <span class="nav-text">有序集合(sorted set)</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#哈希-hash"><span class="nav-number">1.2.5.</span> <span class="nav-text">哈希(hash)</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#消息队列"><span class="nav-number">1.3.</span> <span class="nav-text">消息队列</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#生产者消费者模式"><span class="nav-number">1.3.1.</span> <span class="nav-text">生产者消费者模式</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#模式介绍"><span class="nav-number">1.3.1.1.</span> <span class="nav-text">模式介绍</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#队列介绍"><span class="nav-number">1.3.1.2.</span> <span class="nav-text">队列介绍</span></a></li></ol></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#redis高可用和集群"><span class="nav-number">2.</span> <span class="nav-text">redis高可用和集群</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#配置redis主从"><span class="nav-number">2.1.</span> <span class="nav-text">配置redis主从</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#配置slave"><span class="nav-number">2.1.1.</span> <span class="nav-text">配置slave</span></a></li></ol></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">ShengQin Miao</span>
+
+  
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-area-chart"></i>
+    </span>
+    
+      <span class="post-meta-item-text">Site words total count&#58;</span>
+    
+    <span title="Site words total count">131.6k</span>
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Pisces</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js"></script>
+  <script>AV.initialize("vItlX9Jc2L4BuXKt6BJWW6eJ-gzGzoHsz", "IisqhTArerBOyaxKHN8TcE10");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

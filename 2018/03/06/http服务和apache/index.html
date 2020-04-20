@@ -1,0 +1,1798 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="httpd,web服务," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="http协议概览htpp(Hyper Text Transfer Protocol,80&#x2F;tcp)协议工作在应用层，基于tcp&#x2F;ip协议。 http协议个版本介绍 http&#x2F;0.9:1991，原型版本，功能简陋，只有一个命令GET。GET &#x2F;index.html，服务器只能回应HTML格式字符串，不能回应别的格式  http&#x2F;1.0：1996年5月，支持cache，MIME,method  每个T">
+<meta property="og:type" content="article">
+<meta property="og:title" content="http协议和apache入门">
+<meta property="og:url" content="http://yoursite.com/2018/03/06/http%E6%9C%8D%E5%8A%A1%E5%92%8Capache/index.html">
+<meta property="og:site_name" content="漫步人生路">
+<meta property="og:description" content="http协议概览htpp(Hyper Text Transfer Protocol,80&#x2F;tcp)协议工作在应用层，基于tcp&#x2F;ip协议。 http协议个版本介绍 http&#x2F;0.9:1991，原型版本，功能简陋，只有一个命令GET。GET &#x2F;index.html，服务器只能回应HTML格式字符串，不能回应别的格式  http&#x2F;1.0：1996年5月，支持cache，MIME,method  每个T">
+<meta property="article:published_time" content="2018-03-05T16:00:00.000Z">
+<meta property="article:modified_time" content="2020-04-20T13:33:50.459Z">
+<meta property="article:author" content="ShengQin Miao">
+<meta property="article:tag" content="httpd">
+<meta property="article:tag" content="web服务">
+<meta name="twitter:card" content="summary">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2018/03/06/http服务和apache/"/>
+
+
+
+
+
+  <title>http协议和apache入门 | 漫步人生路</title>
+  
+
+
+
+
+
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?f076ecd4b66d3a02de923868671591de";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+<meta name="generator" content="Hexo 4.2.0"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">漫步人生路</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off"
+             placeholder="搜索..." spellcheck="false"
+             type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/03/06/http%E6%9C%8D%E5%8A%A1%E5%92%8Capache/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="ShengQin Miao">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/uploads/touxiang.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="漫步人生路">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">http协议和apache入门</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-03-06T00:00:00+08:00">
+                2018-03-06
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+             <span id="/2018/03/06/http%E6%9C%8D%E5%8A%A1%E5%92%8Capache/" class="leancloud_visitors" data-flag-title="http协议和apache入门">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+            <div class="post-wordcount">
+              
+                
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-file-word-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">字数统计&#58;</span>
+                
+                <span title="字数统计">
+                  6.2k
+                </span>
+              
+
+              
+                <span class="post-meta-divider">|</span>
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-clock-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">阅读时长 &asymp;</span>
+                
+                <span title="阅读时长">
+                  24
+                </span>
+              
+            </div>
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="http协议概览"><a href="#http协议概览" class="headerlink" title="http协议概览"></a>http协议概览</h2><p>htpp(Hyper Text Transfer Protocol,80/tcp)协议工作在应用层，基于tcp/ip协议。</p>
+<h3 id="http协议个版本介绍"><a href="#http协议个版本介绍" class="headerlink" title="http协议个版本介绍"></a>http协议个版本介绍</h3><ul>
+<li><p>http/0.9:1991，原型版本，功能简陋，只有一个命令GET。GET /index.html，服务器只能回应HTML格式字符串，不能回应别的格式</p>
+</li>
+<li><p>http/1.0：1996年5月，支持cache，MIME,method</p>
+<blockquote>
+<p>每个TCP链接只能发送一个请求，发送数据完毕，链接就关闭，如果还要请求其他资源，就必须再建立一个连接<br>  引入了POST命令和HEAD命令<br>  头信息是ASCII码，后面的数据可为任何格式，服务器回应是会告诉客户端，数据是什么格式，即Content-Type字段的作用。这些数据类型总称为MIME即多用途互联网邮件扩展，每个值包括一级类型和二级类型，预定义类型，也可以自定义类型，常见Content-Type值：text/xml image/jpeg audio/mp3</p>
+</blockquote>
+</li>
+<li><p>http/1.1：1997年1月，http/1.1效率不高</p>
+<blockquote>
+<p>引入了持久连接（persistent connection），即TCP连接默认不关闭，可以被多个请求服用，不用声明Connection:keep-alive。对于同一个域名，大多数浏览器允许同时建立6个持久连接<br>  引入了管道机制（pipelining），即在同一个TCP连接里，客户端可以同时发送多个请求，进一步改进了HTTP协议的效率<br>  新增方法：PUT、PATCH、OPTIONS、DELETE<br>  同一个TCP连接里，所有的数据通信是按次序进行的。服务器只能顺序处理回应，前面的回应慢，会有许多请求排队，造成”队头堵塞”（Head-of-line blocking）<br>  为避免上述问题，两种方法：一是减少请求数，二是同时多开持久连接。网页优化技巧，如合并脚本和样式表、将图片嵌入CSS代码、域名分片（domain sharding）等<br>  HTTP 协议不带有状态，每次请求都必须附上所有信息。请求的很多字段都是重复的，浪费带宽，影响速度</p>
+</blockquote>
+</li>
+<li><p>http/2.0:2015年</p>
+<blockquote>
+<p>头信息和数据体都是二进制，称为头信息和数据帧<br>  复用TCP连接，在一个连接里，客户端和浏览器都可以同时发送多个请求或回应，且不用按顺序一一对应，避免你了”对头堵塞”，此双向的实时通信同为多工(Multiplexing)<br>  引入头信息压缩机制(header compression)，头信息使用gzip或compress压缩后再发送，客户端和服务器同时维护一张头信息表，所有字段都会存入这个表，生成一个索引号，不发送字段，只发送引号，提高速度<br>  http/2允许服务器未经请求，主动向客户端发送资源，即服务器推送(server push)</p>
+</blockquote>
+</li>
+</ul>
+<h3 id="一次完整的http请求处理的过程"><a href="#一次完整的http请求处理的过程" class="headerlink" title="一次完整的http请求处理的过程"></a>一次完整的http请求处理的过程</h3><p><strong>建立连接</strong>：接受或拒绝连接请求<br><strong>接受请求</strong>：接受客户端请求报文中对某资源的一次请求的过程<br>web访问响应模型(Web I/O)</p>
+<ul>
+<li><p>单进程I/O模型：启动一个进程处理用户请求，而且一次只处理一个，多个请求被串行响应</p>
+</li>
+<li><p>多进程I/O模型：并行启动多个进程,每个进程响应一个连接请求</p>
+</li>
+<li><p>复用I/O结构：启动一个进程，同时响应N个连接请求</p>
+<blockquote>
+<p>实现方法：多线程模型和事件驱动</p>
+<pre><code>多线程模型：一个进程生成N个线程，每线程响应一个连接请求
+事件驱动：一个进程处理N个请求</code></pre></blockquote>
+</li>
+<li><p>复用的多进程I/O模型：启动M个进程，每个进程响应N个连接请求，同时接收M* N个请求</p>
+</li>
+</ul>
+<p><strong>处理请求</strong>：服务器队请求报文进行解析，并获取请求的资源及请求方法等相关信息，根据方法，资源，首部和可选的主题部分队请求进行处理</p>
+<pre><code>元数据：请求报文首部
+&lt;method&gt; &lt;url&gt; &lt;version&gt;
+headers 格式name:value
+&lt;request body&gt;
+示例
+    Host:www.msq.com 请求主机的名称
+    server:Apache/2.4.7
+http常用的请求方法 method
+    GET、POST、HEAD、PUT、DELETE、TRACE、OPTIONS</code></pre><p><strong>访问资源</strong>：服务器获取请求报文中请求的资源web服务器，即存放了web资源的服务器，负责详情求者提供对方请求的静态资源，或动态运行后生成的资源</p>
+<pre><code>资源放置于本地文件系统特定的路径：DcoRoot
+DocRoot --&gt; /var/www/html
+/var/www/html/images/logo.jpg
+
+web服务器资源路径映射方式
+docroot
+alias
+虚拟主机docroot
+用户家目录docroot</code></pre><p><strong>构建响应报文</strong>：一旦服务器识别出了资源，就执行请求方法中描述的动作，并返回响应报文。响应报文中包含响应状态码，响应首部，如果生成了响应主题的话，还包括响应主体。</p>
+<ul>
+<li><p>响应实体：如果事务处理产生了响应主体，就将内容放在响应报文中回送过去。响应报文中通常包括</p>
+<blockquote>
+<p>描述了响应主体MIME类型的Content-Type首部<br>  描述了响应主体长度的Content-Length<br>  实际报文的主体内容</p>
+</blockquote>
+</li>
+<li><p>URL重定向：web服务器构建的响应并非客户端请求的资源，而是资源另外一个访问路径</p>
+<blockquote>
+<p>永久重定向：<a href="http://www.360buy.com" target="_blank" rel="noopener">http://www.360buy.com</a><br>  临时重定向：<a href="http://www.taobao.com" target="_blank" rel="noopener">http://www.taobao.com</a></p>
+</blockquote>
+</li>
+<li><p>MIME类型：web服务器要负责确定响应主体的MIME类型。多种配置服务器的方法可将MIME类型与资源管理起来</p>
+<blockquote>
+<p>魔法分类：</p>
+<pre><code>Apache web服务器可以扫描每个资源的内容，并将其与一个已知模式表(被称为魔法文件)进行匹配，以决定每个文件的MIME类型。这样做可能比较慢，但很方便，尤其是文件没有标准扩展名时</code></pre></blockquote>
+<blockquote>
+<p>显式分类：</p>
+<pre><code>可以对Web服务器进行配置，使其不考虑文件的扩展名或内容，强制特定文件或目录内容拥有某个MIME类型</code></pre></blockquote>
+<blockquote>
+<p>类型协商： </p>
+<pre><code>有些Web服务器经过配置，可以以多种文档格式来存储资源。在这种情况下，可以配置Web服务器，使其可以通过与用户的协商来决定使用哪种格式(及相关的MIME类型)&quot;最好&quot;</code></pre></blockquote>
+</li>
+</ul>
+<p><strong>发送响应报文</strong>：Web服务器通过连接发送数据时也会面临与接收数据一样的问题。服务器可能有很多条到各个客户端的连接，有些是空闲的，有些在向服务器发送数据，还有一些在向客户端回送响应数据。服务器要记录连接的状态，还要特别注意对持久连接的处理。对非持久连接而言，服务器应该在发送了整条报文之后，关闭自己这一端的连接。对持久连接来说，连接可能仍保持打开状态，在这种情况下，服务器要正确地计算Content-Length首部，不然客户端就无法知道响应什么时候结束了 </p>
+<p><strong>记录日志</strong>：最后，当事务结束时，Web服务器会在日志文件中添加一个条目，来描述已执行的事务</p>
+<h3 id="有状态和无状态"><a href="#有状态和无状态" class="headerlink" title="有状态和无状态"></a>有状态和无状态</h3><p>客户端发出的响应和得到的请求会受到之前的请求和响应的影响（即请求和请求之间有关联）的连接称为有状态的连接，反之称为无状态的连接。http协议是无状态的连接。</p>
+<h3 id="http报文语法格式"><a href="#http报文语法格式" class="headerlink" title="http报文语法格式"></a>http报文语法格式</h3><p>request报文</p>
+<pre><code>&lt;method&gt; &lt;request-URL&gt; &lt;version&gt;
+&lt;headers&gt;
+&lt;entity-body&gt;</code></pre><p>response报文</p>
+<pre><code>&lt;version&gt; &lt;status&gt; &lt;reason-phrase&gt;
+&lt;headers&gt;
+&lt;entity-body&gt;</code></pre><p>method: 请求方法，标明客户端希望服务器对资源执行的动作GET、HEAD、POST等</p>
+<h2 id="httpd介绍"><a href="#httpd介绍" class="headerlink" title="httpd介绍"></a>httpd介绍</h2><p>20世纪90年代初，国家超级计算机应用中心NCSA开发<br>1995年开源社区发布apache（a patchy server）<br>ASF: apache software foundation<br>FSF：Free Software Foundation<br>特性</p>
+<ul>
+<li>高度模块化：core + modules</li>
+<li>DSO: Dynamic Shared Object 动态加/卸载</li>
+</ul>
+<ul>
+<li>MPM：multi-processing module多路处理模块</li>
+</ul>
+<h3 id="MPM工作模式"><a href="#MPM工作模式" class="headerlink" title="MPM工作模式"></a>MPM工作模式</h3><p><strong>prefork</strong>：多进程I/O模型，每个进程响应一个请求，默认模型</p>
+<ul>
+<li>一个主进程：生成和回收n个子进程，创建套接字，不响应请求</li>
+<li>多个子进程：工作work进程，每个子进程处理一个请求；系统初始时，预先生成多个空闲进程，等待请求，最大不超过1024个</li>
+</ul>
+<p><strong>worker</strong>：复用的多进程I/O模型,多进程多线程，IIS使用此模型</p>
+<ul>
+<li>一个主进程：生成m个子进程，每个子进程负责生成n个线程，每个线程响应一个请求，并发响应请求：m* n</li>
+</ul>
+<p><strong>event</strong>：事件驱动模型（worker模型的变种）</p>
+<ul>
+<li>一个主进程：生成m个子进程，每个进程直接响应n个请求，并发响应请求：m* n，有专门的线程来管理这些keep-alive类型的线程，当有真实请求时，将请求传递给服务线程，执行完毕后，又允许释放。这样增强了高并发场景下的请求处理能力</li>
+</ul>
+<h3 id="httpd功能特性"><a href="#httpd功能特性" class="headerlink" title="httpd功能特性"></a>httpd功能特性</h3><p>虚拟主机</p>
+<ul>
+<li>IP、Port、FQDN</li>
+</ul>
+<p>CGI：Common Gateway Interface，通用网关接口</p>
+<ul>
+<li><p>反向代理</p>
+</li>
+<li><p>负载均衡</p>
+</li>
+<li><p>路径别名</p>
+</li>
+<li><p>丰富的用户认证机制</p>
+<blockquote>
+<p>basic<br>  digest</p>
+</blockquote>
+</li>
+<li><p>支持第三方模块</p>
+</li>
+</ul>
+<h4 id="httpd-2-4新特性"><a href="#httpd-2-4新特性" class="headerlink" title="httpd-2.4新特性"></a>httpd-2.4新特性</h4><ul>
+<li>MPM支持运行为DSO机制；以模块形式按需加载</li>
+<li>event MPM生产环境可用</li>
+<li>异步读写机制</li>
+<li>支持没模块及每目录的单独日志界别定义</li>
+<li>每请求相关的专用配置</li>
+<li>增强型的表达分析式</li>
+<li>毫秒级持久连接时长定义</li>
+<li>基于FQDN的虚拟主机不需要NameVirutalHost指令</li>
+<li>新指令，AllowOverrideList</li>
+<li>支持用户自定义变量</li>
+<li>更低的内存消耗</li>
+</ul>
+<h3 id="httpd安装"><a href="#httpd安装" class="headerlink" title="httpd安装"></a>httpd安装</h3><p>yum安装</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ yum -y install httpd</span><br></pre></td></tr></table></figure>
+
+<p>编译安装：定制或特殊需求</p>
+<p>centos7程序环境：httpd-2.4<br>配置文件</p>
+<ul>
+<li>/etc/httpd/conf/httpd.conf</li>
+<li>/etc/httpd/conf.d/* .conf</li>
+</ul>
+<p>检查配置语法<br>-httpd -t</p>
+<h3 id="httpd程序环境"><a href="#httpd程序环境" class="headerlink" title="httpd程序环境"></a>httpd程序环境</h3><p>服务单元文件</p>
+<ul>
+<li><p>/usr/lib/systemd/system/httpd.service</p>
+<blockquote>
+<p>配置文件</p>
+<pre><code>/etc/sysconfig/httpd</code></pre></blockquote>
+</li>
+<li><p>模块文件路径</p>
+<blockquote>
+<p>/etc/httpd/modules<br>  /usr/lib64/httpd/modules</p>
+</blockquote>
+</li>
+<li><p>主程序文件：</p>
+<blockquote>
+<p>/usr/sbin/httpd</p>
+</blockquote>
+</li>
+<li><p>主进程文件：</p>
+<blockquote>
+<p>/etc/httpd/run/httpd.pid</p>
+</blockquote>
+</li>
+<li><p>日志文件目录：</p>
+<blockquote>
+<p>/var/log/httpd</p>
+<pre><code>access_log: 访问日志
+error_log：错误日志</code></pre></blockquote>
+</li>
+<li><p>帮助文档包：</p>
+<blockquote>
+<p>httpd-manual</p>
+</blockquote>
+</li>
+<li><p>httpd配置文件的组成：</p>
+<blockquote>
+<p>主要组成</p>
+<pre><code>Global Environment
+Main server configuration
+virtual host</code></pre></blockquote>
+</li>
+<li><p>配置格式：directive value</p>
+<blockquote>
+<p>directive 不区分字符大小写<br>  value 为路径时，是否区分大小写，取决于文件系统</p>
+</blockquote>
+</li>
+<li><p>官方帮助</p>
+<blockquote>
+<p><a href="http://httpd.apache.org/docs/2.4/" target="_blank" rel="noopener">http://httpd.apache.org/docs/2.4/</a></p>
+</blockquote>
+</li>
+</ul>
+<h3 id="httpd配置实战"><a href="#httpd配置实战" class="headerlink" title="httpd配置实战"></a>httpd配置实战</h3><h4 id="httpd的条件式应用标签"><a href="#httpd的条件式应用标签" class="headerlink" title="httpd的条件式应用标签"></a>httpd的条件式应用标签</h4><ul>
+<li>DocumentRoot 网页url的根<blockquote>
+<p>&lt; Directory “”&gt;<br>  control-condition<br>  &lt; /Drectory&gt;<br>  &lt; file “”&gt;<br>  &lt; /file&gt;<br>  &lt; DirectoryMatch&gt;<br>  &lt; /DirectoryMatch&gt;<br>  默认文件夹/文件不允许访问，必许增加控制语句才可以访问</p>
+</blockquote>
+</li>
+</ul>
+<h4 id="基于用户的访问控制"><a href="#基于用户的访问控制" class="headerlink" title="基于用户的访问控制"></a>基于用户的访问控制</h4><ul>
+<li><p>认证质询：WWW-Authenticate：响应码401，拒绝客户请求，并说明要求客户端提供账号和密码。</p>
+</li>
+<li><p>认证：Authorization：客户端用户填入账号和密码后再次发送请求报文；认证通过时，则服务器发送响应的资源。</p>
+</li>
+<li><p>认证方式</p>
+<blockquote>
+<p>basic：明文<br>  digest：消息摘要认证，兼容性差</p>
+</blockquote>
+</li>
+<li><p>安全域：需要用户认证后方能访问的路径；应该通过名称对其进行标识，以便于高速用户认证的原因</p>
+</li>
+<li><p>用户的账号和密码</p>
+<blockquote>
+<p>虚拟账号：仅用于访问某服务时用到的认证标识<br>  存储：文本文件，SQL数据库，ldap(轻量目录访问协议)目录存储，nis等</p>
+</blockquote>
+</li>
+<li><p>示例：使用用户认证</p>
+<blockquote>
+<p>&lt; Drectory “/path”&gt;<br>  options +indexes #指明的URL路径不存在与定义的页面主页资源相符的资源文件时，返回索引列表给用户<br>  AllowOverride None #是否允许指定目录下的.htaccess中的指令覆盖之前的配置指令<br>  AuthType basic #认证方式<br>  AuthName “string” #认证对话框提示信息<br>  AuthUserFile “/path/to/httpd_user_passwd_file” #存放认证用户的文件<br>  Require user user1 user2… #允许那些用户认证登录，require valid-user表示.htaccess中的用户均可登录<br>  &lt; /Direcroty&gt;</p>
+</blockquote>
+<blockquote>
+<p>生成用于认证的用户</p>
+<pre><code>[root@apache conf.d]#htpasswd -b  /etc/httpd/conf/.htpasswd jerry centos</code></pre></blockquote>
+</li>
+<li><p>示例：使用用户组认证</p>
+<blockquote>
+<p>&lt; Drectory “/path”&gt;<br>  options +indexes #指明的URL路径不存在与定义的页面主页资源相符的资源文件时，返回索引列表给用户<br>  AllowOverride None #是否允许指定目录下的.htaccess中的指令覆盖之前的配置指令<br>  AuthType basic #认证方式<br>  AuthName “string” #认证对话框提示信息<br>  AuthgroupFile “/path/to/httpd_group_passwd_file” #存放认证用户的文件<br>  Require group group1 group2 group3… #允许那些用户组认证登录，require<br>  &lt; /Direcroty&gt;</p>
+</blockquote>
+<blockquote>
+<p>创建用于认证的用户组文件，并将生成的用户加入组</p>
+<pre><code>[root@apache conf]#vi .htgroup
+disny : tom jerry</code></pre></blockquote>
+<blockquote>
+<p>htpasswd命令介绍</p>
+<pre><code>htpasswd用于管理httpd认证的用户并自动成相关文件
+htpasswd [options] /PATH/HTTPD_PASSWD_FILE username
+-c 自动创建文件，仅应该在文件不存在时使用
+-p 明文密码
+-d CRYPT格式加密，默认
+-m md5格式加密
+-s sha格式加密
+-D 删除指定用户</code></pre></blockquote>
+</li>
+</ul>
+<h4 id="路径别名"><a href="#路径别名" class="headerlink" title="路径别名"></a>路径别名</h4><p>通过定义路径别名，可以让用户访问不在DcumentRoot定义的根目录下的其他路径</p>
+<ul>
+<li>示例<blockquote>
+<p>如下配置表示，当用户访问192.168.34.108/bbs/时，实际是在访问服务器上的/var/www/html/文件夹下的文件</p>
+<pre><code>DocumentRoot /data/www/html/
+&lt;Directory &quot;/data/www/html&quot;&gt;
+        options none
+        allowoverride none
+        require all granted                
+&lt;/Directory&gt;
+Alias /bbs/ /var/www/html/
+&lt;Directory &quot;/var/www/html/&quot;&gt;
+        options none
+        AllowOverride none
+        Require all granted
+&lt;/Directory&gt;</code></pre></blockquote>
+</li>
+</ul>
+<h4 id="httpd日志"><a href="#httpd日志" class="headerlink" title="httpd日志"></a>httpd日志</h4><p>httpd访问使用LogFormat format logformat_name定义日志格式<br>使用Cuetomlog logs/access_log format_name来启用某种格式的日志</p>
+<ul>
+<li>format的常用选项<blockquote>
+<p> %h 客户端IP地址<br>  %l 远程用户,启用mod_ident才有效，通常为减号“-”<br>  %u 验证（basic，digest）远程用户,非登录访问时，为一个减号“-”<br>  %t 服务器收到请求时的时间<br>  %r First line of request，即表示请求报文的首行；记录了此次请求的“方法”，“URL”以及协议版本<br>  %&gt;s 响应状态码<br>  %b 响应报文的大小，单位是字节；不包括响应报文http首部<br>  %{Referer}i 请求报文中首部“referer”的值；即从哪个页面中的超链接跳转至当前页面的<br>  %{User-Agent}i 请求报文中首部“User-Agent”的值；即发出请求的应用程序</p>
+</blockquote>
+</li>
+</ul>
+<p>httpd错误日志有两部分组成，</p>
+<ul>
+<li>Errorlog “logs/error_log” #错误日志存放位置<br>LogLevel warn #报警级别，此配置代表warn及以上的报警都会记录</li>
+</ul>
+<h4 id="虚拟主机配置"><a href="#虚拟主机配置" class="headerlink" title="虚拟主机配置"></a>虚拟主机配置</h4><p>通过虚拟主机的配置，可以实现一台服务器提供多个web站点的功能，提高了资源利用率，并且每个主机都可以使用自己专用的日志，别名，等等资源。</p>
+<ul>
+<li><p>基于ip地址的虚拟主机配置</p>
+<blockquote>
+<p>如下配置，当访问192.168.34.108时，实际访问的是主机上/data/vhost1文件夹下的文件，当访问172.18.132.240时，实际访问的是主机上/data/vhst2文件夹下的内容</p>
+<pre><code>&lt;VirtualHost 192.168.34.108:80&gt;                               
+ServerName www.msq.com
+DocumentRoot &quot;/data/vhost1&quot;
+&lt;Directory &quot;/data/vhost1&quot;&gt;
+        Options None
+        AllowOverride None
+        Require all granted
+&lt;/Directory&gt;
+&lt;/Virtualhost&gt;
+&lt;VirtualHost 172.18.132.240:80&gt;
+        ServerName bbs.msq.com
+        DocumentRoot &quot;/data/vhost2&quot;
+        &lt;Directory &quot;/data/vhost2&quot;&gt;
+                Options None
+                AllowOverride None
+                Require all granted
+        &lt;/Directory&gt;
+&lt;/Virtualhost&gt;</code></pre></blockquote>
+</li>
+<li><p>基于端口的虚拟主机的配置，当访问192.168.34.108:8080时，实际访问的是/data/vhost1文件夹下的文件</p>
+<blockquote>
+<p>如下配置实现了基于端口的虚拟主机的配置</p>
+<pre><code>Listen 8080
+&lt;VirtualHost 192.168.34.108:8080&gt;
+        ServerName www.msq.com
+        DocumentRoot &quot;/data/vhost1&quot;
+        &lt;Directory &quot;/data/vhost1&quot;&gt;
+                Options None
+                AllowOverride None
+                Require all granted
+        &lt;/Directory&gt;
+&lt;/Virtualhost&gt;</code></pre></blockquote>
+</li>
+<li><p>基于主机名的虚拟主机配置,此模式下需要使用DNS解析，</p>
+<blockquote>
+<p>如下配置实现了基于主机名的虚拟主机的配置，当访问<a href="http://www.msq.com时，访问的是/data/vhost1文件夹下的资源，当访问bbs.msq.com时，访问的是/data/vhost2文件夹下的资源。" target="_blank" rel="noopener">www.msq.com时，访问的是/data/vhost1文件夹下的资源，当访问bbs.msq.com时，访问的是/data/vhost2文件夹下的资源。</a></p>
+<pre><code>&lt;VirtualHost *:80&gt;                                           
+ServerName www.msq.com
+DocumentRoot &quot;/data/vhost1&quot;
+&lt;Directory &quot;/data/vhost1&quot;&gt;
+        Options None
+        AllowOverride None
+        Require all granted
+&lt;/Directory&gt;
+&lt;/Virtualhost&gt;
+&lt;VirtualHost *:80&gt;
+        ServerName bbs.msq.com
+        DocumentRoot &quot;/data/vhost2&quot;
+        &lt;Directory &quot;/data/vhost2&quot;&gt;
+                Options None
+                AllowOverride None
+                Require all granted
+        &lt;/Directory&gt;
+&lt;/Virtualhost&gt;</code></pre></blockquote>
+</li>
+</ul>
+<h4 id="持久连接配置"><a href="#持久连接配置" class="headerlink" title="持久连接配置"></a>持久连接配置</h4><p>httpd-2.4支持毫秒级持久连接时长定义，全局配置；打开保持连接可以提高请求和响应的效率，但是当并发量较大时，会降低并发能力，需要在这之间寻找平衡。<br>KeepAlive on #开启持久连接<br>KeepAlive Timeout #ms #持久连接时长<br>MaxKeepAliveRequests 100 #最大持久链接数</p>
+<h4 id="mod-deflate模块"><a href="#mod-deflate模块" class="headerlink" title="mod_deflate模块"></a>mod_deflate模块</h4><p>使用mod_deflate模块可以压缩页面优化传输速度<br>使用场景</p>
+<ul>
+<li><p>节约带宽，额外消耗CPU；同时，可能有些叫老浏览器不支持</p>
+</li>
+<li><p>压缩适于压缩的资源，例如文本文件</p>
+</li>
+<li><p>使用mod_deflate模块方法</p>
+<blockquote>
+<p>加载模块,可以在/etc/httpd/conf.moduels.d/文件夹下新建一个配置文件用于配置(htttpd-2.4默认已经加载该模块)</p>
+<blockquote>
+<p>LoadModule deflate_module modules/mod_deflate.so </p>
+</blockquote>
+</blockquote>
+<blockquote>
+<p>配置对哪些资源进行压缩，可以创建一个/etc/httpd/conf.d/deflate.conf的文件写入以下配置</p>
+<blockquote>
+<p>SetOutputFilter DEFLATE</p>
+</blockquote>
+</blockquote>
+<h1 id="Restrict-compression-to-these-MIME-types"><a href="#Restrict-compression-to-these-MIME-types" class="headerlink" title="Restrict compression to these MIME types"></a>Restrict compression to these MIME types</h1><p>  AddOutputFilterByType DEFLATE text/plain<br>  AddOutputFilterByType DEFLATE text/html<br>  AddOutputFilterByType DEFLATE application/xhtml+xml<br>  AddOutputFilterByType DEFLATE text/xml<br>  AddOutputFilterByType DEFLATE application/xml<br>  AddOutputFilterByType DEFLATE application/x-javascript<br>  AddOutputFilterByType DEFLATE text/javascript<br>  AddOutputFilterByType DEFLATE text/css</p>
+<blockquote>
+<p>设置压缩比，压缩比越大，消耗CPU越严重,压缩后的页面更小</p>
+<blockquote>
+<p>Level of compression (Highest 9 - Lowest 1)<br>  DeflateCompressionLevel 9</p>
+</blockquote>
+</blockquote>
+<blockquote>
+<p>排除特定旧版本的浏览器，不支持压缩</p>
+<blockquote>
+<p>Netscape 4.x 只压缩text/html<br>  BrowserMatch ^Mozilla/4 gzip-only-text/html<br>  Netscape 4.06-08三个版本 不压缩<br>  BrowserMatch ^Mozilla/4.0[678] no-gzip<br>  Internet Explorer标识本身为“Mozilla / 4”，但实际上是能够处理请求的压<br>  缩。如果用户代理首部匹配字符串“MSIE”（“B”为单词边界”），就关闭<br>  之前定义的限制<br>  BrowserMatch \bMSI[E] !no-gzip !gzip-only-text/html</p>
+</blockquote>
+</blockquote>
+</li>
+</ul>
+<h4 id="status页面"><a href="#status页面" class="headerlink" title="status页面"></a>status页面</h4><p>status页面是由http内建模块提供的一项功能，允许用户查看服务器状态，这是个比较危险的设置，应该做访问控制，只允许内部ip进行浏览，或者通过认证才能访问。</p>
+<ul>
+<li><p>配置</p>
+<blockquote>
+<p>查看当前httpd是否加载了status模块（默认加载）</p>
+<pre><code>[root@apache ~]#httpd -M|grep status
+ status_module (shared)</code></pre></blockquote>
+<blockquote>
+<p>如果未加载，可在/etc/httpd/conf.moduels.d/目录下添加配置文件，写入如下配置</p>
+<pre><code>LoadModule status_module modules/mod_status.so</code></pre></blockquote>
+<blockquote>
+<p>添加配置以启动status功能，可以增加全局设置或者只对某个虚拟主机进行配置（以在虚拟主机中配置为例）</p>
+<pre><code> &lt;VirtualHost *:80&gt;
+ServerName blog.msq.com
+DocumentRoot &quot;/data/vhost3&quot;
+&lt;Directory &quot;/data/vhost3&quot;&gt;
+        Options None
+        AllowOverride None
+        Require all granted
+        &lt;/Directory&gt;
+        &lt;Location &quot;/status&quot;&gt;
+                SetHandler server-status
+                require ip 192.168.34                            
+        &lt;/Location&gt;
+&lt;/Virtualhost&gt;</code></pre></blockquote>
+</li>
+</ul>
+<h2 id="https"><a href="#https" class="headerlink" title="https"></a>https</h2><p>https: http over ssl<br>SSL会话的简化过程</p>
+<ul>
+<li><p>客户端发送可供选择的加密方式，并向服务器请求证书</p>
+</li>
+<li><p>服务器端发送证书以及选定的加密方式给客户端</p>
+</li>
+<li><p>客户端取得证书并进行证书验证</p>
+<blockquote>
+<p>如果信任给其发证书的CA</p>
+<pre><code>验证证书来源的合法性；用CA的公钥解密证书上数字签名
+验证证书的内容的合法性：完整性验证
+检查证书的有效期限
+检查证书是否被吊销
+证书中拥有者的名字，与访问的目标主机要一致</code></pre></blockquote>
+</li>
+<li><p>客户端生成临时会话密钥（对称密钥），并使用服务器端的公钥加密此数据发送给服务器，完成密钥交换</p>
+</li>
+<li><p>服务用此密钥加密用户请求的资源，响应给客户端</p>
+</li>
+<li><p>注意：SSL是基于IP地址实现，单IP的主机仅可以使用一个https虚拟主机</p>
+</li>
+</ul>
+<h3 id="https的实现"><a href="#https的实现" class="headerlink" title="https的实现"></a>https的实现</h3><p><strong>为服务器申请数字证书</strong></p>
+<ul>
+<li>测试：通过实践CA发证书<blockquote>
+<p>创建私有CA<br>  在服务器创建证书件数请求<br>  CA签证</p>
+</blockquote>
+</li>
+</ul>
+<p><strong>配置httpd支持使用ssl，及使用的证书</strong></p>
+<ul>
+<li>yum -y install mod-ssl<blockquote>
+<p>配置文件：/etc/httpd/conf.d/ssl.conf</p>
+<blockquote>
+<p>DocumentRoot<br>  ServerName<br>  SSLCertificateFile<br>  SSLCertificateKeyFile</p>
+</blockquote>
+</blockquote>
+</li>
+</ul>
+<p><strong>测试基于httpd访问响应的主机</strong><br>可以使用浏览器或openssl客户端测试</p>
+<ul>
+<li>openssl s_client [-connect host:port] [-cert filename] [-CApath directory] [-CAfile filename]</li>
+</ul>
+<h4 id="https实战"><a href="#https实战" class="headerlink" title="https实战"></a>https实战</h4><p>生成私钥</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@apache ssl]<span class="comment">#(umask 066;openssl genrsa -out cakey.pem 2048)</span></span><br></pre></td></tr></table></figure>
+<p>生成自签名证书</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@apache ssl]<span class="comment">#openssl req -new -x509 -key cakey.pem -out cacert.crt -subj "/CN=blog.msq.com/O=devops" -days 3650</span></span><br></pre></td></tr></table></figure>
+<p>安装mod-ssl模块</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@apache ssl]<span class="comment">#yum -y install mod_ssl</span></span><br></pre></td></tr></table></figure>
+<p>修改/etc/httpd/conf.d/ssl.conf配置文件，将以下内容更改</p>
+<pre><code>SSLCertificateFile /etc/httpd/ssl/httpd.crt
+SSLCertificateKeyFile /etc/httpd/ssl/httpd.crt</code></pre><p>重启httpd后，就实现了https连接。</p>
+<h4 id="http重定向到https"><a href="#http重定向到https" class="headerlink" title="http重定向到https"></a>http重定向到https</h4><p>将http请求转发至https的URL上</p>
+<ul>
+<li><p>在配置文件加上下述语句</p>
+<blockquote>
+<p>Redirect [status] URL -path URL</p>
+</blockquote>
+</li>
+<li><p>status状态</p>
+<blockquote>
+<p>Permanent: 返回永久重定向状态码301<br>  Temp：返回临时重定向状态码302，此为默认值</p>
+</blockquote>
+</li>
+<li><p>示例</p>
+<blockquote>
+<p>Redirect temp / <a href="http://blog.msq.com" target="_blank" rel="noopener">http://blog.msq.com</a></p>
+</blockquote>
+</li>
+</ul>
+<p>配置</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">[root@apache ~]<span class="comment">#ll /var/www/html/</span></span><br><span class="line">total 12</span><br><span class="line">-rw-r--r-- 1 root root 8435 Dec 14 18:59 access_log</span><br><span class="line">drwxr-xr-x 4 root root   24 Oct 20 09:43 centos</span><br></pre></td></tr></table></figure>
+
+<h2 id="http相关工具"><a href="#http相关工具" class="headerlink" title="http相关工具"></a>http相关工具</h2><h3 id="curl工具"><a href="#curl工具" class="headerlink" title="curl工具"></a>curl工具</h3><p>curl是基于URL语法在命令行方式下工作的文件传输工具，它支持FTP, FTPS,<br>HTTP, HTTPS, GOPHER, TELNET, DICT, FILE及LDAP等协议。curl支持HTTPS认<br>证，并且支持HTTP的POST、PUT等方法， FTP上传， kerberos认证，HTTP上<br>传，代理服务器，cookies，用户名/密码认证， 下载文件断点续传，上载文件断<br>点续传, http代理服务器管道（ proxy tunneling），还支持IPv6，socks5代理服<br>务器，通过http代理服务器上传文件到FTP服务器等，功能十分强大</p>
+<p><strong>用法</strong></p>
+<ul>
+<li>curl [options] [URL…]</li>
+</ul>
+<p>常用options如下</p>
+<pre><code>-A/--user-agent &lt;string&gt; 设置用户代理发送给服务器
+-e/--referer &lt;URL&gt; 来源网址
+--cacert &lt;file&gt; CA证书 (SSL)
+-k/--insecure 允许忽略证书进行 SSL 连接
+--compressed 要求返回是压缩的格式
+-H/--header &lt;line&gt;自定义首部信息传递给服务器
+-i 显示页面内容，包括报文首部信息
+-I/--head 只显示响应报文首部信息
+-D/--dump-header &lt;file&gt;将url的header信息存放在指定文件中
+--basic 使用HTTP基本认证
+-u/--user &lt;user[:password]&gt;设置服务器的用户和密码
+-L 如果有3xx响应码，重新发请求到新位置
+-O 使用URL中默认的文件名保存文件到本地
+-o &lt;file&gt; 将网络文件保存为指定的文件中
+--limit-rate &lt;rate&gt; 设置传输速度
+-0/--http1.0 数字0，使用HTTP 1.0
+-v/--verbose 更详细
+-C 选项可对文件使用断点续传功能
+-c/--cookie-jar &lt;file name&gt; 将url中cookie存放在指定文件中
+-x/--proxy &lt;proxyhost[:port]&gt; 指定代理服务器地址
+-X/--request &lt;command&gt; 向服务器发送指定请求方法
+-U/--proxy-user &lt;user:password&gt; 代理服务器用户和密码
+-T 选项可将指定的本地文件上传到FTP服务器上
+--data/-d 方式指定使用POST方式传递数据
+-b name=data 从服务器响应set-cookie得到值，返回给服务器</code></pre><h3 id="elinks工具"><a href="#elinks工具" class="headerlink" title="elinks工具"></a>elinks工具</h3><p><strong>用法</strong></p>
+<ul>
+<li>elinks [OPTION]… [URL]…</li>
+</ul>
+<p>常用options</p>
+<pre><code>-dump: 非交互式模式，将URL的内容输出至标准输出
+-source:打印源码</code></pre><h3 id="httpd自带的工具程序"><a href="#httpd自带的工具程序" class="headerlink" title="httpd自带的工具程序"></a>httpd自带的工具程序</h3><p>htpasswd：basic认证基于文件实现时，用到的账号密码文件生成工具<br>apachectl：httpd自带的服务控制脚本，支持start和stop<br>rotatelogs：日志滚动工具,如果单个日志太大会影响服务器性能，日志滚动可以在日志文件达到一定大小或规定时间时进行日志滚动。</p>
+<ul>
+<li>access.log –&gt; access.log,access.1.log –&gt; access.log,access.1.log,access.2.log</li>
+</ul>
+<h4 id="httpd的压力测试工具"><a href="#httpd的压力测试工具" class="headerlink" title="httpd的压力测试工具"></a>httpd的压力测试工具</h4><p>ab,webbench,http_load,seige</p>
+<ul>
+<li>ab,webbench,http_load,seige</li>
+<li>jmeter 开源</li>
+<li>loaddrunner 商业，有相关认证</li>
+<li>tcpcopy 网易，复制生产环境中的真是请求，并将之保存</li>
+</ul>
+<p><strong>ab介绍</strong><br>ab时httpd自带的一个压力测试工具，来自httpd-tools包</p>
+<p><strong>用法</strong></p>
+<ul>
+<li>ab [options] url</li>
+</ul>
+<p>常用options</p>
+<pre><code>-n:请求总数
+-c:模拟的并行数
+-k:以持久连接模式测试</code></pre><p>ulimit -n # 调整能打开的文件数</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/httpd/" rel="tag"># httpd</a>
+          
+            <a href="/tags/web%E6%9C%8D%E5%8A%A1/" rel="tag"># web服务</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/01/28/keepalived/" rel="next" title="keepalived">
+                <i class="fa fa-chevron-left"></i> keepalived
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/03/16/loganalyze/" rel="prev" title="使用loganalyzer展示数据库中的日志">
+                使用loganalyzer展示数据库中的日志 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+        <!-- JiaThis Button BEGIN -->
+<div class="jiathis_style">
+<span class="jiathis_txt">分享到：</span>
+<a class="jiathis_button_fav">收藏夹</a>
+<a class="jiathis_button_copy">复制网址</a>
+<a class="jiathis_button_email">邮件</a>
+<a class="jiathis_button_weixin">微信</a>
+<a class="jiathis_button_qzone">QQ空间</a>
+<a class="jiathis_button_tqq">腾讯微博</a>
+<a class="jiathis_button_douban">豆瓣</a>
+<a class="jiathis_button_share">一键分享</a>
+
+<a href="http://www.jiathis.com/share?uid=2140465" class="jiathis jiathis_txt jiathis_separator jtico jtico_jiathis" target="_blank">更多</a>
+<a class="jiathis_counter_style"></a>
+</div>
+<script type="text/javascript" >
+var jiathis_config={
+  data_track_clickback:true,
+  summary:"",
+  shortUrl:false,
+  hideMore:false
+}
+</script>
+<script type="text/javascript" src="http://v3.jiathis.com/code/jia.js?uid=" charset="utf-8"></script>
+<!-- JiaThis Button END -->
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+    </div>
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/uploads/touxiang.jpg"
+                alt="ShengQin Miao" />
+            
+              <p class="site-author-name" itemprop="name">ShengQin Miao</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">53</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                
+                  <span class="site-state-item-count">1</span>
+                  <span class="site-state-item-name">分类</span>
+                
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">61</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#http协议概览"><span class="nav-number">1.</span> <span class="nav-text">http协议概览</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#http协议个版本介绍"><span class="nav-number">1.1.</span> <span class="nav-text">http协议个版本介绍</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#一次完整的http请求处理的过程"><span class="nav-number">1.2.</span> <span class="nav-text">一次完整的http请求处理的过程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#有状态和无状态"><span class="nav-number">1.3.</span> <span class="nav-text">有状态和无状态</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#http报文语法格式"><span class="nav-number">1.4.</span> <span class="nav-text">http报文语法格式</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#httpd介绍"><span class="nav-number">2.</span> <span class="nav-text">httpd介绍</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#MPM工作模式"><span class="nav-number">2.1.</span> <span class="nav-text">MPM工作模式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#httpd功能特性"><span class="nav-number">2.2.</span> <span class="nav-text">httpd功能特性</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#httpd-2-4新特性"><span class="nav-number">2.2.1.</span> <span class="nav-text">httpd-2.4新特性</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#httpd安装"><span class="nav-number">2.3.</span> <span class="nav-text">httpd安装</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#httpd程序环境"><span class="nav-number">2.4.</span> <span class="nav-text">httpd程序环境</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#httpd配置实战"><span class="nav-number">2.5.</span> <span class="nav-text">httpd配置实战</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#httpd的条件式应用标签"><span class="nav-number">2.5.1.</span> <span class="nav-text">httpd的条件式应用标签</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#基于用户的访问控制"><span class="nav-number">2.5.2.</span> <span class="nav-text">基于用户的访问控制</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#路径别名"><span class="nav-number">2.5.3.</span> <span class="nav-text">路径别名</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#httpd日志"><span class="nav-number">2.5.4.</span> <span class="nav-text">httpd日志</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#虚拟主机配置"><span class="nav-number">2.5.5.</span> <span class="nav-text">虚拟主机配置</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#持久连接配置"><span class="nav-number">2.5.6.</span> <span class="nav-text">持久连接配置</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#mod-deflate模块"><span class="nav-number">2.5.7.</span> <span class="nav-text">mod_deflate模块</span></a></li></ol></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Restrict-compression-to-these-MIME-types"><span class="nav-number"></span> <span class="nav-text">Restrict compression to these MIME types</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#status页面"><span class="nav-number">0.0.1.</span> <span class="nav-text">status页面</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#https"><span class="nav-number">1.</span> <span class="nav-text">https</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#https的实现"><span class="nav-number">1.1.</span> <span class="nav-text">https的实现</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#https实战"><span class="nav-number">1.1.1.</span> <span class="nav-text">https实战</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#http重定向到https"><span class="nav-number">1.1.2.</span> <span class="nav-text">http重定向到https</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#http相关工具"><span class="nav-number">2.</span> <span class="nav-text">http相关工具</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#curl工具"><span class="nav-number">2.1.</span> <span class="nav-text">curl工具</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#elinks工具"><span class="nav-number">2.2.</span> <span class="nav-text">elinks工具</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#httpd自带的工具程序"><span class="nav-number">2.3.</span> <span class="nav-text">httpd自带的工具程序</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#httpd的压力测试工具"><span class="nav-number">2.3.1.</span> <span class="nav-text">httpd的压力测试工具</span></a></li></ol></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">ShengQin Miao</span>
+
+  
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-area-chart"></i>
+    </span>
+    
+      <span class="post-meta-item-text">Site words total count&#58;</span>
+    
+    <span title="Site words total count">131.6k</span>
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Pisces</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js"></script>
+  <script>AV.initialize("vItlX9Jc2L4BuXKt6BJWW6eJ-gzGzoHsz", "IisqhTArerBOyaxKHN8TcE10");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

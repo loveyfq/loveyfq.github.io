@@ -1,0 +1,1553 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="HAProxy,负载均衡器," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="HAProxyHAProxy: 是法国开发者Willy Tarreau开发的一个开源软件，是一款具备高并发、高性能的TCP和HTTP负载均衡器，支持基于cookie的持久性，自动故障切换，支持正则表达式及web状态统计。 LB Cluster:  四层：lvs, nginx(stream模式且nginx1.9.0或更新版本)，haproxy(mode tcp) 七层：http: nginx(htt">
+<meta property="og:type" content="article">
+<meta property="og:title" content="HAProxy">
+<meta property="og:url" content="http://yoursite.com/2018/07/08/HAProxy/index.html">
+<meta property="og:site_name" content="漫步人生路">
+<meta property="og:description" content="HAProxyHAProxy: 是法国开发者Willy Tarreau开发的一个开源软件，是一款具备高并发、高性能的TCP和HTTP负载均衡器，支持基于cookie的持久性，自动故障切换，支持正则表达式及web状态统计。 LB Cluster:  四层：lvs, nginx(stream模式且nginx1.9.0或更新版本)，haproxy(mode tcp) 七层：http: nginx(htt">
+<meta property="article:published_time" content="2018-07-07T16:00:00.000Z">
+<meta property="article:modified_time" content="2020-04-20T13:33:50.381Z">
+<meta property="article:author" content="ShengQin Miao">
+<meta property="article:tag" content="HAProxy">
+<meta property="article:tag" content="负载均衡器">
+<meta name="twitter:card" content="summary">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2018/07/08/HAProxy/"/>
+
+
+
+
+
+  <title>HAProxy | 漫步人生路</title>
+  
+
+
+
+
+
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?f076ecd4b66d3a02de923868671591de";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+<meta name="generator" content="Hexo 4.2.0"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">漫步人生路</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off"
+             placeholder="搜索..." spellcheck="false"
+             type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/07/08/HAProxy/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="ShengQin Miao">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/uploads/touxiang.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="漫步人生路">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">HAProxy</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-07-08T00:00:00+08:00">
+                2018-07-08
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+             <span id="/2018/07/08/HAProxy/" class="leancloud_visitors" data-flag-title="HAProxy">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+            <div class="post-wordcount">
+              
+                
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-file-word-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">字数统计&#58;</span>
+                
+                <span title="字数统计">
+                  6.2k
+                </span>
+              
+
+              
+                <span class="post-meta-divider">|</span>
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-clock-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">阅读时长 &asymp;</span>
+                
+                <span title="阅读时长">
+                  28
+                </span>
+              
+            </div>
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="HAProxy"><a href="#HAProxy" class="headerlink" title="HAProxy"></a>HAProxy</h2><p>HAProxy: 是法国开发者Willy Tarreau开发的一个开源软件，是一款具备高并发、高性能的TCP和HTTP负载均衡器，支持基于cookie的持久性，自动故障切换，支持正则表达式及web状态统计。</p>
+<p>LB Cluster:</p>
+<ul>
+<li>四层：lvs, nginx(stream模式且nginx1.9.0或更新版本)，haproxy(mode tcp)</li>
+<li>七层：http: nginx(http), haproxy(mode http), httpd…</li>
+</ul>
+<h3 id="HAProxy功能"><a href="#HAProxy功能" class="headerlink" title="HAProxy功能"></a>HAProxy功能</h3><p>HAProxy是TCP / HTTP反向代理服务器，尤其适合于高可用性高并发环境</p>
+<ul>
+<li>可以针对HTTP请求添加cookie，进行路由后端服务器</li>
+<li>可平衡负载至后端服务器，并支持持久连接</li>
+<li>支持基于cookie进行调度</li>
+<li>支持所有主服务器故障切换至备用服务器</li>
+<li>支持专用端口实现监控服务</li>
+<li>支持不影响现有连接情况下停止接受新连接请求</li>
+<li>可以在双向添加，修改或删除HTTP报文首部</li>
+<li>支持基于pattern实现连接请求的访问控制</li>
+<li>通过特定的URI为授权用户提供详细的状态信息</li>
+</ul>
+<h3 id="使用HAProxy"><a href="#使用HAProxy" class="headerlink" title="使用HAProxy"></a>使用HAProxy</h3><h4 id="安装启动haproxy"><a href="#安装启动haproxy" class="headerlink" title="安装启动haproxy"></a>安装启动haproxy</h4><p>编译安装</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[root@master haproxy-1.8.17]<span class="comment"># yum install gcc gcc-c++ glibc glibc-devel pcre pcre-devel openssl  openssl-devel systemd-devel net-tools vim iotop bc  zip unzip zlib-devel lrzsz tree screen lsof tcpdump wget ntpdate #解决依赖关系</span></span><br><span class="line">[root@master haproxy-1.8.17]<span class="comment"># make  ARCH=x86_64 TARGET=linux2628 USE_PCRE=1 USE_OPENSSL=1 USE_ZLIB=1 USE_SYSTEMD=1  USE_CPU_AFFINITY=1  PREFIX=/usr/local/haproxy</span></span><br><span class="line">[root@master haproxy-1.8.17]<span class="comment"># make install PREFIX=/usr/local/haproxy</span></span><br></pre></td></tr></table></figure>
+<p>在编译的过程中会在当前目录生成一个haproxy可执行程序，将其拷贝到/usr/sbin/目录下。</p>
+<p>创建启动文件</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">[root@master haproxy-1.8.17]<span class="comment"># vi /usr/lib/systemd/system/haproxy.service</span></span><br><span class="line">[Unit]</span><br><span class="line">Description=HAProxy Load Balancer</span><br><span class="line">After=syslog.target network.target</span><br><span class="line">[Service]</span><br><span class="line">ExecStartPre=/usr/sbin/haproxy -f /etc/haproxy/haproxy.cfg  -c -q</span><br><span class="line">ExecStart=/usr/sbin/haproxy -Ws -f /etc/haproxy/haproxy.cfg  -p /run/haproxy.pid</span><br><span class="line">ExecReload=/bin/<span class="built_in">kill</span> -USR2 <span class="variable">$MAINPID</span></span><br><span class="line">[Install]</span><br><span class="line">WantedBy=multi-user.target</span><br></pre></td></tr></table></figure>
+<p>创建配置文件</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line">[root@master haproxy]<span class="comment"># cat /etc/haproxy/haproxy.cfg </span></span><br><span class="line">global</span><br><span class="line">maxconn 100000</span><br><span class="line">chroot /usr/<span class="built_in">local</span>/haproxy</span><br><span class="line"><span class="comment">#stats socket /var/lib/haproxy/haproxy.sock mode 600 level admin</span></span><br><span class="line">uid 188</span><br><span class="line">gid 188</span><br><span class="line">daemon</span><br><span class="line">nbproc 4</span><br><span class="line">cpu-map 1 0</span><br><span class="line">cpu-map 2 1</span><br><span class="line">cpu-map 3 2</span><br><span class="line">cpu-map 4 3</span><br><span class="line">pidfile /usr/<span class="built_in">local</span>/haproxy/run/haproxy.pid</span><br><span class="line"><span class="built_in">log</span> 127.0.0.1 local3 info</span><br><span class="line"></span><br><span class="line">defaults</span><br><span class="line">option http-keep-alive</span><br><span class="line">option  forwardfor</span><br><span class="line">maxconn 100000</span><br><span class="line">mode http</span><br><span class="line">timeout connect 300000ms</span><br><span class="line">timeout client  300000ms</span><br><span class="line">timeout server  300000ms</span><br><span class="line"></span><br><span class="line">listen stats</span><br><span class="line"> mode http</span><br><span class="line"> <span class="built_in">bind</span> 0.0.0.0:9999</span><br><span class="line"> stats <span class="built_in">enable</span></span><br><span class="line"> <span class="built_in">log</span> global</span><br><span class="line"> stats uri     /haproxy-status</span><br><span class="line"> stats auth    haadmin:q1w2e3r4ys</span><br><span class="line"></span><br><span class="line">listen  web_port</span><br><span class="line"> <span class="built_in">bind</span> 0.0.0.0:80</span><br><span class="line"> mode http</span><br><span class="line"> <span class="built_in">log</span> global</span><br><span class="line"> server web1  127.0.0.1:8080  check inter 3000 fall 2 rise 5</span><br></pre></td></tr></table></figure>
+<p>创建目录和用户</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">[root@master haproxy-1.8.17]<span class="comment"># mkdir  /etc/haproxy</span></span><br><span class="line">[root@master haproxy-1.8.17]<span class="comment"># useradd  haproxy -s /sbin/nologin</span></span><br><span class="line">[root@master haproxy-1.8.17]<span class="comment"># mkdir  /var/lib/haproxy</span></span><br><span class="line">[root@master haproxy-1.8.17]<span class="comment"># chown  haproxy.haproxy /var/lib/haproxy/ -R</span></span><br></pre></td></tr></table></figure>
+<p>haproxy.cfg文件中定义了chroot、pidfile、user、group等参数，如果系统没有相应的资源会导致haproxy无法启动，具体参考日志文件/var/log/messages</p>
+<p>启动haproxy</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">~]<span class="comment"># systemctl daemon-reload</span></span><br><span class="line">~]<span class="comment"># systemctl start haproxy</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="haproxy基本配置"><a href="#haproxy基本配置" class="headerlink" title="haproxy基本配置"></a>haproxy基本配置</h4><p>HAProxy组成<br>程序环境</p>
+<ul>
+<li>主程序：/usr/sbin/haproxy</li>
+<li>配置文件：/etc/haproxy/haproxy.cfg</li>
+<li>unit file:/usr/lib/systemd/system/haproxy.service</li>
+</ul>
+<p>配置段：</p>
+<ul>
+<li>global：全局配置段<blockquote>
+<p>进程及安全配置相关的参数<br>性能调整相关的参数<br>debug参数</p>
+</blockquote>
+</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">chroot <span class="comment">#锁定运行目录，当haproxy被侵入，则只能在锁定目录活动，能保护系统上的其他目录不受侵害。</span></span><br><span class="line">deamon <span class="comment">#以守护进程运行</span></span><br><span class="line"><span class="comment">#stats socket /var/lib/haproxy/haproxy.sock mode 600 level admin #socket文件</span></span><br><span class="line">user, group, uid, gid  <span class="comment">#运行haproxy的用户身份</span></span><br><span class="line">nbproc  <span class="comment">#开启的haproxy进程数，与CPU保持一致</span></span><br><span class="line">nbthread  <span class="comment">#指定每个haproxy进程开启的线程数，默认为每个进程一个线程</span></span><br><span class="line">cpu-map 1 0 <span class="comment">#绑定haproxy 进程至指定CPU</span></span><br><span class="line">maxconn  <span class="comment">#每个haproxy进程的最大并发连接数</span></span><br><span class="line">maxsslconn     <span class="comment">#SSL每个haproxy进程ssl最大连接数</span></span><br><span class="line">maxconnrate  <span class="comment">#每个进程每秒最大连接数</span></span><br><span class="line">spread-checks   <span class="comment">#后端server状态check随机提前或延迟百分比时间，建议2-5(20%-50%)之间</span></span><br><span class="line">pidfile <span class="comment">#指定pid文件路径</span></span><br><span class="line"><span class="built_in">log</span> 127.0.0.1  local3 info <span class="comment">#定义全局的syslog服务器；最多可以定义两个</span></span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>proxies：代理配置段<blockquote>
+<p>defaults:为frontend,backend,listen提供默认配置<br>frontend &lt;\name&gt;:前端，相当于nginx中的server{}<br>backend &lt;\name&gt;：后端，相当于nginx中的upstream{}<br>listen &lt;\name&gt;：同时拥有前端和后端，适用于一对一环境。</p>
+</blockquote>
+</li>
+</ul>
+<p>注意：name字段只能用”-“,”.”,”、”,”:”,并严格区分大小写，例如：Web和web时完全不同的两组服务器。</p>
+<p>defaults[&lt;\name&gt;] #默认配置项，针对以下的frontend、backend和listen生效，可以多个name</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">option redispatch    <span class="comment">#当server Id对应的服务器挂掉后，强制定向到其他健康的服务器  </span></span><br><span class="line">option abortonclose   <span class="comment">#当服务器负载很高的时候，自动结束掉当前队列处理比较久的链接</span></span><br><span class="line">option http-keep-alive <span class="comment">#开启会话保持</span></span><br><span class="line">option  forwardfor <span class="comment">#开启IP透传</span></span><br><span class="line">mode http <span class="comment">#默认工作类型</span></span><br><span class="line">timeout connect 120s  <span class="comment">#连接到一台后端server的最长时间</span></span><br><span class="line">timeout client  600s  <span class="comment">#与客户端的最长空闲时间</span></span><br><span class="line">timeout server  600s  <span class="comment">#等待服务端的超时时长</span></span><br><span class="line">timeout http-keep-alive 120s <span class="comment">#session 会话保持时间</span></span><br><span class="line"><span class="comment">#timeout check   5s   #对后端服务器的检测超时时间</span></span><br></pre></td></tr></table></figure>
+<p>bind：指定HAProxy的监听地址，可以是IPV4或IPV6，可以同时监听多个IP或端口，可同时用于listen字段中<br>bind [<address>]:<port_range> [, …] [param*]<br>mode  http/tcp      #指定负载协议类型<br>use_backend  backend_name   #调用的后端服务器组名称<br>示例：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">frontend  WEB_PORT</span><br><span class="line">    <span class="built_in">bind</span> :80,:8080</span><br><span class="line">    <span class="built_in">bind</span> 192.168.7.102:10080,192.168.7.102:10043</span><br><span class="line">    use_backend backend_name</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>check #对指定real进行健康状态检查，默认不开启<blockquote>
+<p>addr IP    #可指定的健康状态监测IP<br>port num  #指定的健康状态监测端口<br>inter num #健康状态检查间隔时间，默认2000 ms<br>fall  num   #后端服务器失效检查次数，默认为3<br>rise num    #后端服务器从下线恢复检查次数，默认为2<br>weight  #默认为1，最大值为256，0表示不参与负载均衡<br>backup #将后端服务器标记为备份状态<br>disabled #将后端服务器标记为不可用状态<br>redir <a href="http://www.magedu.com/" target="_blank" rel="noopener">http://www.magedu.com/</a> #将请求临时重定向至其它URL，只适用于http模式<br>maxconn <maxconn>：当前后端server的最大并发连接数<br>backlog <backlog>：当server的连接数达到上限后的后援队列长度</p>
+</blockquote>
+</li>
+</ul>
+<p>也可以直接使用listen定义一组负载均衡：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">[root@master ~]<span class="comment"># tail /etc/haproxy/haproxy.cfg </span></span><br><span class="line">listen web-port-80</span><br><span class="line">  <span class="built_in">bind</span> 192.168.34.100:80</span><br><span class="line">  mode http</span><br><span class="line">  option forwardfor</span><br><span class="line">  server web1 192.168.34.101:80 </span><br><span class="line">  server web2 192.168.34.102:80</span><br><span class="line">  server web3 192.168.34.103:80</span><br></pre></td></tr></table></figure>
+
+<h4 id="HAProxy算法"><a href="#HAProxy算法" class="headerlink" title="HAProxy算法"></a>HAProxy算法</h4><p>无状态和有状态：</p>
+<ul>
+<li>无状态的请求实质两次请求之间没有关联，有状态反之。</li>
+</ul>
+<p>balance： 指明对后端服务器的调度算法，配置在listen或backend</p>
+<p><strong>静态算法</strong><br>静态算法：按照事先定义好的规则轮询公平调度，不关心后端服务器的当前负载、链接数和相应速度等，且无法实时修改权重，只能重启后生效</p>
+<ul>
+<li><p>static-rr：基于权重的轮询调度，不支持权重的运行时调整及后端服务器慢启动，其后端主机数量没有限制</p>
+</li>
+<li><p>first：根据服务器在列表中的位置，自上而下进行调度，但是其只会当第一台服务器的连接数达到上限，新请求才会分配给下一台服务，因此会忽略服务器的权重设置。</p>
+</li>
+</ul>
+<p><strong>动态算法</strong><br>动态算法：基于后端服务器 状态进行调度适当调整，比如优先调度至当前负载较低的服务器，且权重可以在haproxy运行时动态调整无需重启。</p>
+<ul>
+<li><p>roundrobin：基于权重的轮询动态调度算法，支持权重的运行时调整，不等于lvs 的rr，支持慢启动即新加的服务器会逐渐增加转发数，每个后端backend中最多支持4095个server，此为默认调度算法，server 权重设置 weight</p>
+</li>
+<li><p>leastconn： 加权的最少连接的动态，支持权重的运行时调整和慢启动，即当前后端服务器连接最少的优先调度，比较适合长连接的场景使用，比如MySQL等场景。</p>
+</li>
+<li><p>source：源地址hash，基于用户源地址hash并将请求转发到后端服务器，默认为静态即取模方式，但是可以通过hash-type支持的选项更改，后续同一个源地址请求将被转发至同一个后端web服务器，比较适用于session保持等场景。</p>
+<blockquote>
+<p>map-based：取模法，基于服务器权重的hash数组取模，该hash是静态的即不支持在线调整权重，不支持慢启动，其对后端服务器调度均衡，缺点是当服务器的总权重发生变化时，即有服务器上线或下线，都会因权重发生变化而导致调度结果整体改变。</p>
+</blockquote>
+</li>
+</ul>
+<blockquote>
+<p>consistent：一致性哈希，该hash是动态的，支持在线调整权重，支持慢启动，优点在于当服务器的总权重发生变化时，对调度结果影响是局部的，不会引起大的变动，该算法很容易导致后端服务器负载不均衡，但是比较适合session保持。</p>
+</blockquote>
+<p>source算法示例：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">listen  web_prot_http_nodes</span><br><span class="line">    <span class="built_in">bind</span>  192.168.7.101:80</span><br><span class="line">    mode http</span><br><span class="line">    balance <span class="built_in">source</span></span><br><span class="line">    <span class="built_in">hash</span>-type consistent</span><br><span class="line">    <span class="built_in">log</span> global</span><br><span class="line">    option  forwardfor</span><br><span class="line">    server 192.168.7.101   192.168.7.101:8080   check inter 3000 fall 3 rise 5</span><br><span class="line">    server 192.168.7.102   192.168.7.102:8080   check inter 3000 fall 3 rise 5</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>uri：基于对用户请求的uri做hash并将请求转发到后端指定服务器<blockquote>
+<p> map-based：取模法<br>consistent：一致性哈希</p>
+</blockquote>
+</li>
+</ul>
+<p>uri: uniform resource identifier，统一资源标识符,是一个用于标识某一互联网资源名称的字符串</p>
+<p>uri调度算法示例：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">listen  web_prot_http_nodes</span><br><span class="line">    <span class="built_in">bind</span>  192.168.7.101:80</span><br><span class="line">    mode http <span class="comment">#不支持tcp，会切换到tcp的roundrobin负载模式</span></span><br><span class="line">    balance uri</span><br><span class="line">    <span class="built_in">hash</span>-type consistent</span><br><span class="line">    <span class="built_in">log</span> global</span><br><span class="line">    option  forwardfor</span><br><span class="line">    server 192.168.7.101   192.168.7.101:8080   check inter 3000 fall 3 rise 5</span><br><span class="line">    server 192.168.7.102   192.168.7.102:8080   check inter 3000 fall 3 rise</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>url_param：对用户请求的url中的<params>部分中的参数name作hash计算，并由服务器总权重相除以后派发至某挑出的服务器；通常用于追踪用户，以确保来自同一个用户的请求始终发往同一个Backend Server</li>
+</ul>
+<p>url_param调度算法示例:</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">listen  web_prot_http_nodes</span><br><span class="line">    <span class="built_in">bind</span>  192.168.7.101:80</span><br><span class="line">    mode http <span class="comment">#不支持tcp，会切换到tcp的roundrobin负载模式</span></span><br><span class="line">    balance url_param  name  <span class="comment">#基于参数name做hash</span></span><br><span class="line">    <span class="built_in">hash</span>-type consistent</span><br><span class="line">    <span class="built_in">log</span> global</span><br><span class="line">    option  forwardfor</span><br><span class="line">    server 192.168.7.101   192.168.7.101:8080   check inter 3000 fall 3 rise 5</span><br><span class="line">    server 192.168.7.102   192.168.7.102:8080   check inter 3000 fall 3 rise 5</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>hdr(<name>)：针对用户每个http头部(header)请求中的指定信息做hash，此处由<name>指定的http首部将会被取出并做hash计算，然后由服务器总权重相除以后派发至某挑出的服务器，假如无有效的值，则会被轮询调度<blockquote>
+<p>hdr( Cookie、 User-Agent、host )</p>
+</blockquote>
+</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">listen  web_prot_http_nodes</span><br><span class="line">    <span class="built_in">bind</span>  192.168.7.101:80</span><br><span class="line">    mode http</span><br><span class="line">    balance hdr(User-Agent)</span><br><span class="line">    <span class="built_in">hash</span>-type consistent</span><br><span class="line">    <span class="built_in">log</span> global</span><br><span class="line">    option  forwardfor</span><br><span class="line">    server 192.168.7.101   192.168.7.101:8080   check inter 3000 fall 3 rise 5</span><br><span class="line">    server 192.168.7.102   192.168.7.102:8080   check inter 3000 fall 3 rise 5</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>rdp-cookie对远程桌面的负载，使用cookie保持会话<br>rdp-cookie(<name>)</li>
+</ul>
+<p>示例</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">listen RDP</span><br><span class="line"><span class="built_in">bind</span>  192.168.7.101:3389</span><br><span class="line">balance rdp-cookie</span><br><span class="line">mode tcp</span><br><span class="line">server rdp0 172.18.139.20:3389 check fall 3 rise 5 inter 2000 weight 1</span><br><span class="line">server rdp1 172.18.139.21:3389 check fall 3 rise 5 inter 2000 weight 1</span><br></pre></td></tr></table></figure>
+
+<p>基于iptables实现目标地址转换</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">~]<span class="comment"># iptables -t nat -A PREROUTING -d 192.168.34.101 -p tcp --dport 3389 -j DNAT --to-destnation 192.167.34.101:80</span></span><br><span class="line">~]<span class="comment"># iptables -t nat -A POSTROUTING -s 192.168.34.0/24 -j SNAT --to-source 192.168.34.101</span></span><br><span class="line">~]<span class="comment"># echo "net.ipv4.ip_forward = 1" &gt;&gt; /etc/sysctl.conf</span></span><br></pre></td></tr></table></figure>
+
+
+<p>算法总结：<br>roundrobin——–&gt;tcp/http 动态<br>leastconn———–&gt;tcp/http 动态<br>static-rr————–&gt;tcp/http  静态<br>first——————–&gt;tcp/http  静态</p>
+<p>source—————-&gt;tcp/http<br>Uri———————-&gt;http<br>url_param———-&gt;http                取决于hash_type是否consistent<br>hdr———————&gt;http<br>rdp-cookie———&gt;tcp</p>
+<h4 id="HAProxy-服务器动态上下线"><a href="#HAProxy-服务器动态上下线" class="headerlink" title="HAProxy-服务器动态上下线"></a>HAProxy-服务器动态上下线</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br></pre></td><td class="code"><pre><span class="line">[root@master ~]<span class="comment"># yum -y install socat</span></span><br><span class="line">[root@master ~]<span class="comment"># echo "show info"|socat stdio /var/lib/haproxy/haproxy.sock</span></span><br><span class="line">proxy.sock </span><br><span class="line">Name: HAProxy</span><br><span class="line">Version: 1.8.17</span><br><span class="line">Release_date: 2019/01/08</span><br><span class="line">Nbthread: 1</span><br><span class="line">Nbproc: 2</span><br><span class="line">Process_num: 2</span><br><span class="line">Pid: 17966</span><br><span class="line">Uptime: 0d 1h10m29s</span><br><span class="line">Uptime_sec: 4229</span><br><span class="line">Memmax_MB: 0</span><br><span class="line">PoolAlloc_MB: 0</span><br><span class="line">PoolUsed_MB: 0</span><br><span class="line">PoolFailed: 0</span><br><span class="line">Ulimit-n: 200032</span><br><span class="line">Maxsock: 200032</span><br><span class="line">Maxconn: 100000</span><br><span class="line">Hard_maxconn: 100000</span><br><span class="line">CurrConns: 0</span><br><span class="line">CumConns: 5</span><br><span class="line">CumReq: 8</span><br><span class="line">MaxSslConns: 0</span><br><span class="line">CurrSslConns: 0</span><br><span class="line">CumSslConns: 0</span><br><span class="line">Maxpipes: 0</span><br><span class="line">PipesUsed: 0</span><br><span class="line">PipesFree: 0</span><br><span class="line">ConnRate: 0</span><br><span class="line">ConnRateLimit: 0</span><br><span class="line">MaxConnRate: 1</span><br><span class="line">SessRate: 0</span><br><span class="line">SessRateLimit: 0</span><br><span class="line">MaxSessRate: 1</span><br><span class="line">SslRate: 0</span><br><span class="line">SslRateLimit: 0</span><br><span class="line">MaxSslRate: 0</span><br><span class="line">SslFrontendKeyRate: 0</span><br><span class="line">SslFrontendMaxKeyRate: 0</span><br><span class="line">SslFrontendSessionReuse_pct: 0</span><br><span class="line">SslBackendKeyRate: 0</span><br><span class="line">SslBackendMaxKeyRate: 0</span><br><span class="line">SslCacheLookups: 0</span><br><span class="line">SslCacheMisses: 0</span><br><span class="line">CompressBpsIn: 0</span><br><span class="line">CompressBpsOut: 0</span><br><span class="line">CompressBpsRateLim: 0</span><br><span class="line">ZlibMemUsage: 0</span><br><span class="line">MaxZlibMemUsage: 0</span><br><span class="line">Tasks: 5</span><br><span class="line">Run_queue: 1</span><br><span class="line">Idle_pct: 100</span><br><span class="line">node: master</span><br><span class="line">Stopping: 0</span><br><span class="line">Jobs: 4</span><br><span class="line">Listeners: 3</span><br></pre></td></tr></table></figure>
+
+<h4 id="IP地址透传与基于cookie实现会话保持"><a href="#IP地址透传与基于cookie实现会话保持" class="headerlink" title="IP地址透传与基于cookie实现会话保持"></a>IP地址透传与基于cookie实现会话保持</h4><p>四层负载和七层的区别：<br>四层</p>
+<pre><code>在四层负载设备中，把client发送的报文目标地址(原来是负载均衡设备的IP地址)，根据均衡设备设置的选择web服务器的规则选择对应的web服务器IP地址，这样client就可以直接跟此服务器建立TCP连接并发送数据。</code></pre><p>七层</p>
+<pre><code>七层负载均衡服务器起了一个代理服务器的作用，服务器建立一次TCP连接要三次握手，而client要访问webserver要先于七层设备进行三次握手后建立TCP连接，把要访问的报文信息发送给七层负载均衡，然后七层负载均衡再根据设置的均衡规则选择特定的webserver，然后通过三次握手与此台webserver建立TCP连接，然后webserver把需要的数据发送给七层负载均衡设备，负载均衡设备再把数据发给client；所以，七层负载均衡设备起到了代理服务器的作用。</code></pre><p>抓包命令：</p>
+<ul>
+<li>tcpdump tcp -i eth0 -nn port !22 -w dump-tcp.pcap -v</li>
+</ul>
+<p>内核参数优化：</p>
+<ul>
+<li>/etc/sysctl.conf</li>
+<li>/etc/security.conf</li>
+</ul>
+<h5 id="七层ip透传"><a href="#七层ip透传" class="headerlink" title="七层ip透传"></a>七层ip透传</h5><p>haproxy设置</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">listen  web_prot_http_nodes</span><br><span class="line">    <span class="built_in">bind</span>  192.168.7.102:80</span><br><span class="line">    mode  http</span><br><span class="line">    option  forwardfor</span><br><span class="line">server 192.168.7.102  blogs.studylinux.net:80   check inter 3000 fall 3 rise 5</span><br></pre></td></tr></table></figure>
+
+<p>后端server配置<br>nginx</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">http &#123;</span><br><span class="line">    log_format  main  <span class="string">'$remote_addr - $remote_user [$time_local] "$request" '</span></span><br><span class="line">                      <span class="string">'$status $body_bytes_sent "$http_referer" '</span></span><br><span class="line">                      <span class="string">'"$http_user_agent" "$http_x_forwarded_for"'</span>;</span><br><span class="line">access_log  /var/<span class="built_in">log</span>/nginx/access.log  main;</span><br></pre></td></tr></table></figure>
+
+<p>httpd</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">LogFormat <span class="string">"\"%&#123;X-Forwarded-For&#125;i\" %l %u %t \"%r\" %&gt;s %b"</span> common1</span><br><span class="line">CustomLog <span class="string">"logs/access_log"</span> common1</span><br></pre></td></tr></table></figure>
+
+<h5 id="四层ip透传"><a href="#四层ip透传" class="headerlink" title="四层ip透传"></a>四层ip透传</h5><p>配置haproxy</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">listen  web_prot_http_nodes</span><br><span class="line">    <span class="built_in">bind</span>  192.168.7.102:80</span><br><span class="line">    mode  tcp</span><br><span class="line">    server 192.168.7.102  blogs.studylinux.net:80  send-proxy  check inter 3000 fall 3 rise 5</span><br></pre></td></tr></table></figure>
+
+<p>配置后端服务器(nginx)</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">listen       80 proxy_protocol;</span><br><span class="line"><span class="string">'"tcp_ip":"$proxy_protocol_addr",'</span>   <span class="comment">#TCP获取客户端真实IP日志格式</span></span><br></pre></td></tr></table></figure>
+
+<h5 id="基于cookie实现会话保持"><a href="#基于cookie实现会话保持" class="headerlink" title="基于cookie实现会话保持"></a>基于cookie实现会话保持</h5><p>cookie <value>：为当前server指定cookie值，实现基于cookie的会话黏性<br>cookie <name> [ rewrite | insert | prefix ] [ indirect ] [ nocache ]  [ postonly ] [ preserve ] [ httponly ] [ secure ]  [ domain <domain> ]* [ maxidle <idle> ] [ maxlife <life> ]<br><name>：cookie名称，用于实现持久连接<br>    rewrite：重写<br>    insert：插入<br>    prefix：前缀<br>    nocache：当client和hapoxy之间有缓存时，不缓存cookie</p>
+<p>配置示例：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">listen  web_prot_http_nodes</span><br><span class="line">    <span class="built_in">bind</span>  192.168.34.100:80</span><br><span class="line">    mode  http</span><br><span class="line">    cookie  SERVER-COOKIE  insert indirect nocache</span><br><span class="line">    server web1 192.168.34.101:80  cookie web1 check inter 3000 fall 3 rise 5</span><br><span class="line">    server web2 192.168.34.102:80  cookie web2 check inter 3000 fall 3 rise 5</span><br></pre></td></tr></table></figure>
+<p>测试</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">[root@node03 ~]<span class="comment"># curl --cookie "SERVER-COOKIE=web1" 192.168.34.100</span></span><br><span class="line">101</span><br><span class="line">[root@node03 ~]<span class="comment"># curl --cookie "SERVER-COOKIE=web2" 192.168.34.100</span></span><br><span class="line">102</span><br></pre></td></tr></table></figure>
+
+<h4 id="状态页、日志配置和报文操作"><a href="#状态页、日志配置和报文操作" class="headerlink" title="状态页、日志配置和报文操作"></a>状态页、日志配置和报文操作</h4><p>haproxy状态页的使用</p>
+<pre><code>stats enable   #基于默认的参数启用stats page
+stats hide-version  # 隐藏版本
+stats refresh &lt;delay&gt; # 设定自动刷新时间间隔
+stats uri &lt;prefix&gt;  #自定义stats page uri，默认值：/haproxy?stats 
+stats realm &lt;realm&gt; #账户认证时的提示信息，示例：stats realm : HAProxy\ Statistics
+stats auth &lt;user&gt;:&lt;passwd&gt; #认证时的账号和密码，可使用多次，默认：no authentication
+stats admin { if | unless } &lt;cond&gt; #启用stats page中的管理功能</code></pre><p>配置</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">listen stats</span><br><span class="line">        <span class="built_in">bind</span> :9009</span><br><span class="line">        stats <span class="built_in">enable</span></span><br><span class="line">        <span class="comment">#stats hide-version </span></span><br><span class="line">        stats uri  /haproxy-status</span><br><span class="line">        stats realm HAPorxy\ Stats\ Page</span><br><span class="line">        stats auth haadmin:123456</span><br><span class="line">        stats auth admin:123456</span><br><span class="line">        stats refresh 30s</span><br><span class="line">        stats admin <span class="keyword">if</span> TRUE</span><br></pre></td></tr></table></figure>
+<p>在浏览器访问,就可以管理haproxy</p>
+<p><strong>修改报文首部</strong><br>在请求报文尾部添加指定首部<br>      reqadd  <string> [{if | unless} <cond>]    #支持条件判断<br>在响应报文尾部添加指定首部<br>       rspadd <string> [{if | unless} <cond>]<br>      示例：rspadd X-Via:\ HAPorxy<br>从请求报文中删除匹配正则表达式的首部<br>        reqdel  <search> [{if | unless} <cond>]<br>        reqidel <search> [{if | unless} <cond>] 不分大小写   </p>
+<p>从响应报文中删除匹配正则表达式的首部<br>        rspdel  <search> [{if | unless} <cond>]<br>        rspidel <search> [{if | unless} <cond>]<br>        示例： rspidel  server.* #从相应报文删除server信息<br>         rspidel X-Powered-By:.*  #从响应报文删除X-Powered-By信息</p>
+<p><strong>HAProxy日志配置</strong><br>在default配置项定义：</p>
+<pre><code>log 127.0.0.1  local{1-7} info #基于syslog记录日志到指定设备，级别有(err、warning、info、debug)</code></pre><p>配置rsyslog：</p>
+<pre><code>$ModLoad imudp
+$UDPServerRun 514
+local3.*    /var/log/haproxy.log</code></pre><p>配置HAProxy：</p>
+<pre><code>listen  web_port
+ bind 127.0.0.1:80
+ mode http
+ log global
+option tcplog
+ server web1  127.0.0.1:8080  check inter 3000 fall 2 rise 5</code></pre><p>重启syslog服务并访问haproxy状态页</p>
+<p><strong>自定义日志记录</strong><br>将特定信息记录在日志中</p>
+<pre><code>capture cookie &lt;name&gt; len &lt;length&gt; #捕获请求和响应报文中的 cookie并记录日志    
+capture request header &lt;name&gt; len &lt;length&gt; #捕获请求报文中指定的首部内容和长度并记录日志
+capture response header &lt;name&gt; len &lt;length&gt; #捕获响应报文中指定的内容和长度首部并记录日志</code></pre><p>示例</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">capture request  header Host len  256</span><br><span class="line">capture request header User-Agent len 512</span><br></pre></td></tr></table></figure>
+
+<p><strong>压缩功能</strong></p>
+<pre><code>compression algo   #启用http协议中的压缩机制，常用算法有gzip deflate
+compression type  #要压缩的类型</code></pre><p>示例</p>
+<pre><code>compression algo gzip
+compression type compression type text/plain text/html text/css text/xml text/javascript application/javascript</code></pre><p><strong>web服务器状态监测</strong><br>option httpchk<br>option httpchk <uri><br>option httpchk <method> <uri><br>option httpchk <method> <uri> <version></p>
+<p>示例</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">listen  web_prot_http_nodes</span><br><span class="line">    <span class="built_in">bind</span>  192.168.7.102:80</span><br><span class="line">    mode  http</span><br><span class="line">    <span class="built_in">log</span> global</span><br><span class="line">    option httpchk GET /wp-includes/js/jquery/jquery.js?ver=1.12.4 HTTP/1.0  <span class="comment">#基于指定URL</span></span><br><span class="line">    <span class="comment">#option httpchk HEAD /wp-includes/js/jquery/jquery.js?ver=1.12.4 HTTP/1.0\r\nHost:\ 192.168.7.102 #通过request获取的头部信息进行匹配进行健康检测</span></span><br><span class="line">     server 192.168.7.102  blogs.studylinux.net:80   check inter 3000 fall 3 rise 5</span><br><span class="line">     server 192.168.7.101 192.168.7.101:8080  cookie web1 check inter 3000 fall 3 rise 5</span><br></pre></td></tr></table></figure>
+
+<h4 id="ACL"><a href="#ACL" class="headerlink" title="ACL"></a>ACL</h4><p>ACL必须在haproxy工作在http模式下才可以使用。</p>
+<ul>
+<li>acl：对接收到的报文进行匹配和过滤，基于请求报文头部中的源地址、源端口、目标地址、目标端口、请求方法、URL、文件后缀等信息内容进行匹配并执行进一步操作。</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">acl &lt;aclname&gt;  &lt;criterion&gt;   [flags]           [operator]        [&lt;value&gt;]</span><br></pre></td></tr></table></figure>
+<ul>
+<li>acl      名称             条件       条件标记位     具体操作符     操作对象类型</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">acl   image_service hdr_dom(host)   -i   img.magedu.com</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>ACL名称，可以使用大字母A-Z、小写字母a-z、数字0-9、冒号：、点.、中横线和下划线，并且严格区分大小写，必须Image_site和image_site完全是两个acl。</li>
+</ul>
+<p><strong>Criterion-acl</strong><br>&lt;\criterion&gt; ：匹配条件<br>dst         目标IP<br>dst_port       目标PORT<br>src            源IP<br>src_port      源PORT</p>
+<p>hdr &lt;\string&gt;用于测试请求头部首部指定内容</p>
+<pre><code>hdr_dom(host)  请求的host名称，如 www.magedu.com
+hdr_beg(host)  请求的host开头，如 www. img. video. download. ftp.
+hdr_end(host)  请求的host结尾，如 .com .net .cn
+path_beg   请求的URL开头，如/static、/images、/img、/css
+path_end   请求的URL中资源的结尾，如 .gif  .png  .css  .js .jpg .jpeg</code></pre><p><strong>flags</strong><br>&lt;\flags&gt;-条件标记<br>    -i 不区分大小写<br>    -m 使用指定的pattern匹配方法<br>    -n 不做DNS解析<br>    -u 禁止acl重名，否则多个同名ACL匹配或关系<br>    –  强制flag结束. 当字符串和某个flag相似时使用</p>
+<p><strong>operator</strong><br> [operator]-操作符：<br>  整数比较：eq、ge、gt、le、lt<br>  字符比较：</p>
+<ul>
+<li>exact match     (-m str) :字符串必须完全匹配模式</li>
+<li>substring match (-m sub) :在提取的字符串中查找模式，如果其中任何一个被发现，ACL将匹配</li>
+<li>prefix match    (-m beg) :在提取的字符串首部中查找模式，如果其中任何一个被发现，ACL将匹配</li>
+<li>suffix match    (-m end) :将模式与提取字符串的尾部进行比较，如果其中任何一个匹配，则ACL进行匹配</li>
+<li>subdir match    (-m dir) :查看提取出来的用斜线分隔（“/”）的字符串，如果其中任何一个匹配，则ACL进行匹配</li>
+<li>domain match    (-m dom) :查找提取的用点（“.”）分隔字符串，如果其中任何一个匹配，则ACL进行匹配    </li>
+</ul>
+<p><strong>value</strong><br><value>的类型：<br>    - Boolean #布尔值<br>    - integer or integer range #整数或整数范围，比如用于匹配端口范围<br>    - IP address / network #IP地址或IP范围<br>    - string<br>         exact –精确比较<br>            substring—子串    <a href="http://www.magedu.com" target="_blank" rel="noopener">www.magedu.com</a><br>            suffix-后缀比较<br>            prefix-前缀比较<br>            subdir-路径， /wp-includes/js/jquery/jquery.js<br>            domain-域名，<a href="http://www.magedu.com" target="_blank" rel="noopener">www.magedu.com</a><br>    - regular expression #正则表达式<br>    - hex block #16进制</p>
+<p><strong>ACL定义与调用</strong><br>acl作为条件时的逻辑关系：<br>    - 与：隐式（默认）使用<br>    - 或：使用“or” 或 “||”表示<br>    - 否定：使用“!“ 表示    </p>
+<pre><code>示例：
+         if   invalid_src invalid_port      与关系
+    if invalid_src || invalid_port      或
+    if ! invalid_src             非</code></pre><p>acl 示例-域名匹配</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">listen  web_port</span><br><span class="line">  <span class="built_in">bind</span> 192.168.7.102:8800</span><br><span class="line">  mode http</span><br><span class="line">  <span class="built_in">log</span> global</span><br><span class="line">  acl  test_host  hdr_dom(host)   www.magedu.com</span><br><span class="line">  use_backend   test_host   <span class="keyword">if</span>   test_host</span><br><span class="line">  default_backend default_web <span class="comment">#以上都没有匹配到的时候使用默认backend</span></span><br><span class="line"></span><br><span class="line">backend test_host</span><br><span class="line">  mode http</span><br><span class="line">  server web1 www.magedu.com check inter 2000 fall 3 rise 5</span><br><span class="line"></span><br><span class="line">backend default_web</span><br><span class="line">  mode http</span><br><span class="line">  server web1 192.168.7.101:8080 check inter 2000 fall 3 rise 5</span><br></pre></td></tr></table></figure>
+
+<p>acl 示例-源地址子网匹配</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">listen  web_port</span><br><span class="line">  <span class="built_in">bind</span> 192.168.7.102:8800</span><br><span class="line">  mode http</span><br><span class="line">  <span class="built_in">log</span> global</span><br><span class="line">  acl ip_range_test src 192.168.4.0/24</span><br><span class="line">  use_backend   web2   <span class="keyword">if</span>  ip_range_test</span><br><span class="line">  default_backend web1</span><br><span class="line"></span><br><span class="line">backend web1</span><br><span class="line">  mode http</span><br><span class="line">  server web1 192.168.7.101:8080 check inter 2000 fall 3 rise 5</span><br><span class="line"></span><br><span class="line">backend web2</span><br><span class="line">  mode http</span><br><span class="line">  server web1 192.168.7.102:8080 check inter 2000 fall 3 rise 5</span><br></pre></td></tr></table></figure>
+
+<p>acl 示例-源地址访问控制</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">listen  web_port</span><br><span class="line">  <span class="built_in">bind</span> 192.168.7.102:8800</span><br><span class="line">  mode http</span><br><span class="line">  <span class="built_in">log</span> global</span><br><span class="line">  acl block_test src 192.168.7.103 192.168.7.104</span><br><span class="line">  block  <span class="keyword">if</span>  block_test</span><br><span class="line">  default_backend web1</span><br><span class="line"></span><br><span class="line">backend web1</span><br><span class="line">  mode http</span><br><span class="line">  <span class="built_in">log</span> global</span><br><span class="line">  server web1 192.168.7.101:8080 check inter 2000 fall 3 rise 5</span><br></pre></td></tr></table></figure>
+
+<p>acl示例-匹配浏览器</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">listen  web_port</span><br><span class="line">  <span class="built_in">bind</span> 192.168.7.102:8800</span><br><span class="line">  mode http</span><br><span class="line">  <span class="built_in">log</span> global</span><br><span class="line">  acl block_test src 192.168.7.103 192.168.7.104</span><br><span class="line">  acl redirect_test hdr(User-Agent) -m sub  -i <span class="string">"Mozilla/5.0 (Windows NT 6.1; WOW64; Trident/7.0; rv:11.0) like Gecko"</span></span><br><span class="line">  block  <span class="keyword">if</span>  block_test</span><br><span class="line">  redirect prefix   http://192.168.7.101:8080 <span class="keyword">if</span> redirect_test</span><br><span class="line">  default_backend web2</span><br><span class="line">backend web1</span><br><span class="line">  mode http</span><br><span class="line">  <span class="built_in">log</span> global</span><br><span class="line">  server web1 192.168.7.101:8080 check inter 2000 fall 3 rise 5</span><br></pre></td></tr></table></figure>
+
+<p>自定义错误页面</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">errorfile 500  /usr/<span class="built_in">local</span>/haproxy/html/500.html <span class="comment">#自定义错误页面跳转</span></span><br><span class="line">errorfile 502  /usr/<span class="built_in">local</span>/haproxy/html/502.html</span><br><span class="line">errorfile 503  /usr/<span class="built_in">local</span>/haproxy/html/503.html</span><br><span class="line">errorloc 503  http://192.168.7.103/error_page/503.html</span><br></pre></td></tr></table></figure>
+
+
+<p>基于acl+文件后缀实现动静分离</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">listen  web_port</span><br><span class="line">    <span class="built_in">bind</span> 192.168.7.102:80</span><br><span class="line">    mode http</span><br><span class="line">    acl php_server path_end  -i .php</span><br><span class="line">    use_backend php_server_host <span class="keyword">if</span> php_server</span><br><span class="line">    acl image_server path_end  -i .jpg .png .jpeg -gif</span><br><span class="line">    use_backend image_server_host <span class="keyword">if</span> image_server</span><br><span class="line">    default_backend default_host</span><br><span class="line">backend default_host</span><br><span class="line">    mode http</span><br><span class="line">    server web1 192.168.7.101:8080 check inter 2000 fall 3 rise 5</span><br><span class="line">backend php_server_host</span><br><span class="line">    mode http</span><br><span class="line">    server web1 192.168.7.101:8080 check inter 2000 fall 3 rise 5</span><br><span class="line">backend image_server_host</span><br><span class="line">    mode http</span><br><span class="line">    server web1 192.168.7.102:8080 check inter 2000 fall 3 rise 5</span><br></pre></td></tr></table></figure>
+
+<p>acl-匹配访问路径</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">listen  web_port</span><br><span class="line">    <span class="built_in">bind</span> 192.168.7.102:80</span><br><span class="line">    mode http</span><br><span class="line">    acl static_path  path_beg  -i  /static /images /javascript</span><br><span class="line">    use_backend static_path_host <span class="keyword">if</span> static_path</span><br><span class="line">    </span><br><span class="line">    default_backend default_host</span><br><span class="line">backend default_host</span><br><span class="line">    mode http</span><br><span class="line">    server web1 192.168.7.101:8080 check inter 2000 fall 3 rise 5</span><br><span class="line">backend static_path_host </span><br><span class="line">    mode http</span><br><span class="line">    server web1 192.168.7.101:8080 check inter 2000 fall 3 rise 5</span><br></pre></td></tr></table></figure>
+
+<p>http模式下基于策略的访问控制</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">listen  web_port</span><br><span class="line">    <span class="built_in">bind</span> 192.168.7.102:80</span><br><span class="line">    mode http    </span><br><span class="line">    acl badguy_deny src 192.168.4.1</span><br><span class="line">    http-request deny <span class="keyword">if</span> badguy_deny</span><br><span class="line">    http-request allow</span><br><span class="line">    default_backend default_host</span><br><span class="line">backend default_host</span><br><span class="line">    mode http</span><br><span class="line">    server web1 192.168.7.102:8080 check inter 2000 fall 3 rise 5</span><br><span class="line">backend static_path_host </span><br><span class="line">    mode http</span><br><span class="line">    server web1 192.168.7.101:8080 check inter 2000 fall 3 rise 5</span><br><span class="line">backend image_server_host</span><br><span class="line">    mode http</span><br><span class="line">    server web1 192.168.7.102:8080 check inter 2000 fall 3 rise 5</span><br></pre></td></tr></table></figure>
+
+<p>预定义acl</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">ACL name	Equivalent to	Usage</span><br><span class="line">FALSE	always_false	never match</span><br><span class="line">HTTP	req_proto_http	match <span class="keyword">if</span> protocol is valid HTTP</span><br><span class="line">HTTP_1.0	req_ver 1.0	match HTTP version 1.0</span><br><span class="line">HTTP_1.1	req_ver 1.1	match HTTP version 1.1</span><br><span class="line">HTTP_CONTENT	hdr_val(content-length) gt 0	match an existing content-length</span><br><span class="line">HTTP_URL_ABS	url_reg ^[^/:]*://	match absolute URL with scheme</span><br><span class="line">HTTP_URL_SLASH	url_beg /	match URL beginning with <span class="string">"/"</span></span><br><span class="line">HTTP_URL_STAR	url *	match URL equal to <span class="string">"*"</span></span><br><span class="line">LOCALHOST	src 127.0.0.1/8	match connection from <span class="built_in">local</span> host</span><br><span class="line">METH_CONNECT	method CONNECT	match HTTP CONNECT method</span><br><span class="line">METH_DELETE	method DELETE	match HTTP DELETE method</span><br><span class="line">METH_GET	method GET HEAD	match HTTP GET or HEAD method</span><br><span class="line">METH_HEAD	method HEAD	match HTTP HEAD method</span><br><span class="line">METH_OPTIONS	method OPTIONS	match HTTP OPTIONS method</span><br><span class="line">METH_POST	method POST	match HTTP POST method</span><br><span class="line">METH_PUT	method PUT	match HTTP PUT method</span><br><span class="line">METH_TRACE	method TRACE	match HTTP TRACE method</span><br><span class="line">RDP_COOKIE	req_rdp_cookie_cnt gt 0	match presence of an RDP cookie</span><br><span class="line">REQ_CONTENT	req_len gt 0	match data <span class="keyword">in</span> the request buffer</span><br><span class="line">TRUE	always_true	always match</span><br><span class="line">WAIT_END	wait_end	<span class="built_in">wait</span> <span class="keyword">for</span> end of content analysis</span><br></pre></td></tr></table></figure>
+
+<p>预定义acl的使用</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">listen  web_port</span><br><span class="line">    <span class="built_in">bind</span> 192.168.7.102:80</span><br><span class="line">    mode http</span><br><span class="line">    acl static_path  path_beg  -i  /static /images /javascript</span><br><span class="line">    use_backend static_path_host <span class="keyword">if</span>  HTTP_1.1 TRUE static_path</span><br><span class="line">    default_backend default_host</span><br><span class="line"></span><br><span class="line">backend default_host</span><br><span class="line">    mode http</span><br><span class="line">    server web1 192.168.7.102:8080 check inter 2000 fall 3 rise 5</span><br><span class="line">backend static_path_host </span><br><span class="line">    mode http</span><br><span class="line">    server web1 192.168.7.101:8080 check inter 2000 fall 3 rise 5</span><br></pre></td></tr></table></figure>
+
+<h4 id="四层访问控制"><a href="#四层访问控制" class="headerlink" title="四层访问控制"></a>四层访问控制</h4><p>tcp-request connection {accept|reject}  [{if | unless} <condition>]  根据第4层条件对传入连接执行操作</p>
+<p>示例</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">listen redis-port</span><br><span class="line">    <span class="built_in">bind</span> 192.168.7.102:6379</span><br><span class="line">    mode tcp</span><br><span class="line">    balance leastconn</span><br><span class="line">    acl invalid_src src 192.168.1.0/24 192.168.7.101</span><br><span class="line">    tcp-request connection reject <span class="keyword">if</span> invalid_src</span><br><span class="line">    server server1 192.168.7.104:6379 check</span><br><span class="line">    server server1 192.168.7.103:6379 check backup</span><br></pre></td></tr></table></figure>
+
+<h4 id="HAProxy-https协议"><a href="#HAProxy-https协议" class="headerlink" title="HAProxy-https协议"></a>HAProxy-https协议</h4><pre><code>配置HAProxy支持https协议： 
+支持ssl会话；
+    bind *:443 ssl crt /PATH/TO/SOME_PEM_FILE    
+    crt 后证书文件为PEM格式，且同时包含证书和所有私钥    
+        cat  demo.crt demo.key &gt; demo.pem 
+把80端口的请求重向定443
+    bind *:80
+    redirect scheme https if !{ ssl_fc }    
+向后端传递用户请求的协议和端口（frontend或backend）
+    http_request set-header X-Forwarded-Port %[dst_port]
+    http_request add-header X-Forwared-Proto https if { ssl_fc }</code></pre><p>https证书制作</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">~]<span class="comment"># mkdir /usr/local/haproxy/certs</span></span><br><span class="line">~]<span class="comment"># cd /usr/local/haproxy/cert</span></span><br><span class="line">~]<span class="comment"># openssl  genrsa -out haproxy.key 2048</span></span><br><span class="line">~]<span class="comment"># openssl  req -new -x509 -key haproxy.key  -out haproxy.crt -subj "/CN=www.magedu.net"</span></span><br><span class="line">~]<span class="comment"># cat haproxy.key  haproxy.crt  &gt; haproxy.pem</span></span><br><span class="line">~]<span class="comment"># openssl  x509 -in  haproxy.pem -noout -text #查看证书</span></span><br></pre></td></tr></table></figure>
+
+<p>配置haproxy支持https</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">frontend https</span><br><span class="line">  <span class="built_in">bind</span> 192.168.7.102:443 ssl crt  /usr/<span class="built_in">local</span>/haproxy/certs/haproxy.pem</span><br><span class="line">  use_backend web_host</span><br><span class="line"></span><br><span class="line">backend default_host</span><br><span class="line">    mode http</span><br><span class="line">    server web1 192.168.7.101:8080 check inter 2000 fall 3 rise 5</span><br><span class="line">    server web2 192.168.7.102:8080 check inter 2000 fall 3 rise 5</span><br><span class="line"></span><br><span class="line">backend web_host</span><br><span class="line">    mode http</span><br><span class="line">    http-request <span class="built_in">set</span>-header X-Forwarded-Port %[dst_port]</span><br><span class="line">    http-request add-header X-Forwarded-Proto https <span class="keyword">if</span> &#123; ssl_fc &#125;</span><br><span class="line">    server web1 192.168.7.101:8080 check inter 2000 fall 3 rise 5</span><br><span class="line">    server web2 192.168.7.102:8080 check inter 2000 fall 3 rise 5</span><br></pre></td></tr></table></figure>
+
+<h4 id="HAProxy服务器动态上下线"><a href="#HAProxy服务器动态上下线" class="headerlink" title="HAProxy服务器动态上下线"></a>HAProxy服务器动态上下线</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">~]<span class="comment"># echo "show info" | socat stdio /var/lib/haproxy/haproxy.sock</span></span><br><span class="line">~]<span class="comment"># echo "get weight web_host/192.168.7.101" | socat stdio /var/lib/haproxy/haproxy.sock </span></span><br><span class="line">~]<span class="comment"># echo "disable server  web_host/192.168.7.101" | socat stdio /var/lib/haproxy/haproxy.sock </span></span><br><span class="line">~]<span class="comment"># echo "enable  server  web_host/192.168.7.101" | socat stdio /var/lib/haproxy/haproxy.sock</span></span><br></pre></td></tr></table></figure>
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/HAProxy/" rel="tag"># HAProxy</a>
+          
+            <a href="/tags/%E8%B4%9F%E8%BD%BD%E5%9D%87%E8%A1%A1%E5%99%A8/" rel="tag"># 负载均衡器</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/06/20/AIDE/" rel="next" title="AIDE">
+                <i class="fa fa-chevron-left"></i> AIDE
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/07/11/dockerfile/" rel="prev" title="dockerfile">
+                dockerfile <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+        <!-- JiaThis Button BEGIN -->
+<div class="jiathis_style">
+<span class="jiathis_txt">分享到：</span>
+<a class="jiathis_button_fav">收藏夹</a>
+<a class="jiathis_button_copy">复制网址</a>
+<a class="jiathis_button_email">邮件</a>
+<a class="jiathis_button_weixin">微信</a>
+<a class="jiathis_button_qzone">QQ空间</a>
+<a class="jiathis_button_tqq">腾讯微博</a>
+<a class="jiathis_button_douban">豆瓣</a>
+<a class="jiathis_button_share">一键分享</a>
+
+<a href="http://www.jiathis.com/share?uid=2140465" class="jiathis jiathis_txt jiathis_separator jtico jtico_jiathis" target="_blank">更多</a>
+<a class="jiathis_counter_style"></a>
+</div>
+<script type="text/javascript" >
+var jiathis_config={
+  data_track_clickback:true,
+  summary:"",
+  shortUrl:false,
+  hideMore:false
+}
+</script>
+<script type="text/javascript" src="http://v3.jiathis.com/code/jia.js?uid=" charset="utf-8"></script>
+<!-- JiaThis Button END -->
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+    </div>
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/uploads/touxiang.jpg"
+                alt="ShengQin Miao" />
+            
+              <p class="site-author-name" itemprop="name">ShengQin Miao</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">53</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                
+                  <span class="site-state-item-count">1</span>
+                  <span class="site-state-item-name">分类</span>
+                
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">61</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#HAProxy"><span class="nav-number">1.</span> <span class="nav-text">HAProxy</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#HAProxy功能"><span class="nav-number">1.1.</span> <span class="nav-text">HAProxy功能</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#使用HAProxy"><span class="nav-number">1.2.</span> <span class="nav-text">使用HAProxy</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#安装启动haproxy"><span class="nav-number">1.2.1.</span> <span class="nav-text">安装启动haproxy</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#haproxy基本配置"><span class="nav-number">1.2.2.</span> <span class="nav-text">haproxy基本配置</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#HAProxy算法"><span class="nav-number">1.2.3.</span> <span class="nav-text">HAProxy算法</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#HAProxy-服务器动态上下线"><span class="nav-number">1.2.4.</span> <span class="nav-text">HAProxy-服务器动态上下线</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#IP地址透传与基于cookie实现会话保持"><span class="nav-number">1.2.5.</span> <span class="nav-text">IP地址透传与基于cookie实现会话保持</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#七层ip透传"><span class="nav-number">1.2.5.1.</span> <span class="nav-text">七层ip透传</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#四层ip透传"><span class="nav-number">1.2.5.2.</span> <span class="nav-text">四层ip透传</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#基于cookie实现会话保持"><span class="nav-number">1.2.5.3.</span> <span class="nav-text">基于cookie实现会话保持</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#状态页、日志配置和报文操作"><span class="nav-number">1.2.6.</span> <span class="nav-text">状态页、日志配置和报文操作</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#ACL"><span class="nav-number">1.2.7.</span> <span class="nav-text">ACL</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#四层访问控制"><span class="nav-number">1.2.8.</span> <span class="nav-text">四层访问控制</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#HAProxy-https协议"><span class="nav-number">1.2.9.</span> <span class="nav-text">HAProxy-https协议</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#HAProxy服务器动态上下线"><span class="nav-number">1.2.10.</span> <span class="nav-text">HAProxy服务器动态上下线</span></a></li></ol></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">ShengQin Miao</span>
+
+  
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-area-chart"></i>
+    </span>
+    
+      <span class="post-meta-item-text">Site words total count&#58;</span>
+    
+    <span title="Site words total count">131.6k</span>
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Pisces</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js"></script>
+  <script>AV.initialize("vItlX9Jc2L4BuXKt6BJWW6eJ-gzGzoHsz", "IisqhTArerBOyaxKHN8TcE10");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
